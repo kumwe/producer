@@ -22,7 +22,8 @@ published release when Studio ships it, and every consumer-facing claim waits fo
 | P-8 | Enhancement-runtime handshake: data-attribute requests, runtime requirement flag, pinned asset reference | vector `enhancements` assertions |
 | P-9 | Host port interfaces + in-memory reference host + host-vector replay | host conformance suite |
 | P-10 | Deployment emitter and security verifiers, adopted from the Studio reference at the first published-release re-pin | PHP boundary suite |
-| P-11 | Packagist publication and the host adoption guide | clean-room install proof |
+| P-11 | Twig bridge: embed the render result (fragment, stylesheet reference, enhancement flag, preload hints) as a thin extension | bridge suite |
+| P-12 | Packagist publication and the host adoption guide | clean-room install proof |
 
 Deferred by design: anything the charter forbids, and any shape that exists only in unmerged
 Studio work — Producer implements merged, pinned contract only.
