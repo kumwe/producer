@@ -32,6 +32,22 @@ and implements Producer's small port interfaces with its own services. The full 
 | Realization | **Producer** | Published composition → semantic HTML + generated stylesheet |
 | Delivery | **Your application** | Embeds the render result in its own templates and serves Studio's prebuilt assets |
 
+## How it is built
+
+The library is layered with one dependency direction — Canonical JSON, the schema-property
+profile, the error taxonomy, the wire layer, rendering, stylesheets — each proven by replaying the
+vendored Studio conformance corpora before the next layer consumes it. The
+[engineering standard](docs/engineering-standard.md) states the architecture, code, testing, and
+documentation rules in full: strict types, final classes, injected authority, centralized
+escaping, deterministic output, typed refusals with stable codes, and a suite that proves intended
+outcomes only — the conformance corpora are the spine, negative paths are first-class, and
+frivolous tests are forbidden.
+
+Producer is also written to be ported. The contract is language-neutral JSON, so a Python or
+TypeScript sibling implements the same corpora and claims conformance the same way; the
+[porting guide](docs/porting-guide.md) gives an implementer the order, the boundaries, and the
+subtleties, so a port needs this repository and nothing else.
+
 ## Status
 
 Founding stage. The contract is vendored from a pre-release Studio pin and the surface below is
