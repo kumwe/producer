@@ -1,0 +1,172 @@
+<?php
+
+/**
+ * The closed operation registry: all thirty-one pinned operations with their
+ * exact metadata, refusal of anything outside the registry, and byte
+ * equality with the pinned contract's canonical registry document.
+ *
+ * @since 0.1.0
+ */
+
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Tests\Case;
+
+use Kumwe\Producer\Canonical\CanonicalJson;
+use Kumwe\Producer\Error\HostRefusal;
+use Kumwe\Producer\Tests\TestCase;
+use Kumwe\Producer\Wire\Operation;
+use Kumwe\Producer\Wire\OperationRegistry;
+
+final class WireOperationRegistryTest extends TestCase
+{
+    /**
+     * The canonical digest of the pinned release's host-operations
+     * registry document (schemas/examples/host-operations.example.json at
+     * the pinned Studio commit), computed under the contract's canonical
+     * serialization.
+     */
+    private const PINNED_REGISTRY_DIGEST = 'sha256-+boZ8kg/01UlASgJqxOmcAoX6fMXmytRBDOwGnSAtA4=';
+
+    public function testTheRegistryReproducesThePinnedDocumentByteForByte(): void
+    {
+        $document = OperationRegistry::document();
+        $this->assertSame('host-operations', $document->kind, 'The registry document kind is fixed.');
+        $this->assertSame(OperationRegistry::CONTRACT_VERSION, $document->contractVersion, 'The contract version is pinned.');
+        $this->assertSame(
+            self::PINNED_REGISTRY_DIGEST,
+            CanonicalJson::digest($document),
+            'The registry must be canonically identical to the pinned contract registry.'
+        );
+    }
+
+    public function testTheRegistryIsClosedAtThirtyOneOperationsAcrossTenPorts(): void
+    {
+        $operations = OperationRegistry::all();
+        $this->assertSame(31, count($operations), 'The pinned registry binds exactly thirty-one operations.');
+
+        $ports = [];
+        $capabilities = [];
+        $routes = [];
+        $methodsByPort = [];
+        foreach ($operations as $operation) {
+            $ports[$operation->port] = true;
+            $capabilities[] = $operation->capability;
+            $routes[] = $operation->route;
+            $methodsByPort[$operation->port . '.' . $operation->method] = true;
+        }
+        $portNames = array_keys($ports);
+        sort($portNames, SORT_STRING);
+        $this->assertSame(
+            ['artifact', 'authoring', 'localization', 'media', 'model', 'permission', 'preview', 'recovery', 'resource', 'telemetry'],
+            $portNames,
+            'Exactly the ten contract ports appear.'
+        );
+        $this->assertSame(count($capabilities), count(array_unique($capabilities)), 'Capabilities are unique.');
+        $this->assertSame(count($routes), count(array_unique($routes)), 'Routes are unique.');
+        $this->assertSame(31, count($methodsByPort), 'Method names are unique within their port.');
+
+        $sorted = $capabilities;
+        sort($sorted, SORT_STRING);
+        $this->assertSame($sorted, $capabilities, 'The registry lists operations in canonical capability order.');
+    }
+
+    public function testConcurrencyMutationAndRequirednessFlagsMatchThePin(): void
+    {
+        $expectsRevision = [];
+        $mutating = [];
+        $required = [];
+        foreach (OperationRegistry::all() as $operation) {
+            if ($operation->expectsRevision) {
+                $expectsRevision[] = $operation->capability;
+            }
+            if ($operation->mutating) {
+                $mutating[] = $operation->capability;
+            }
+            if ($operation->required) {
+                $required[] = $operation->capability;
+            }
+        }
+        $this->assertSame(
+            [
+                'studio.operation/artifact.publish',
+                'studio.operation/artifact.save',
+                'studio.operation/artifact.unpublish',
+            ],
+            $expectsRevision,
+            'Exactly the three artifact mutations are concurrency-protected.'
+        );
+        $this->assertSame(
+            [
+                'studio.operation/artifact.publish',
+                'studio.operation/artifact.save',
+                'studio.operation/artifact.unpublish',
+                'studio.operation/authoring.save-as-new-type',
+                'studio.operation/authoring.save-item',
+                'studio.operation/authoring.save-new-type-version',
+                'studio.operation/authoring.start',
+                'studio.operation/media.abort-upload',
+                'studio.operation/media.authorize-upload',
+                'studio.operation/media.complete-upload',
+                'studio.operation/media.import-external',
+                'studio.operation/recovery.discard',
+                'studio.operation/recovery.store',
+                'studio.operation/telemetry.emit',
+            ],
+            $mutating,
+            'The mutating set matches the pinned registry.'
+        );
+        $this->assertSame(
+            [
+                'studio.operation/artifact.dependencies',
+                'studio.operation/artifact.load',
+                'studio.operation/artifact.publish',
+                'studio.operation/artifact.save',
+                'studio.operation/artifact.unpublish',
+            ],
+            $required,
+            'Only the artifact port is required.'
+        );
+    }
+
+    public function testLookupsResolveTheSameOperationByCapabilityAndRoute(): void
+    {
+        $save = OperationRegistry::byCapability('studio.operation/artifact.save');
+        $this->assertSame('artifact/save', $save->route, 'The save route matches the pin.');
+        $this->assertSame('save', $save->method, 'The save method matches the pin.');
+        $this->assertSame('studio.port/artifact', $save->portCapability, 'The port capability matches the pin.');
+        $this->assertSame($save, OperationRegistry::byRoute('artifact/save'), 'Both indexes hold one instance.');
+
+        $listTypes = OperationRegistry::byRoute('authoring/list-types');
+        $this->assertSame('listTypes', $listTypes->method, 'Wire spellings map to identifier methods.');
+        $this->assertSame('list-types', $listTypes->toDocument()->operation, 'The operation local name derives from the route.');
+
+        $this->assertTrue(OperationRegistry::isCapability('studio.operation/telemetry.emit'), 'Known capability.');
+        $this->assertTrue(OperationRegistry::isRoute('telemetry/emit'), 'Known route.');
+        $this->assertTrue(!OperationRegistry::isCapability('studio.operation/artifact.delete'), 'Unknown capability.');
+        $this->assertTrue(!OperationRegistry::isRoute('artifact/delete'), 'Unknown route.');
+    }
+
+    public function testAnythingOutsideTheRegistryIsATypedRefusal(): void
+    {
+        foreach (['artifact/delete', 'unknown/load', 'artifact', '', 'artifact/load/extra'] as $route) {
+            $refusal = $this->assertThrows(
+                static fn (): Operation => OperationRegistry::byRoute($route),
+                HostRefusal::class,
+                "Route {$route} must be refused."
+            );
+            $this->assertSame(
+                'invalid-request',
+                $refusal->error()->category(),
+                'An unknown route refuses as invalid-request, never a passthrough.'
+            );
+            $this->assertSame(false, $refusal->error()->retryable(), 'The refusal is not retryable.');
+        }
+        $refusal = $this->assertThrows(
+            static fn (): Operation => OperationRegistry::byCapability('studio.operation/artifact.delete'),
+            HostRefusal::class,
+            'An unknown capability must be refused.'
+        );
+        $this->assertSame('invalid-request', $refusal->error()->category(), 'Unknown capability is invalid-request.');
+    }
+}
