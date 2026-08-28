@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Css;
+
 /**
  * The static base stylesheet of the semantic web profile.
  *
@@ -8,15 +12,18 @@
  * component scaffolding, and the prefers-reduced-motion overrides. It is a
  * constant — no per-request computation and no stored styles ever reach it.
  *
- * @since 0.2.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Css;
-
 final class BaseStylesheet
 {
+    /**
+     * The complete base stylesheet text, pinned byte for byte to the
+     * reference renderer's BASE_CSS so every conforming runtime ships the
+     * identical presentation vocabulary. Nothing stored, host-supplied, or
+     * per-request is ever interpolated into it.
+     *
+     * @since   0.1.0
+     */
     private const CSS = <<<'CSS'
 [data-studio-block]{box-sizing:border-box;min-inline-size:0}
 .studio-visually-hidden{block-size:1px;clip-path:inset(50%);inline-size:1px;overflow:hidden;position:absolute;white-space:nowrap}
@@ -65,10 +72,22 @@ final class BaseStylesheet
 @media (prefers-reduced-motion:reduce){[data-studio-gallery="slideshow"] [data-studio-part="content"]{scroll-behavior:auto}[data-studio-motion]{opacity:1!important;transform:none!important;transition:none!important}}
 CSS;
 
+    /**
+     * Static vocabulary holder; never instantiated.
+     *
+     * @since   0.1.0
+     */
     private function __construct()
     {
     }
 
+    /**
+     * The base stylesheet: identical bytes on every call within a Producer
+     * release — no input, clock, or configuration influences it.
+     *
+     * @return  string  The complete static base stylesheet text.
+     * @since   0.1.0
+     */
     public static function css(): string
     {
         return self::CSS;

@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Canonical;
+
 /**
  * Canonical cross-language JSON, byte-identical to Studio's serialization.
  *
@@ -14,19 +18,34 @@
  * are lists, which is what keeps {} and [] distinguishable. Decode inputs
  * with {@see CanonicalJson::decode()} to preserve that distinction.
  *
- * @since 0.1.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Canonical;
-
 final class CanonicalJson
 {
+    /**
+     * Nesting bound applied when a caller supplies none: 64 levels of
+     * containers, the depth the portability contract publishes.
+     *
+     * @since   0.1.0
+     */
     public const DEFAULT_MAXIMUM_DEPTH = 64;
 
+    /**
+     * Object member names refused with the `forbidden-member` rejection:
+     * the names that pollute prototypes in JavaScript runtimes, so no
+     * conforming serialization ever carries them.
+     *
+     * @var list<string>
+     *
+     * @since   0.1.0
+     */
     private const FORBIDDEN_MEMBERS = ['__proto__', 'prototype', 'constructor'];
 
+    /**
+     * Static utility; never instantiated.
+     *
+     * @since   0.1.0
+     */
     private function __construct()
     {
     }
@@ -34,6 +53,13 @@ final class CanonicalJson
     /**
      * Decode JSON text into the canonical value shape (stdClass objects,
      * list arrays), refusing malformed input.
+     *
+     * @param string $json JSON text to decode.
+     *
+     * @throws \JsonException When the text is not valid JSON or nests beyond
+     *                        the decoder's limit.
+     *
+     * @since   0.1.0
      */
     public static function decode(string $json): mixed
     {
@@ -42,6 +68,21 @@ final class CanonicalJson
 
     /**
      * The canonical string form of a value.
+     *
+     * @param mixed $value        Decoded JSON value: null, bool, int, float,
+     *                            string, list array, or stdClass.
+     * @param int   $maximumDepth Container nesting bound, checked before each
+     *                            recursion; must be positive.
+     *
+     * @throws CanonicalEncodingException `depth-exceeded` when nesting passes
+     *                                    the bound; `forbidden-member` for a
+     *                                    prototype-polluting member name;
+     *                                    `unrepresentable` for a non-finite
+     *                                    number, a non-list array, a value
+     *                                    outside JSON, or a non-positive
+     *                                    bound.
+     *
+     * @since   0.1.0
      */
     public static function stringify(mixed $value, int $maximumDepth = self::DEFAULT_MAXIMUM_DEPTH): string
     {
@@ -56,13 +97,39 @@ final class CanonicalJson
     }
 
     /**
-     * The SRI-style digest the contracts compute over the canonical bytes.
+     * The SRI-style digest the contracts compute over the canonical bytes:
+     * `sha256-` followed by the base64 of the raw SHA-256 of the canonical
+     * UTF-8 serialization.
+     *
+     * @param mixed $value        Decoded JSON value to digest.
+     * @param int   $maximumDepth Container nesting bound; must be positive.
+     *
+     * @throws CanonicalEncodingException When {@see stringify()} refuses the
+     *                                    value.
+     *
+     * @since   0.1.0
      */
     public static function digest(mixed $value, int $maximumDepth = self::DEFAULT_MAXIMUM_DEPTH): string
     {
         return 'sha256-' . base64_encode(hash('sha256', self::stringify($value, $maximumDepth), true));
     }
 
+    /**
+     * Serialize one position: scalars by the deterministic grammars, lists
+     * in semantic order, object members sorted by UTF-16 code unit — with
+     * the depth bound checked before entering either container and the
+     * forbidden member names refused.
+     *
+     * @param mixed $value        Value at this position.
+     * @param int   $maximumDepth Container nesting bound.
+     * @param int   $depth        Containers already entered above this
+     *                            position.
+     *
+     * @throws CanonicalEncodingException Under the {@see stringify()} refusal
+     *                                    contract.
+     *
+     * @since   0.1.0
+     */
     private static function serialize(mixed $value, int $maximumDepth, int $depth): string
     {
         if ($value === null) {
@@ -131,6 +198,13 @@ final class CanonicalJson
      * Deterministic number grammar matching the reference: negative zero
      * canonicalizes to 0, integer-valued doubles print as integers, and
      * non-finite values are refused.
+     *
+     * @param float $value Float to encode.
+     *
+     * @throws CanonicalEncodingException `unrepresentable` for NAN or an
+     *                                    infinity.
+     *
+     * @since   0.1.0
      */
     private static function number(float $value): string
     {
@@ -155,6 +229,10 @@ final class CanonicalJson
      * ECMA-404 minimal escaping: quote, backslash, the five short control
      * escapes, four lowercase hex digits for the remaining C0 range, and
      * every other code point emitted as raw UTF-8.
+     *
+     * @param string $value Raw UTF-8 text to quote.
+     *
+     * @since   0.1.0
      */
     private static function quote(string $value): string
     {
@@ -189,6 +267,14 @@ final class CanonicalJson
      * semantics: code points at or above U+10000 compare through their
      * surrogate halves, so astral names order exactly as they do in the
      * TypeScript implementation.
+     *
+     * @param string $left  UTF-8 member name.
+     * @param string $right UTF-8 member name.
+     *
+     * @return int Negative, zero, or positive as $left sorts before, with,
+     *             or after $right.
+     *
+     * @since   0.1.0
      */
     private static function compareCodeUnits(string $left, string $right): int
     {
@@ -205,7 +291,15 @@ final class CanonicalJson
     }
 
     /**
+     * Expand a UTF-8 string into its UTF-16 code units, one per code point
+     * below U+10000 and a surrogate pair above, mapping each invalid byte
+     * to U+FFFD.
+     *
+     * @param string $value UTF-8 text to expand.
+     *
      * @return list<int>
+     *
+     * @since   0.1.0
      */
     private static function utf16CodeUnits(string $value): array
     {

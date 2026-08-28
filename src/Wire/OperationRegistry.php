@@ -26,13 +26,34 @@ use Kumwe\Producer\Error\HostError;
 use Kumwe\Producer\Error\HostRefusal;
 use Kumwe\Producer\Error\MessageReference;
 
+/**
+ * The pinned operation registry as a closed lookup: thirty-one operations,
+ * ten ports, nothing else.
+ *
+ * The table below reproduces the pinned release's canonical registry
+ * document byte for byte — {@see document()} rebuilds that document and
+ * the suite proves its digest — so a lookup here is a lookup in the
+ * contract itself. Lookups outside the vocabulary refuse as typed
+ * invalid-request; there is no way to route to an operation the pin does
+ * not name.
+ *
+ * @since   0.1.0
+ */
 final class OperationRegistry
 {
+    /**
+     * The pinned contract version the registry document declares — the
+     * same pin the error taxonomy carries.
+     *
+     * @since   0.1.0
+     */
     public const CONTRACT_VERSION = HostError::CONTRACT_VERSION;
 
     /**
      * capability => [route, method, port, portCapability, expectsRevision, mutating, required],
      * sorted by capability exactly as the canonical registry document is.
+     *
+     * @since   0.1.0
      */
     private const TABLE = [
         'studio.operation/artifact.dependencies' => ['artifact/dependencies', 'dependencies', 'artifact', 'studio.port/artifact', false, false, true],
@@ -68,12 +89,31 @@ final class OperationRegistry
         'studio.operation/telemetry.emit' => ['telemetry/emit', 'emit', 'telemetry', 'studio.port/telemetry', false, true, false],
     ];
 
-    /** @var array<string, Operation>|null */
+    /**
+     * The capability-keyed index, materialized from the table on first
+     * use; deterministic, so caching is observationally pure.
+     *
+     * @var     array<string, Operation>|null
+     *
+     * @since   0.1.0
+     */
     private static ?array $byCapability = null;
 
-    /** @var array<string, Operation>|null */
+    /**
+     * The route-keyed index, materialized from the capability index on
+     * first use.
+     *
+     * @var     array<string, Operation>|null
+     *
+     * @since   0.1.0
+     */
     private static ?array $byRoute = null;
 
+    /**
+     * Not constructable: the registry is the pinned static table.
+     *
+     * @since   0.1.0
+     */
     private function __construct()
     {
     }
@@ -81,25 +121,54 @@ final class OperationRegistry
     /**
      * Every operation on the wire, in canonical (capability) order.
      *
-     * @return list<Operation>
+     * @return  list<Operation>  The thirty-one pinned operations.
+     *
+     * @since   0.1.0
      */
     public static function all(): array
     {
         return array_values(self::capabilityIndex());
     }
 
+    /**
+     * Whether a capability name is in the closed registry.
+     *
+     * @param   string  $capability  The qualified operation name to test.
+     *
+     * @return  bool  True only for one of the thirty-one pinned
+     *                capabilities.
+     *
+     * @since   0.1.0
+     */
     public static function isCapability(string $capability): bool
     {
         return isset(self::TABLE[$capability]);
     }
 
+    /**
+     * Whether a transport route is in the closed registry.
+     *
+     * @param   string  $route  The route to test, e.g. `artifact/save`.
+     *
+     * @return  bool  True only for one of the thirty-one pinned routes.
+     *
+     * @since   0.1.0
+     */
     public static function isRoute(string $route): bool
     {
         return isset(self::routeIndex()[$route]);
     }
 
     /**
-     * @throws HostRefusal invalid-request for a capability outside the closed registry
+     * The registry row for a capability name.
+     *
+     * @param   string  $capability  The qualified operation name.
+     *
+     * @return  Operation  The pinned row for that capability.
+     *
+     * @throws  HostRefusal  invalid-request for a capability outside the closed registry
+     *
+     * @since   0.1.0
      */
     public static function byCapability(string $capability): Operation
     {
@@ -107,7 +176,15 @@ final class OperationRegistry
     }
 
     /**
-     * @throws HostRefusal invalid-request for a route outside the closed registry
+     * The registry row for a transport route.
+     *
+     * @param   string  $route  The route a request addresses.
+     *
+     * @return  Operation  The pinned row for that route.
+     *
+     * @throws  HostRefusal  invalid-request for a route outside the closed registry
+     *
+     * @since   0.1.0
      */
     public static function byRoute(string $route): Operation
     {
@@ -116,6 +193,12 @@ final class OperationRegistry
 
     /**
      * The canonical host-operations registry document for this pin.
+     *
+     * @return  \stdClass  The document whose canonical bytes are
+     *                     byte-identical to the pinned release's registry
+     *                     document, as the suite proves by digest.
+     *
+     * @since   0.1.0
      */
     public static function document(): \stdClass
     {
@@ -131,7 +214,12 @@ final class OperationRegistry
     }
 
     /**
-     * @return array<string, Operation>
+     * Materializes and caches the capability-keyed index from the pinned
+     * table, preserving its canonical order.
+     *
+     * @return  array<string, Operation>  Rows keyed by capability.
+     *
+     * @since   0.1.0
      */
     private static function capabilityIndex(): array
     {
@@ -156,7 +244,12 @@ final class OperationRegistry
     }
 
     /**
-     * @return array<string, Operation>
+     * Materializes and caches the route-keyed index; routes are unique in
+     * the pinned table, so the mapping is one-to-one.
+     *
+     * @return  array<string, Operation>  Rows keyed by transport route.
+     *
+     * @since   0.1.0
      */
     private static function routeIndex(): array
     {
@@ -171,6 +264,14 @@ final class OperationRegistry
         return self::$byRoute;
     }
 
+    /**
+     * The typed refusal for any lookup outside the closed vocabulary: a
+     * fixed invalid-request that names no candidate and echoes nothing.
+     *
+     * @return  HostRefusal  The refusal ready to throw.
+     *
+     * @since   0.1.0
+     */
     private static function unknownOperation(): HostRefusal
     {
         return new HostRefusal(HostError::invalidRequest(new MessageReference(

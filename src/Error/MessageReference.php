@@ -15,8 +15,39 @@ declare(strict_types=1);
 
 namespace Kumwe\Producer\Error;
 
+/**
+ * A localizable message as the contract shapes it: a catalog key plus an
+ * optional pre-written fallback.
+ *
+ * This is the only message type the error layer accepts, which is what
+ * makes every user-facing message non-disclosing by construction: both
+ * members are validated against the contract grammars at construction and
+ * neither has room for interpolated request values, exception text, or
+ * host internals.
+ *
+ * @since   0.1.0
+ */
 final class MessageReference
 {
+    /**
+     * Proves both members against the contract grammars; an instance that
+     * exists is a valid messageReference document.
+     *
+     * @param   string       $key             The catalog key — a contract
+     *                                        qualified name such as
+     *                                        `kumwe.producer/unknown-operation`.
+     * @param   string|null  $defaultMessage  A pre-written human fallback
+     *                                        shown when no catalog entry
+     *                                        resolves; UTF-8 text of 1 to
+     *                                        500 code points, or null to
+     *                                        offer none.
+     *
+     * @throws  \InvalidArgumentException  When the key is not a qualified
+     *                                     name or the fallback breaks its
+     *                                     length bound.
+     *
+     * @since   0.1.0
+     */
     public function __construct(
         private readonly string $key,
         private readonly ?string $defaultMessage = null,
@@ -29,16 +60,39 @@ final class MessageReference
         }
     }
 
+    /**
+     * The catalog key naming this message.
+     *
+     * @return  string  A contract qualified name.
+     *
+     * @since   0.1.0
+     */
     public function key(): string
     {
         return $this->key;
     }
 
+    /**
+     * The pre-written fallback text, or null when the reference offers
+     * only its catalog key.
+     *
+     * @return  string|null  UTF-8 text of 1 to 500 code points, or null.
+     *
+     * @since   0.1.0
+     */
     public function defaultMessage(): ?string
     {
         return $this->defaultMessage;
     }
 
+    /**
+     * The schema-shaped messageReference document; an absent fallback is
+     * omitted, never emitted as null.
+     *
+     * @return  \stdClass  The document ready for canonical serialization.
+     *
+     * @since   0.1.0
+     */
     public function toDocument(): \stdClass
     {
         $document = new \stdClass();

@@ -1,21 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Render;
+
 /**
  * A host-resolved media asset ready for rendering.
  *
  * Mirrors the reference renderer's ResolvedWebMedia shape. The src carried
  * here is whatever the host resolved; the renderer vets it through the URL
- * allowlist before a single byte reaches the page.
+ * allowlist before a single byte reaches the page. Immutable — a vetted
+ * variant is a new instance via {@see self::withSrc()}.
  *
- * @since 0.2.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Render;
-
 final class ResolvedMedia
 {
+    /**
+     * @param   string   $src        The host-resolved URL, not yet vetted.
+     * @param   string   $altText    Alternative text; '' means decorative.
+     * @param   ?string  $caption    Optional caption text.
+     * @param   ?string  $mediaType  Optional media type, consulted when
+     *     vetting blob: URLs.
+     * @param   int|float|null  $width   Optional intrinsic width.
+     * @param   int|float|null  $height  Optional intrinsic height.
+     * @since   0.1.0
+     */
     public function __construct(
         public readonly string $src,
         public readonly string $altText = '',
@@ -27,8 +37,14 @@ final class ResolvedMedia
     }
 
     /**
-     * Build from a decoded media descriptor object (assetId/src/altText and
-     * the optional caption, mediaType, width, and height members).
+     * Build from a decoded media descriptor object (assetId/src/altText
+     * and the optional caption, mediaType, width, and height members).
+     * Never throws: a missing or mistyped member becomes its documented
+     * default.
+     *
+     * @param   \stdClass  $descriptor  The decoded descriptor.
+     * @return  self  The coerced media value.
+     * @since   0.1.0
      */
     public static function fromDescriptor(\stdClass $descriptor): self
     {
@@ -42,6 +58,14 @@ final class ResolvedMedia
         );
     }
 
+    /**
+     * A copy carrying a replacement src — how the vetted URL supersedes
+     * the host-resolved one — with every other member unchanged.
+     *
+     * @param   string  $src  The replacement URL.
+     * @return  self  The new instance.
+     * @since   0.1.0
+     */
     public function withSrc(string $src): self
     {
         return new self($src, $this->altText, $this->caption, $this->mediaType, $this->width, $this->height);
@@ -49,7 +73,12 @@ final class ResolvedMedia
 
     /**
      * The width/height attribute fragment the reference emits, with each
-     * dimension normalized to a bounded positive integer.
+     * dimension normalized to a bounded positive integer — a fractional,
+     * non-positive, or oversized dimension becomes 1, never the raw value.
+     *
+     * @return  string  The leading-space attribute fragment; empty when
+     *     neither dimension is present.
+     * @since   0.1.0
      */
     public function dimensionsAttribute(): string
     {
@@ -64,6 +93,14 @@ final class ResolvedMedia
         return $out;
     }
 
+    /**
+     * Normalize one dimension to an integer from 1 through 100000: a whole
+     * number in range passes, everything else becomes 1.
+     *
+     * @param   int|float  $value  The stored dimension.
+     * @return  int  The bounded positive integer.
+     * @since   0.1.0
+     */
     private static function positiveInteger(int|float $value): int
     {
         if (is_float($value)) {

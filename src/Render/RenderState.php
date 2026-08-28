@@ -1,33 +1,67 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Render;
+
 /**
  * Mutable per-render accumulation shared by the block renderers.
  *
  * Collects generated per-node CSS and enhancement requests in document
  * order, and offers block renderers the engine services they need: child
- * slot rendering, binding resolution, and vetted media resolution.
+ * slot rendering, binding resolution, and vetted media resolution. One
+ * instance lives for exactly one render and is never reused.
  *
- * @since 0.2.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Render;
-
 final class RenderState
 {
-    /** @var list<string> */
+    /**
+     * Compiled per-node scoped stylesheets in encounter (document) order;
+     * the composition renderer prepends the base stylesheet and drops
+     * empty entries when assembling the result.
+     *
+     * @var list<string>
+     *
+     * @since   0.1.0
+     */
     public array $css = [];
 
-    /** @var list<Enhancement> */
+    /**
+     * Every enhancement request so far, in document order — the order the
+     * conformance corpus fixes.
+     *
+     * @var list<Enhancement>
+     *
+     * @since   0.1.0
+     */
     public array $enhancements = [];
 
+    /**
+     * @param   RenderContext        $context   The host authority for this
+     *     render.
+     * @param   CompositionRenderer  $renderer  The engine that walks child
+     *     nodes on this state's behalf.
+     * @since   0.1.0
+     */
     public function __construct(
         public readonly RenderContext $context,
         private readonly CompositionRenderer $renderer,
     ) {
     }
 
+    /**
+     * Record one enhancement request for a node, in document order. The
+     * node's stored id is captured as-is; nothing is deduplicated here.
+     *
+     * @param   string     $kind   The behavior name from the reference
+     *     runtime's closed vocabulary.
+     * @param   \stdClass  $node   The requesting node.
+     * @param   string     $scope  The node's CSS-safe scope token.
+     * @param   array<string, mixed>  $details  Behavior-specific
+     *     configuration for the runtime.
+     * @since   0.1.0
+     */
     public function enhance(string $kind, \stdClass $node, string $scope, array $details = []): void
     {
         $this->enhancements[] = new Enhancement(
@@ -39,20 +73,43 @@ final class RenderState
     }
 
     /**
-     * @param list<\stdClass> $nodes
+     * Render child nodes through the engine, accumulating their CSS and
+     * enhancements on this state.
+     *
+     * @param   list<\stdClass>  $nodes  Decoded Blueprint nodes.
+     * @return  string  The nodes' escaped markup, in document order.
+     * @throws  RenderException  When a node is structurally unusable, as in
+     *     {@see CompositionRenderer::renderNodes()}.
+     * @since   0.1.0
      */
     public function renderNodes(array $nodes): string
     {
         return $this->renderer->renderNodes($nodes, $this);
     }
 
+    /**
+     * Render every node in one named slot of a node; a missing or
+     * malformed slot renders as the empty string, never an error.
+     *
+     * @param   \stdClass  $node  The parent node.
+     * @param   string     $slot  The slot name.
+     * @return  string  The slot's escaped markup, in document order.
+     * @throws  RenderException  When a child node is structurally unusable.
+     * @since   0.1.0
+     */
     public function renderChildren(\stdClass $node, string $slot): string
     {
         return $this->renderNodes($this->slotNodes($node, $slot));
     }
 
     /**
-     * @return list<\stdClass>
+     * The stored children of one named slot; a missing or non-array slot
+     * yields the empty list.
+     *
+     * @param   \stdClass  $node  The parent node.
+     * @param   string     $slot  The slot name.
+     * @return  list<\stdClass>  The slot's stored child nodes.
+     * @since   0.1.0
      */
     public function slotNodes(\stdClass $node, string $slot): array
     {
@@ -63,7 +120,13 @@ final class RenderState
 
     /**
      * The value bound to a node port: the host's resolver when it provides
-     * one, otherwise only the static value stored on the node's binding.
+     * one, otherwise only the static value stored on the node's binding —
+     * any other binding source resolves to null without a host.
+     *
+     * @param   \stdClass  $node  The bound node.
+     * @param   string     $port  The port name.
+     * @return  mixed  The resolved value, or null when nothing resolves.
+     * @since   0.1.0
      */
     public function bindingValue(\stdClass $node, string $port): mixed
     {
@@ -79,8 +142,16 @@ final class RenderState
     }
 
     /**
-     * Resolve a media-reference value through the host and vet the resolved
-     * URL. Anything unresolvable or unsafe is simply unavailable.
+     * Resolve a media-reference value through the host and vet the
+     * resolved URL through {@see SafeMarkup::safeMediaUrl()} under the
+     * context's blob authority. Anything unresolvable or unsafe — a
+     * non-reference value, no host resolver, a refused URL — is simply
+     * unavailable, and the owning block renders its fallback.
+     *
+     * @param   mixed  $value  The bound value; only a media-reference
+     *     object with a string assetId can resolve.
+     * @return  ?ResolvedMedia  The vetted media, or null when unavailable.
+     * @since   0.1.0
      */
     public function resolvedMedia(mixed $value): ?ResolvedMedia
     {
