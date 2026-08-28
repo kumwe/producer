@@ -5,8 +5,14 @@ completes it. A step is claimed only when `composer check` proves it on a clean 
 
 ## Position
 
-Founding. The Studio pin is a pre-release git source pin; it moves to the first coordinated
-published release when Studio ships it, and every consumer-facing claim waits for that re-pin.
+Runtime realization. Delivered and proven on a clean clone: the pinned contract lane (P-1), the
+canonical serializer (P-2), the wire layer with the closed thirty-one-operation registry and the
+port interfaces (P-3 and the interface half of P-9), the schema-property profile, the complete
+forty-five-type renderer with its escaping discipline and fallbacks (P-4, P-5), the stylesheet
+generator (P-6), rich-text projection rendering (P-7), and the enhancement need signal on the
+render result (the producer half of P-8). The Studio pin is a pre-release git source pin; it moves
+to the first coordinated published release when Studio ships it, and every consumer-facing claim
+waits for that re-pin.
 
 ## Steps
 
