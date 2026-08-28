@@ -1,0 +1,69 @@
+name: Release
+
+# A release is a version tag on a commit that passes the complete check lane.
+# Publishing is creating the GitHub release; Packagist follows tags through
+# its GitHub integration, so no registry credential ever enters this
+# repository's workflows.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Verify the tagged commit and publish the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the tagged commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2.35.5
+        with:
+          php-version: '8.1'
+          extensions: json, mbstring
+          coverage: none
+          tools: none
+
+      - name: Lint
+        run: php tools/lint.php
+
+      - name: Verify the pinned Studio contract
+        run: php tools/verify-contract.php
+
+      - name: Run the suite
+        run: php tests/run.php
+
+      - name: Require the changelog to carry this version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          grep -Eq "^## \[?${version//./\\.}\]?" CHANGELOG.md || {
+            echo "::error::CHANGELOG.md has no section for ${version}; a release ships its record."
+            exit 1
+          }
+
+      - name: Record the Studio pin in the release notes
+        id: pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          commit=$(php -r '$p=json_decode(file_get_contents("resources/studio-contract/PIN.json"),true); echo $p["source"]["commit"] ?? $p["source"]["release"] ?? "unknown";')
+          echo "studio_pin=${commit}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STUDIO_PIN: ${{ steps.pin.outputs.studio_pin }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes "Implements the Studio contract at pin \`$STUDIO_PIN\` (see resources/studio-contract/PIN.json). Changelog: CHANGELOG.md section ${GITHUB_REF_NAME#v}."
