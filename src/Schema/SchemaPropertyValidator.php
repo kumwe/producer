@@ -1,5 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Schema;
+
+use Kumwe\Producer\Canonical\CanonicalJson;
+
 /**
  * An eval-free interpreting validator for an admitted Studio property
  * schema.
@@ -17,15 +23,8 @@
  * are memoized per schema node and instance location within one run, so an
  * acyclic reference fan-out is evaluated once per actual instance location.
  *
- * @since 0.1.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Schema;
-
-use Kumwe\Producer\Canonical\CanonicalJson;
-
 final class SchemaPropertyValidator
 {
     /**
@@ -33,6 +32,8 @@ final class SchemaPropertyValidator
      * passing one.
      *
      * @var list<SchemaInstanceDiagnostic>|null
+     *
+     * @since   0.1.0
      */
     private ?array $diagnostics = null;
 
@@ -40,6 +41,8 @@ final class SchemaPropertyValidator
      * Per-run memo of subschema verdicts for identity-bearing instances.
      *
      * @var \SplObjectStorage<\stdClass, array<string, array{0: bool, 1: list<SchemaInstanceDiagnostic>}>>
+     *
+     * @since   0.1.0
      */
     private \SplObjectStorage $memo;
 
@@ -51,6 +54,8 @@ final class SchemaPropertyValidator
      * @param \stdClass                                    $root       Admitted schema document root.
      * @param \SplObjectStorage<\stdClass, \stdClass|bool> $references Resolved `$ref` target per
      *                                                                 referring schema node.
+     *
+     * @since   0.1.0
      */
     public function __construct(
         private readonly \stdClass $root,
@@ -63,6 +68,12 @@ final class SchemaPropertyValidator
      * Validate one decoded JSON instance against the admitted schema:
      * null, bool, int, float, string, list array or stdClass, exactly as
      * {@see CanonicalJson::decode()} produces.
+     *
+     * @param mixed $instance Decoded JSON instance to validate.
+     *
+     * @return bool The verdict; on false, {@see diagnostics()} reports why.
+     *
+     * @since   0.1.0
      */
     public function validate(mixed $instance): bool
     {
@@ -85,6 +96,8 @@ final class SchemaPropertyValidator
      * evaluation order, or null after a pass.
      *
      * @return list<SchemaInstanceDiagnostic>|null
+     *
+     * @since   0.1.0
      */
     public function diagnostics(): ?array
     {
@@ -95,8 +108,13 @@ final class SchemaPropertyValidator
      * Validate an instance against one subschema, memoizing
      * identity-bearing verdicts per schema node and instance location.
      *
-     * @param list<SchemaInstanceDiagnostic>   $errors Failure sink, appended in evaluation order.
-     * @param \SplObjectStorage<object, mixed> $active Schema nodes currently on the stack.
+     * @param \stdClass|bool                   $schema   Subschema to apply; a boolean is complete.
+     * @param mixed                            $instance Decoded JSON instance at this location.
+     * @param string                           $path     Instance JSON Pointer to the location.
+     * @param list<SchemaInstanceDiagnostic>   $errors   Failure sink, appended in evaluation order.
+     * @param \SplObjectStorage<object, mixed> $active   Schema nodes currently on the stack.
+     *
+     * @since   0.1.0
      */
     private function subschema(
         \stdClass|bool $schema,
@@ -149,8 +167,13 @@ final class SchemaPropertyValidator
     /**
      * Apply every keyword one schema node declares.
      *
-     * @param list<SchemaInstanceDiagnostic>   $errors Failure sink.
-     * @param \SplObjectStorage<object, mixed> $active Schema nodes currently on the stack.
+     * @param \stdClass                        $schema   Schema node to apply.
+     * @param mixed                            $instance Decoded JSON instance at this location.
+     * @param string                           $path     Instance JSON Pointer to the location.
+     * @param list<SchemaInstanceDiagnostic>   $errors   Failure sink.
+     * @param \SplObjectStorage<object, mixed> $active   Schema nodes currently on the stack.
+     *
+     * @since   0.1.0
      */
     private function node(
         \stdClass $schema,
@@ -237,9 +260,14 @@ final class SchemaPropertyValidator
      * Apply the composition keywords, speculating with a scratch buffer
      * where the profile demands a silent trial.
      *
-     * @param list<SchemaInstanceDiagnostic>            $errors Failure sink.
-     * @param \SplObjectStorage<object, mixed>          $active Schema nodes on the stack.
-     * @param callable(string, string, ?string=): void  $fail   Failure reporter.
+     * @param \stdClass                                 $schema   Schema node declaring the keywords.
+     * @param mixed                                     $instance Decoded JSON instance at this location.
+     * @param string                                    $path     Instance JSON Pointer to the location.
+     * @param list<SchemaInstanceDiagnostic>            $errors   Failure sink.
+     * @param \SplObjectStorage<object, mixed>          $active   Schema nodes on the stack.
+     * @param callable(string, string, ?string=): void  $fail     Failure reporter.
+     *
+     * @since   0.1.0
      */
     private function combinators(
         \stdClass $schema,
@@ -307,7 +335,11 @@ final class SchemaPropertyValidator
     /**
      * Apply the string keywords by code-point length.
      *
-     * @param callable(string, string, ?string=): void $fail Failure reporter.
+     * @param \stdClass                                $schema   Schema node declaring the keywords.
+     * @param string                                   $instance String instance.
+     * @param callable(string, string, ?string=): void $fail     Failure reporter.
+     *
+     * @since   0.1.0
      */
     private static function stringKeywords(\stdClass $schema, string $instance, callable $fail): void
     {
@@ -328,7 +360,11 @@ final class SchemaPropertyValidator
      * Apply the number keywords, comparing `multipleOf` on exact base-10
      * coefficients.
      *
-     * @param callable(string, string, ?string=): void $fail Failure reporter.
+     * @param \stdClass                                $schema   Schema node declaring the keywords.
+     * @param int|float                                $instance Finite number instance.
+     * @param callable(string, string, ?string=): void $fail     Failure reporter.
+     *
+     * @since   0.1.0
      */
     private static function numberKeywords(\stdClass $schema, int|float $instance, callable $fail): void
     {
@@ -361,9 +397,13 @@ final class SchemaPropertyValidator
      * Apply the array keywords, recursing per item with a fresh active set:
      * a child position consumes instance input, so cycle tracking restarts.
      *
+     * @param \stdClass                                $schema   Schema node declaring the keywords.
      * @param list<mixed>                              $instance Array instance.
+     * @param string                                   $path     Instance JSON Pointer to the array.
      * @param list<SchemaInstanceDiagnostic>           $errors   Failure sink.
      * @param callable(string, string, ?string=): void $fail     Failure reporter.
+     *
+     * @since   0.1.0
      */
     private function arrayKeywords(
         \stdClass $schema,
@@ -433,8 +473,13 @@ final class SchemaPropertyValidator
      * Apply the object keywords in code-unit member order with sorted
      * name-array checks.
      *
-     * @param list<SchemaInstanceDiagnostic>           $errors Failure sink.
-     * @param callable(string, string, ?string=): void $fail   Failure reporter.
+     * @param \stdClass                                $schema   Schema node declaring the keywords.
+     * @param \stdClass                                $instance Object instance.
+     * @param string                                   $path     Instance JSON Pointer to the object.
+     * @param list<SchemaInstanceDiagnostic>           $errors   Failure sink.
+     * @param callable(string, string, ?string=): void $fail     Failure reporter.
+     *
+     * @since   0.1.0
      */
     private function objectKeywords(
         \stdClass $schema,
@@ -558,6 +603,12 @@ final class SchemaPropertyValidator
      * coefficient and a base-10 exponent; the multiple test is then an
      * integer-digit modulo with no floating-point division and no epsilon,
      * so `4.02` is a multiple of `0.01` while `4.021` is not.
+     *
+     * @param int|float $instance Finite number instance to test.
+     * @param int|float $divisor  Admitted `multipleOf` operand, greater than
+     *                            zero.
+     *
+     * @since   0.1.0
      */
     private static function isCanonicalDecimalMultiple(int|float $instance, int|float $divisor): bool
     {
@@ -578,7 +629,11 @@ final class SchemaPropertyValidator
      * Split a number's canonical encoding into unsigned coefficient digits
      * free of trailing zeros and a base-10 exponent.
      *
+     * @param int|float $value Finite number to split.
+     *
      * @return array{0: string, 1: int}
+     *
+     * @since   0.1.0
      */
     private static function canonicalDecimal(int|float $value): array
     {
@@ -600,6 +655,13 @@ final class SchemaPropertyValidator
 
     /**
      * Compute `dividend mod divisor` over decimal digit strings.
+     *
+     * @param string $dividend Unsigned decimal digits.
+     * @param string $divisor  Unsigned decimal digits, never zero.
+     *
+     * @return string The remainder's digits, `0` for none.
+     *
+     * @since   0.1.0
      */
     private static function digitsModulo(string $dividend, string $divisor): string
     {
@@ -621,6 +683,14 @@ final class SchemaPropertyValidator
 
     /**
      * Compare two unsigned decimal digit strings without leading zeros.
+     *
+     * @param string $left  Unsigned decimal digits.
+     * @param string $right Unsigned decimal digits.
+     *
+     * @return int Negative, zero, or positive as $left is less than, equal
+     *             to, or greater than $right.
+     *
+     * @since   0.1.0
      */
     private static function digitsCompare(string $left, string $right): int
     {
@@ -631,6 +701,14 @@ final class SchemaPropertyValidator
 
     /**
      * Subtract one unsigned decimal digit string from a larger or equal one.
+     *
+     * @param string $minuend    Unsigned decimal digits.
+     * @param string $subtrahend Unsigned decimal digits, at most the minuend.
+     *
+     * @return string The difference's digits without leading zeros, `0` for
+     *                none.
+     *
+     * @since   0.1.0
      */
     private static function digitsSubtract(string $minuend, string $subtrahend): string
     {
@@ -650,6 +728,11 @@ final class SchemaPropertyValidator
     /**
      * Deep JSON-value equality: numeric across int and float,
      * order-insensitive for objects.
+     *
+     * @param mixed $left  Decoded JSON value.
+     * @param mixed $right Decoded JSON value.
+     *
+     * @since   0.1.0
      */
     private static function deepEqual(mixed $left, mixed $right): bool
     {
@@ -690,7 +773,14 @@ final class SchemaPropertyValidator
     }
 
     /**
-     * Say whether an instance matches one JSON Schema type name.
+     * Say whether an instance matches one JSON Schema type name, where
+     * `integer` admits an integral float and an unknown name matches
+     * nothing.
+     *
+     * @param string $name     JSON Schema type name.
+     * @param mixed  $instance Decoded JSON instance.
+     *
+     * @since   0.1.0
      */
     private static function matchesType(string $name, mixed $instance): bool
     {
@@ -712,6 +802,8 @@ final class SchemaPropertyValidator
      *
      * @param  list<mixed> $instance
      * @return array{0: int, 1: int}|null
+     *
+     * @since   0.1.0
      */
     private static function findDuplicateIndexes(array $instance): ?array
     {
@@ -733,6 +825,8 @@ final class SchemaPropertyValidator
      *
      * @param  list<SchemaInstanceDiagnostic> $errors
      * @return list<SchemaInstanceDiagnostic>
+     *
+     * @since   0.1.0
      */
     private static function uniqueDiagnostics(array $errors): array
     {
@@ -752,6 +846,12 @@ final class SchemaPropertyValidator
 
     /**
      * Narrow an admitted subschema operand to its runtime type.
+     *
+     * @param mixed $value Operand admission proved a boolean or object.
+     *
+     * @throws \LogicException When the operand lost that shape.
+     *
+     * @since   0.1.0
      */
     private static function asSubschema(mixed $value): \stdClass|bool
     {
@@ -768,6 +868,8 @@ final class SchemaPropertyValidator
      *
      * @param  array<int|string, mixed> $values
      * @return list<string>
+     *
+     * @since   0.1.0
      */
     private static function sortedStrings(array $values): array
     {
@@ -783,7 +885,11 @@ final class SchemaPropertyValidator
     }
 
     /**
-     * Escape one JSON Pointer token.
+     * Escape one JSON Pointer token: `~` to `~0`, `/` to `~1`.
+     *
+     * @param string $token Unescaped token.
+     *
+     * @since   0.1.0
      */
     private static function escapeToken(string $token): string
     {
@@ -793,6 +899,10 @@ final class SchemaPropertyValidator
     /**
      * Encode one finite number in its canonical shortest form, the digits
      * both the decimal arithmetic and the default messages use.
+     *
+     * @param int|float $value Finite number to encode.
+     *
+     * @since   0.1.0
      */
     private static function encodeNumber(int|float $value): string
     {
@@ -807,6 +917,10 @@ final class SchemaPropertyValidator
      * memoize by type and value. PHP arrays are value types with no
      * identity, so array instances are re-evaluated — deterministically,
      * with identical diagnostics — instead of being memoized.
+     *
+     * @param mixed $instance Decoded JSON instance to key.
+     *
+     * @since   0.1.0
      */
     private static function instanceKey(mixed $instance): ?string
     {

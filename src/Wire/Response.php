@@ -16,10 +16,32 @@ declare(strict_types=1);
 
 namespace Kumwe\Producer\Wire;
 
+/**
+ * One finished wire response: canonical body bytes, the exact headers to
+ * send with them, and whether the body is a refusal.
+ *
+ * The host must emit the body bytes verbatim — they are canonical JSON and
+ * any re-encoding breaks byte identity — together with every header in the
+ * list. No status code is carried because the contract distinguishes
+ * outcomes by body shape alone; the refusal flag exists solely so the host
+ * can apply its own status policy without inspecting the body.
+ *
+ * @since   0.1.0
+ */
 final class Response
 {
     /**
-     * @param array<string, string> $headers Lowercase header names.
+     * Binds the finished response; construction happens only inside
+     * {@see StrictResponder}, which guarantees the body is canonical.
+     *
+     * @param   string                 $body     The canonical JSON bytes to
+     *                                           emit verbatim.
+     * @param   array<string, string>  $headers  Lowercase header names.
+     * @param   bool                   $refusal  True when the body is a
+     *                                           host-error document, false
+     *                                           for a host-result document.
+     *
+     * @since   0.1.0
      */
     public function __construct(
         public readonly string $body,

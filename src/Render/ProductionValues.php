@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Render;
+
 /**
  * Typed production value parsing, ported from the Studio core contract.
  *
@@ -9,31 +13,62 @@
  * owning block render its labeled semantic fallback — the typed data never
  * leaks into markup.
  *
- * @since 0.2.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Render;
-
 final class ProductionValues
 {
+    /**
+     * The closed chart-type vocabulary; any other type refuses the spec.
+     *
+     * @since   0.1.0
+     */
     private const CHART_TYPES = ['bar', 'doughnut', 'line', 'pie'];
 
+    /**
+     * The canonical money-amount grammar: an optionally negative integer
+     * part of at most eighteen digits with no leading zero, and at most six
+     * decimal places. Matched as a string so no binary float is involved.
+     *
+     * @since   0.1.0
+     */
     private const MONEY_AMOUNT = '/^-?(?:0|[1-9][0-9]{0,17})(?:\.[0-9]{1,6})?$/';
 
+    /**
+     * The money-currency grammar: exactly three uppercase ASCII letters.
+     *
+     * @since   0.1.0
+     */
     private const CURRENCY = '/^[A-Z]{3}$/';
 
+    /**
+     * The closed drawing-color grammar: a six-digit hex color or a bounded
+     * namespaced token reference (`family/name`).
+     *
+     * @since   0.1.0
+     */
     private const DRAWING_COLOR = '%^(?:#[0-9A-Fa-f]{6}|[a-z][a-z0-9-]{0,62}/[a-z][a-z0-9-]{0,62})$%';
 
+    /**
+     * Static parser; never instantiated.
+     *
+     * @since   0.1.0
+     */
     private function __construct()
     {
     }
 
     /**
      * Parse one canonical chart spec, refusing library-specific
-     * configuration. Returns {type, labels, datasets: list of {label,
-     * values}, title?}.
+     * configuration. Accepts at most 200 labels of at most 500 characters,
+     * 1 through 20 datasets each carrying exactly one finite number (of
+     * magnitude at most 1e15) per label, and an optional bounded title.
+     *
+     * @param   mixed  $value  The decoded chart spec candidate.
+     * @return  \stdClass  {type, labels, datasets: list of {label, values},
+     *     title?}.
+     * @throws  RenderException  On an unknown member, a type outside the
+     *     closed vocabulary, or any bound exceeded.
+     * @since   0.1.0
      */
     public static function parseChartSpec(mixed $value): \stdClass
     {
@@ -83,7 +118,15 @@ final class ProductionValues
 
     /**
      * Parse a bounded, text-only table document requiring one cell per
-     * declared column. Returns {caption?, columns, rows}.
+     * declared column: 1 through 50 columns of at most 500 characters, at
+     * most 1000 rows of cells of at most 5000 characters, and an optional
+     * bounded caption. Cells are strings only — no markup, no nesting.
+     *
+     * @param   mixed  $value  The decoded table document candidate.
+     * @return  \stdClass  {caption?, columns, rows}.
+     * @throws  RenderException  On an unknown member, a ragged row, or any
+     *     bound exceeded.
+     * @since   0.1.0
      */
     public static function parseTableDocument(mixed $value): \stdClass
     {
@@ -116,8 +159,16 @@ final class ProductionValues
     }
 
     /**
-     * Parse exact decimal money without converting through a binary float.
-     * Returns {amount, currency}.
+     * Parse exact decimal money without converting through a binary float:
+     * the amount stays the canonical decimal string it arrived as (at most
+     * eighteen integer digits, at most six decimal places), and the
+     * currency must be an uppercase three-letter code.
+     *
+     * @param   mixed  $value  The decoded money value candidate.
+     * @return  \stdClass  {amount, currency}.
+     * @throws  RenderException  On an unknown member or a value outside
+     *     either closed grammar.
+     * @since   0.1.0
      */
     public static function parseMoneyValue(mixed $value): \stdClass
     {
@@ -136,8 +187,17 @@ final class ProductionValues
 
     /**
      * Parse bounded vector strokes; SVG markup, data URLs, and canvas
-     * commands have no representation here. Returns {alt, height, strokes,
-     * width}.
+     * commands have no representation here. Dimensions are integers from 1
+     * through 4096; the alternative text carries 1 through 5000 characters;
+     * at most 5000 strokes, each with a closed-grammar color, a width from
+     * 0.25 through 64, and 1 through 10000 finite points inside the
+     * declared dimensions.
+     *
+     * @param   mixed  $value  The decoded drawing document candidate.
+     * @return  \stdClass  {alt, height, strokes, width}.
+     * @throws  RenderException  On an unknown member, an out-of-bounds
+     *     coordinate, or any bound exceeded.
+     * @since   0.1.0
      */
     public static function parseDrawingDocument(mixed $value): \stdClass
     {
@@ -184,7 +244,16 @@ final class ProductionValues
     /**
      * Parse closed presentation intent: no selectors, no declarations, no
      * measurements — only the contract's enumerated design choices. Members
-     * absent from the input stay absent from the result.
+     * absent from the input stay absent from the result, so the renderer
+     * emits no attribute for them.
+     *
+     * @param   mixed  $value  The decoded design intent candidate.
+     * @return  \stdClass  Only the members present in the input, each
+     *     restricted to its closed vocabulary (visibility as a nested
+     *     object of per-breakpoint choices).
+     * @throws  RenderException  On an unknown member or a value outside its
+     *     closed vocabulary.
+     * @since   0.1.0
      */
     public static function parsePresentationIntent(mixed $value): \stdClass
     {
@@ -230,7 +299,17 @@ final class ProductionValues
     }
 
     /**
-     * @param list<string> $keys
+     * Require a plain decoded object whose members all come from the
+     * declared key set — an unknown member is refused, never ignored.
+     * Absent members are not required here; each caller checks its own.
+     *
+     * @param   mixed         $value  The candidate value.
+     * @param   list<string>  $keys   The complete allowed member set.
+     * @param   string        $name   Human label used in refusal messages.
+     * @return  \stdClass  The same object, admitted.
+     * @throws  RenderException  When the value is not a plain object or
+     *     carries an unknown member.
+     * @since   0.1.0
      */
     private static function exactRecord(mixed $value, array $keys, string $name): \stdClass
     {
@@ -247,7 +326,17 @@ final class ProductionValues
     }
 
     /**
-     * @return list<string>
+     * Require an array of bounded strings, enforcing the item limit before
+     * inspecting any item so an oversized list cannot amplify work.
+     *
+     * @param   mixed   $value          The candidate value.
+     * @param   int     $maximumItems   Most items allowed.
+     * @param   int     $maximumLength  Most UTF-8 characters per item.
+     * @param   string  $name           Human label used in refusal messages.
+     * @return  list<string>  The admitted strings, order preserved.
+     * @throws  RenderException  When the value is not an array, exceeds the
+     *     item limit, or contains a non-string or overlong item.
+     * @since   0.1.0
      */
     private static function stringArray(mixed $value, int $maximumItems, int $maximumLength, string $name): array
     {
@@ -265,6 +354,19 @@ final class ProductionValues
         return $items;
     }
 
+    /**
+     * Require an in-range integer, accepting a JSON-decoded whole float
+     * (e.g. 4.0) as the integer it denotes.
+     *
+     * @param   mixed   $value    The candidate value.
+     * @param   int     $minimum  Least allowed value, inclusive.
+     * @param   int     $maximum  Greatest allowed value, inclusive.
+     * @param   string  $name     Human label used in refusal messages.
+     * @return  int  The admitted integer.
+     * @throws  RenderException  When the value is not a whole number inside
+     *     the range.
+     * @since   0.1.0
+     */
     private static function integer(mixed $value, int $minimum, int $maximum, string $name): int
     {
         if (is_float($value) && floor($value) === $value) {
@@ -277,6 +379,19 @@ final class ProductionValues
         return $value;
     }
 
+    /**
+     * Require a finite drawing coordinate from zero through the drawing's
+     * declared dimension, preserving the arrived numeric type so the
+     * emitted bytes match the reference exactly.
+     *
+     * @param   mixed   $value    The candidate value.
+     * @param   int     $maximum  The drawing dimension bounding this axis.
+     * @param   string  $name     Human label used in refusal messages.
+     * @return  int|float  The admitted coordinate, type preserved.
+     * @throws  RenderException  When the value is not a finite number
+     *     inside the bounds.
+     * @since   0.1.0
+     */
     private static function coordinate(mixed $value, int $maximum, string $name): int|float
     {
         if (!self::isFiniteNumber($value) || $value < 0 || $value > $maximum) {
@@ -287,7 +402,17 @@ final class ProductionValues
     }
 
     /**
-     * @param list<string> $values
+     * Copy one optional member onto the result when present, refusing any
+     * value outside its closed vocabulary. An absent member stays absent —
+     * no default is invented.
+     *
+     * @param   \stdClass     $record  The admitted input record.
+     * @param   \stdClass     $target  The result object being built.
+     * @param   string        $name    The member to copy.
+     * @param   list<string>  $values  The member's closed vocabulary.
+     * @throws  RenderException  When the member is present but not one of
+     *     the allowed strings.
+     * @since   0.1.0
      */
     private static function optionalEnumMember(\stdClass $record, \stdClass $target, string $name, array $values): void
     {
@@ -302,7 +427,15 @@ final class ProductionValues
     }
 
     /**
+     * True only for an int or a finite float — NAN, infinities, and every
+     * non-number are false.
+     *
+     * @param   mixed  $value  The candidate value.
+     * @return  bool  Whether the value is a finite number.
+     *
      * @phpstan-assert-if-true int|float $value
+     *
+     * @since   0.1.0
      */
     private static function isFiniteNumber(mixed $value): bool
     {

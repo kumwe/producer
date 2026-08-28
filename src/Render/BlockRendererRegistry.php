@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Render;
+
 /**
  * The block type to renderer mapping.
  *
@@ -8,18 +12,28 @@
  * renderer is not an error — the composition renderer emits the reference's
  * labeled, bounded fallback and the page still renders.
  *
- * @since 0.2.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Render;
-
 final class BlockRendererRegistry
 {
-    /** @var array<string, BlockRenderer> */
+    /**
+     * The current mapping, block type identifier to the renderer that
+     * claimed it most recently.
+     *
+     * @var array<string, BlockRenderer>
+     *
+     * @since   0.1.0
+     */
     private array $renderers = [];
 
+    /**
+     * Register a renderer for every type it claims. A later registration
+     * for a type already claimed wins, which is how a host overrides a
+     * core-catalog renderer with its own.
+     *
+     * @param   BlockRenderer  $renderer  The renderer to register.
+     * @since   0.1.0
+     */
     public function register(BlockRenderer $renderer): void
     {
         foreach ($renderer->types() as $type) {
@@ -27,13 +41,26 @@ final class BlockRendererRegistry
         }
     }
 
+    /**
+     * The renderer registered for a block type, or null when the type is
+     * unregistered — the caller then renders the bounded unknown-type
+     * fallback instead of failing.
+     *
+     * @param   string  $type  The block type identifier to look up.
+     * @return  ?BlockRenderer  The registered renderer, or null.
+     * @since   0.1.0
+     */
     public function rendererFor(string $type): ?BlockRenderer
     {
         return $this->renderers[$type] ?? null;
     }
 
     /**
-     * @return list<string> every registered block type identifier, sorted
+     * Every registered block type in one deterministic order, independent
+     * of registration order.
+     *
+     * @return  list<string>  Every registered type identifier, byte-sorted.
+     * @since   0.1.0
      */
     public function types(): array
     {
@@ -44,7 +71,12 @@ final class BlockRendererRegistry
     }
 
     /**
-     * The registry covering the complete core production and layout catalog.
+     * A registry covering the complete core production and layout catalog:
+     * a renderer for all forty-five pinned {@see BlockTypes} identifiers,
+     * ready for hosts to extend or override with {@see self::register()}.
+     *
+     * @return  self  A fresh registry carrying the core catalog.
+     * @since   0.1.0
      */
     public static function withCoreCatalog(): self
     {

@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Schema;
+
 /**
  * UTF-16 code-unit ordering for the schema profile's deterministic walks.
  *
@@ -13,21 +17,29 @@
  * @internal Support type for the Schema namespace; not part of the library
  *           surface.
  *
- * @since 0.1.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Schema;
-
 final class CodeUnitOrder
 {
+    /**
+     * Static utility; never instantiated.
+     *
+     * @since   0.1.0
+     */
     private function __construct()
     {
     }
 
     /**
      * Compare two member names by UTF-16 code unit.
+     *
+     * @param string $left  UTF-8 member name.
+     * @param string $right UTF-8 member name.
+     *
+     * @return int Negative, zero, or positive as $left sorts before, with,
+     *             or after $right.
+     *
+     * @since   0.1.0
      */
     public static function compare(string $left, string $right): int
     {
@@ -44,7 +56,11 @@ final class CodeUnitOrder
     /**
      * List an object's member names as strings, sorted by code unit.
      *
+     * @param \stdClass $value Decoded JSON object.
+     *
      * @return list<string>
+     *
+     * @since   0.1.0
      */
     public static function sortedMemberNames(\stdClass $value): array
     {
@@ -54,6 +70,14 @@ final class CodeUnitOrder
         return $names;
     }
 
+    /**
+     * Say whether a string is pure ASCII, where byte order and UTF-16
+     * code-unit order already agree.
+     *
+     * @param string $value UTF-8 text to test.
+     *
+     * @since   0.1.0
+     */
     private static function isAscii(string $value): bool
     {
         return preg_match('/[\x80-\xFF]/', $value) !== 1;

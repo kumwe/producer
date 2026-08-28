@@ -13,10 +13,37 @@ declare(strict_types=1);
 
 namespace Kumwe\Producer\Error;
 
+/**
+ * The place a diagnostic points at — an artifact, a node, a field path, a
+ * JSON Pointer — each member optional and proven against its contract
+ * grammar at construction.
+ *
+ * A location names where the problem sits; it never carries the offending
+ * value itself. The schema permits an entirely empty location, so every
+ * member defaults to null and no combination is required.
+ *
+ * @since   0.1.0
+ */
 final class DiagnosticLocation
 {
     /**
-     * @param list<string>|null $fieldPath Local names, at most 32.
+     * Proves every provided member against the contract grammars; an
+     * instance that exists is a valid diagnosticLocation document.
+     *
+     * @param   string|null        $artifactId   The artifact concerned — a
+     *                                           contract stable identifier,
+     *                                           or null.
+     * @param   string|null        $nodeId       The node inside it — a
+     *                                           contract stable identifier,
+     *                                           or null.
+     * @param   list<string>|null  $fieldPath    Local names, at most 32.
+     * @param   string|null        $jsonPointer  A JSON Pointer of at most
+     *                                           1000 code points, or null.
+     *
+     * @throws  \InvalidArgumentException  When any provided member breaks
+     *                                     its grammar or bound.
+     *
+     * @since   0.1.0
      */
     public function __construct(
         private readonly ?string $artifactId = null,
@@ -45,29 +72,63 @@ final class DiagnosticLocation
         }
     }
 
+    /**
+     * The artifact this location concerns, when one is named.
+     *
+     * @return  string|null  A contract stable identifier, or null.
+     *
+     * @since   0.1.0
+     */
     public function artifactId(): ?string
     {
         return $this->artifactId;
     }
 
+    /**
+     * The node this location concerns, when one is named.
+     *
+     * @return  string|null  A contract stable identifier, or null.
+     *
+     * @since   0.1.0
+     */
     public function nodeId(): ?string
     {
         return $this->nodeId;
     }
 
     /**
-     * @return list<string>|null
+     * The field path into the located value, when one is named.
+     *
+     * @return  list<string>|null  At most 32 contract local names, or null.
+     *
+     * @since   0.1.0
      */
     public function fieldPath(): ?array
     {
         return $this->fieldPath;
     }
 
+    /**
+     * The JSON Pointer into the located document, when one is named.
+     *
+     * @return  string|null  A pointer of at most 1000 code points, or null.
+     *
+     * @since   0.1.0
+     */
     public function jsonPointer(): ?string
     {
         return $this->jsonPointer;
     }
 
+    /**
+     * The schema-shaped diagnosticLocation document; absent members are
+     * omitted, never emitted as null, and an empty location is an empty
+     * object.
+     *
+     * @return  \stdClass  The document ready for canonical serialization.
+     *
+     * @since   0.1.0
+     */
     public function toDocument(): \stdClass
     {
         $document = new \stdClass();

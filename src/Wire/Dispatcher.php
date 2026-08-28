@@ -53,8 +53,38 @@ use Kumwe\Producer\Error\HostRefusal;
 use Kumwe\Producer\Error\MessageReference;
 use Kumwe\Producer\Wire\Port\HostAdapterInterface;
 
+/**
+ * The wire entry point: one call from raw route and body to a finished
+ * {@see Response}, with every decision the host's and every failure a
+ * typed, non-disclosing refusal.
+ *
+ * The fixed stage order in the file header is the contract: registry
+ * resolution, envelope validation and registry cross-checks, the host's
+ * authorization first for every operation, idempotent replay of recorded
+ * outcomes without re-applying, the port call, then result discipline.
+ * {@see dispatch()} never throws and never leaks an internal — whatever
+ * happens, the caller receives canonical bytes from the closed taxonomy.
+ *
+ * @since   0.1.0
+ */
 final class Dispatcher
 {
+    /**
+     * Binds the host authority the dispatch stages consult.
+     *
+     * @param   HostAdapterInterface  $host              The host's ports,
+     *                                                   authorization, and
+     *                                                   idempotency ledger.
+     * @param   StrictResponder       $responder         Serializes outcomes to
+     *                                                   canonical bytes.
+     * @param   int                   $maximumBodyBytes  The request body bound
+     *                                                   handed to
+     *                                                   {@see RequestEnvelope::parse()};
+     *                                                   host policy, 1 MiB by
+     *                                                   default.
+     *
+     * @since   0.1.0
+     */
     public function __construct(
         private readonly HostAdapterInterface $host,
         private readonly StrictResponder $responder = new StrictResponder(),
@@ -62,6 +92,20 @@ final class Dispatcher
     ) {
     }
 
+    /**
+     * Serves one request end to end. Never throws: a {@see HostRefusal}
+     * from any stage serializes verbatim, and any other throwable becomes
+     * a non-disclosing internal refusal — so every outcome, success or
+     * refusal, leaves as canonical bytes with the strict headers.
+     *
+     * @param   string  $route  The transport route addressed, e.g.
+     *                          `artifact/save`.
+     * @param   string  $body   The raw request body bytes.
+     *
+     * @return  Response  The canonical response, result or refusal.
+     *
+     * @since   0.1.0
+     */
     public function dispatch(string $route, string $body): Response
     {
         try {
@@ -76,6 +120,24 @@ final class Dispatcher
         }
     }
 
+    /**
+     * The dispatch stages in their fixed order: registry resolution,
+     * envelope parsing, the registry cross-checks (route agreement,
+     * expectedRevision exactly on concurrency-protected operations, an
+     * idempotency key only on a mutating one), authorization, replay,
+     * port call, result discipline, and — for a keyed mutation — the
+     * ledger write before the response is released.
+     *
+     * @param   string  $route  The transport route addressed.
+     * @param   string  $body   The raw request body bytes.
+     *
+     * @return  Response  The canonical response for the accepted outcome.
+     *
+     * @throws  HostRefusal  From any stage; {@see dispatch()} serializes
+     *                       it.
+     *
+     * @since   0.1.0
+     */
     private function handle(string $route, string $body): Response
     {
         $operation = OperationRegistry::byRoute($route);
@@ -137,6 +199,21 @@ final class Dispatcher
         return $response;
     }
 
+    /**
+     * Asks the host's authorization first — before replay, before the
+     * port. A returned HostError is thrown to be emitted verbatim; a
+     * thrown {@see HostRefusal} passes through; any other throwable fails
+     * closed as internal, because no decision means no.
+     *
+     * @param   Operation        $operation  The resolved registry row.
+     * @param   RequestEnvelope  $envelope   The validated request, argument
+     *                                       included — authorization is
+     *                                       item-scoped.
+     *
+     * @throws  HostRefusal  When the host refuses or cannot decide.
+     *
+     * @since   0.1.0
+     */
     private function authorize(Operation $operation, RequestEnvelope $envelope): void
     {
         try {
@@ -154,6 +231,20 @@ final class Dispatcher
         }
     }
 
+    /**
+     * Recalls the ledger record for a scope key. A ledger that cannot
+     * answer fails closed as internal: when replay cannot be ruled out,
+     * the mutation must not run.
+     *
+     * @param   string  $scopeKey  The canonical scope key digest.
+     *
+     * @return  IdempotencyRecord|null  The accepted outcome, or null when
+     *                                  the key is unseen.
+     *
+     * @throws  HostRefusal  When the ledger fails to answer.
+     *
+     * @since   0.1.0
+     */
     private function recall(string $scopeKey): ?IdempotencyRecord
     {
         try {
@@ -168,6 +259,19 @@ final class Dispatcher
         }
     }
 
+    /**
+     * Records the accepted outcome of a keyed mutation in the ledger. A
+     * failed write is an internal refusal: an outcome that cannot be
+     * recorded for replay is not released.
+     *
+     * @param   string             $scopeKey  The canonical scope key digest.
+     * @param   IdempotencyRecord  $record    The intent digest and result to
+     *                                        store.
+     *
+     * @throws  HostRefusal  When the ledger write fails.
+     *
+     * @since   0.1.0
+     */
     private function record(string $scopeKey, IdempotencyRecord $record): void
     {
         try {
@@ -182,6 +286,22 @@ final class Dispatcher
         }
     }
 
+    /**
+     * Calls the operation's method on the host's port with the argument
+     * passed through unjudged (null when absent). A thrown
+     * {@see HostRefusal} passes verbatim; any other throwable becomes a
+     * non-disclosing internal refusal.
+     *
+     * @param   Operation        $operation  The resolved registry row.
+     * @param   RequestEnvelope  $envelope   The validated request.
+     *
+     * @return  HostResult  The port's proven outcome.
+     *
+     * @throws  HostRefusal  The port's typed refusal, or internal for
+     *                       anything else it threw.
+     *
+     * @since   0.1.0
+     */
     private function invoke(Operation $operation, RequestEnvelope $envelope): HostResult
     {
         $port = $this->port($operation);
@@ -198,6 +318,23 @@ final class Dispatcher
         }
     }
 
+    /**
+     * Result discipline, then serialization: a concurrency-protected
+     * operation that returned no advanced revision fails closed as
+     * internal — the host broke the contract, and the caller must not
+     * receive an unversioned acceptance.
+     *
+     * @param   Operation   $operation  The resolved registry row.
+     * @param   HostResult  $result     The outcome to serialize.
+     *
+     * @return  Response  The canonical result response.
+     *
+     * @throws  HostRefusal  internal when the required revision is
+     *                       missing, or from the responder when the result
+     *                       cannot take canonical form.
+     *
+     * @since   0.1.0
+     */
     private function respond(Operation $operation, HostResult $result): Response
     {
         if ($operation->expectsRevision && $result->revision === null) {
@@ -210,6 +347,20 @@ final class Dispatcher
         return $this->responder->result($result);
     }
 
+    /**
+     * Resolves the operation's port on the host. The match is closed over
+     * the registry's ten port names; an absent optional port is refused as
+     * unavailable with retryable false, never guessed at.
+     *
+     * @param   Operation  $operation  The resolved registry row.
+     *
+     * @return  object  The host's port implementation.
+     *
+     * @throws  HostRefusal  unavailable when the host does not provide the
+     *                       port.
+     *
+     * @since   0.1.0
+     */
     private function port(Operation $operation): object
     {
         $port = match ($operation->port) {
@@ -234,6 +385,19 @@ final class Dispatcher
         return $port;
     }
 
+    /**
+     * The deterministic ledger key of a keyed mutation: the canonical
+     * digest of exactly (idempotencyKey, operationId, resourceContextKey,
+     * sessionGeneration), per the pinned host sequence vectors.
+     *
+     * @param   Operation       $operation  The resolved registry row.
+     * @param   RequestContext  $context    The validated context carrying
+     *                                      the key.
+     *
+     * @return  string  The canonical scope key digest.
+     *
+     * @since   0.1.0
+     */
     private static function scopeKey(Operation $operation, RequestContext $context): string
     {
         $scope = new \stdClass();
@@ -245,6 +409,18 @@ final class Dispatcher
         return CanonicalJson::digest($scope);
     }
 
+    /**
+     * The deterministic fingerprint of what the caller asked for: the
+     * canonical digest of the argument (when present) plus
+     * expectedRevision, locale, and protocolVersion, absent optionals
+     * omitted — the identity a retry must match to replay.
+     *
+     * @param   RequestEnvelope  $envelope  The validated request.
+     *
+     * @return  string  The canonical intent digest.
+     *
+     * @since   0.1.0
+     */
     private static function intentDigest(RequestEnvelope $envelope): string
     {
         $context = $envelope->context();
@@ -263,6 +439,18 @@ final class Dispatcher
         return CanonicalJson::digest($intent);
     }
 
+    /**
+     * The cross-check refusal path: a fixed invalid-request built from a
+     * catalog reference, echoing nothing.
+     *
+     * @param   string  $key             The catalog key of the refusal
+     *                                   message.
+     * @param   string  $defaultMessage  Its pre-written fallback.
+     *
+     * @throws  HostRefusal  Always — invalid-request.
+     *
+     * @since   0.1.0
+     */
     private static function refuseInvalid(string $key, string $defaultMessage): never
     {
         throw new HostRefusal(HostError::invalidRequest(new MessageReference($key, $defaultMessage)));

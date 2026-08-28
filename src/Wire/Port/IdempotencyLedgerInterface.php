@@ -25,16 +25,45 @@ namespace Kumwe\Producer\Wire\Port;
 
 use Kumwe\Producer\Wire\IdempotencyRecord;
 
+/**
+ * Durable storage for keyed-mutation outcomes; the replay decision itself
+ * stays in the dispatcher.
+ *
+ * What the host receives: opaque, deterministic scope keys computed by
+ * Producer — it never parses or interprets them. What the host must
+ * guarantee: {@see record()} persists durably before it returns, and
+ * {@see recall()} returns exactly what was recorded under the key or null
+ * for an unseen one. A ledger that cannot answer must throw rather than
+ * guess — the dispatcher then refuses as internal, because a mutation
+ * whose replay cannot be ruled out must not run.
+ *
+ * @since   0.1.0
+ */
 interface IdempotencyLedgerInterface
 {
     /**
      * The outcome previously accepted under this scope key, or null when
      * the key is unseen.
+     *
+     * @param   string  $scopeKey  The canonical scope key digest, opaque
+     *                             to the host.
+     *
+     * @return  IdempotencyRecord|null  The stored record, exactly as
+     *                                  recorded, or null.
+     *
+     * @since   0.1.0
      */
     public function recall(string $scopeKey): ?IdempotencyRecord;
 
     /**
      * Durably associate the accepted outcome with the scope key.
+     *
+     * @param   string             $scopeKey  The canonical scope key
+     *                                        digest, opaque to the host.
+     * @param   IdempotencyRecord  $record    The intent digest and result
+     *                                        to hold for replay.
+     *
+     * @since   0.1.0
      */
     public function record(string $scopeKey, IdempotencyRecord $record): void;
 }

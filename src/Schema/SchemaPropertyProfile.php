@@ -1,5 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Kumwe\Producer\Schema;
+
+use Kumwe\Producer\Canonical\CanonicalJson;
+
 /**
  * Admission for `studio.profile/schema-property`, Studio's closed profile
  * for contributed block property schemas.
@@ -22,15 +28,8 @@
  * Values follow PHP's decoded-JSON shape: objects are stdClass and arrays
  * are lists, exactly as {@see CanonicalJson::decode()} produces them.
  *
- * @since 0.1.0
+ * @since   0.1.0
  */
-
-declare(strict_types=1);
-
-namespace Kumwe\Producer\Schema;
-
-use Kumwe\Producer\Canonical\CanonicalJson;
-
 final class SchemaPropertyProfile
 {
     /**
@@ -38,6 +37,8 @@ final class SchemaPropertyProfile
      * vendored meta-schema.
      *
      * @var array<string, int>
+     *
+     * @since   0.1.0
      */
     public const LIMITS = [
         'maxAlternatives' => 64,
@@ -60,6 +61,8 @@ final class SchemaPropertyProfile
 
     /**
      * The one dialect a schema may declare.
+     *
+     * @since   0.1.0
      */
     private const DRAFT_2020_12 = 'https://json-schema.org/draft/2020-12/schema';
 
@@ -67,6 +70,8 @@ final class SchemaPropertyProfile
      * The closed keyword set contributed schemas may use.
      *
      * @var array<string, true>
+     *
+     * @since   0.1.0
      */
     private const ALLOWED_KEYWORDS = [
         '$defs' => true, '$ref' => true, '$schema' => true, 'additionalProperties' => true,
@@ -85,6 +90,8 @@ final class SchemaPropertyProfile
      * The closed JSON Schema type-name set.
      *
      * @var array<string, true>
+     *
+     * @since   0.1.0
      */
     private const TYPE_NAMES = [
         'array' => true, 'boolean' => true, 'integer' => true, 'null' => true,
@@ -94,16 +101,22 @@ final class SchemaPropertyProfile
     /**
      * Local `$ref` grammar: `#`, or a `#/` pointer whose raw tokens use the
      * portable ASCII subset.
+     *
+     * @since   0.1.0
      */
     private const REFERENCE_GRAMMAR = "/^#(?:\\/(?:[A-Za-z0-9._!\$&'()*+,;=:@-]|~[01])*)*$/";
 
     /**
      * References seen so far in this admission.
+     *
+     * @since   0.1.0
      */
     private int $references = 0;
 
     /**
      * Schema nodes counted so far in this admission.
+     *
+     * @since   0.1.0
      */
     private int $schemaNodes = 0;
 
@@ -111,9 +124,17 @@ final class SchemaPropertyProfile
      * Objects already visited, to refuse aliasing and cycles.
      *
      * @var \SplObjectStorage<object, mixed>
+     *
+     * @since   0.1.0
      */
     private \SplObjectStorage $seen;
 
+    /**
+     * Start one admission run with empty counters; only {@see admit()}
+     * constructs an instance.
+     *
+     * @since   0.1.0
+     */
     private function __construct()
     {
         $this->seen = new \SplObjectStorage();
@@ -129,6 +150,8 @@ final class SchemaPropertyProfile
      *                      associative mode produces.
      *
      * @throws SchemaAdmissionException When the schema falls outside the profile.
+     *
+     * @since   0.1.0
      */
     public static function admit(mixed $schema): SchemaPropertyValidator
     {
@@ -175,6 +198,16 @@ final class SchemaPropertyProfile
      * Walk one schema node, enforcing the closed keyword set and every
      * operand grammar, refusing at the node's first failure in code-unit
      * member order.
+     *
+     * @param mixed  $value Value at this schema position; anything but an
+     *                      object is refused.
+     * @param string $path  Schema JSON Pointer to this position; the empty
+     *                      string is the root.
+     * @param int    $depth Schema nesting depth of this position, root = 1.
+     *
+     * @throws SchemaAdmissionException At the node's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitSchema(mixed $value, string $path, int $depth): void
     {
@@ -233,6 +266,14 @@ final class SchemaPropertyProfile
 
     /**
      * Walk a `$defs` or `properties` map in code-unit order.
+     *
+     * @param mixed  $value Keyword operand; must be an object of schemas.
+     * @param string $path  Schema JSON Pointer to the operand.
+     * @param int    $depth Schema nesting depth of the entries.
+     *
+     * @throws SchemaAdmissionException At the map's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitSchemaMap(mixed $value, string $path, int $depth): void
     {
@@ -265,6 +306,15 @@ final class SchemaPropertyProfile
 
     /**
      * Walk a composition array of subschemas: dense, non-empty, bounded.
+     *
+     * @param mixed  $value Keyword operand; must be a dense list of at most
+     *                      `maxAlternatives` schemas.
+     * @param string $path  Schema JSON Pointer to the operand.
+     * @param int    $depth Schema nesting depth of the members.
+     *
+     * @throws SchemaAdmissionException At the array's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitSchemaArray(mixed $value, string $path, int $depth): void
     {
@@ -300,6 +350,14 @@ final class SchemaPropertyProfile
 
     /**
      * Walk one subschema position, where a bare boolean is a complete schema.
+     *
+     * @param mixed  $value Value at the position: a boolean or a schema object.
+     * @param string $path  Schema JSON Pointer to the position.
+     * @param int    $depth Schema nesting depth of the position.
+     *
+     * @throws SchemaAdmissionException At the subschema's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitSubschema(mixed $value, string $path, int $depth): void
     {
@@ -313,6 +371,13 @@ final class SchemaPropertyProfile
 
     /**
      * Count one schema node against the depth and node ceilings.
+     *
+     * @param string $path  Schema JSON Pointer to the node, for the refusal.
+     * @param int    $depth Schema nesting depth of the node, root = 1.
+     *
+     * @throws SchemaAdmissionException `limit-exceeded` past either ceiling.
+     *
+     * @since   0.1.0
      */
     private function trackSchemaNode(string $path, int $depth): void
     {
@@ -336,6 +401,16 @@ final class SchemaPropertyProfile
     /**
      * Check one `$ref` operand against the portable local grammar and the
      * reference ceiling.
+     *
+     * @param mixed  $value Keyword operand; must be a portable bounded local
+     *                      JSON Pointer reference.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException `invalid-reference` outside the
+     *                                  grammar; `limit-exceeded` past the
+     *                                  reference ceiling.
+     *
+     * @since   0.1.0
      */
     private function visitReference(mixed $value, string $path): void
     {
@@ -358,7 +433,17 @@ final class SchemaPropertyProfile
 
     /**
      * Check an `enum` operand: dense, non-empty, bounded, and canonically
-     * unique.
+     * unique — members are distinct exactly when their canonical
+     * serializations differ.
+     *
+     * @param mixed  $value Keyword operand; must be a dense list of bounded
+     *                      JSON values.
+     * @param string $path  Schema JSON Pointer to the operand.
+     * @param int    $depth JSON nesting depth of the members, top level = 1.
+     *
+     * @throws SchemaAdmissionException At the operand's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitEnum(mixed $value, string $path, int $depth): void
     {
@@ -401,6 +486,15 @@ final class SchemaPropertyProfile
     /**
      * Check an `examples` operand: dense and bounded, each member a bounded
      * JSON value.
+     *
+     * @param mixed  $value Keyword operand; must be a dense list of at most
+     *                      `maxExamples` JSON values.
+     * @param string $path  Schema JSON Pointer to the operand.
+     * @param int    $depth JSON nesting depth of the members, top level = 1.
+     *
+     * @throws SchemaAdmissionException At the operand's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitExamples(mixed $value, string $path, int $depth): void
     {
@@ -425,7 +519,15 @@ final class SchemaPropertyProfile
 
     /**
      * Check a `dependentRequired` operand: a bounded map of safe names to
-     * name arrays.
+     * name arrays, walked in code-unit order.
+     *
+     * @param mixed  $value Keyword operand; must be an object of
+     *                      property-name arrays.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException At the operand's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitDependentRequired(mixed $value, string $path): void
     {
@@ -462,6 +564,14 @@ final class SchemaPropertyProfile
 
     /**
      * Check a property-name array: dense, bounded, safe, unique strings.
+     *
+     * @param mixed  $value   Operand; must be a dense list of strings.
+     * @param string $path    Schema JSON Pointer to the array.
+     * @param int    $maximum Most names the array may hold.
+     *
+     * @throws SchemaAdmissionException At the array's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitNameArray(mixed $value, string $path, int $maximum): void
     {
@@ -503,6 +613,14 @@ final class SchemaPropertyProfile
     /**
      * Check a `type` operand: one known name, or a bounded unique array of
      * them.
+     *
+     * @param mixed  $value Keyword operand to check.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException `invalid-keyword-value` at the first
+     *                                  unknown, duplicate, or misshapen name.
+     *
+     * @since   0.1.0
      */
     private function visitType(mixed $value, string $path): void
     {
@@ -539,7 +657,16 @@ final class SchemaPropertyProfile
 
     /**
      * Check a bounded JSON value operand: finite scalars, dense bounded
-     * arrays, safe bounded maps.
+     * arrays, safe bounded maps, with the depth ceiling checked before
+     * entering either container.
+     *
+     * @param mixed  $value Value at this position.
+     * @param string $path  Schema JSON Pointer to the position.
+     * @param int    $depth JSON nesting depth of the position, top level = 1.
+     *
+     * @throws SchemaAdmissionException At the value's first failure.
+     *
+     * @since   0.1.0
      */
     private function visitJsonValue(mixed $value, string $path, int $depth): void
     {
@@ -611,6 +738,15 @@ final class SchemaPropertyProfile
 
     /**
      * Refuse an object that appears twice in one document.
+     *
+     * @param object $value Object encountered at this position.
+     * @param string $path  Schema JSON Pointer to the position, for the
+     *                      refusal.
+     *
+     * @throws SchemaAdmissionException `invalid-root` on an aliased or
+     *                                  cyclic object.
+     *
+     * @since   0.1.0
      */
     private function trackObject(object $value, string $path): void
     {
@@ -633,6 +769,15 @@ final class SchemaPropertyProfile
      * edge inside a strongly connected component. Diagnostics are arbitrated
      * by the published path order, and only failures at positions the
      * bounded grammar would report stay eligible.
+     *
+     * @param \stdClass $root Schema document root the references resolve
+     *                        against.
+     *
+     * @throws SchemaAdmissionException `recursive-schema` or
+     *                                  `invalid-reference`, first in the
+     *                                  published path order.
+     *
+     * @since   0.1.0
      */
     private function assertNonRecursive(\stdClass $root): void
     {
@@ -812,6 +957,13 @@ final class SchemaPropertyProfile
      * Hold the root to `additionalProperties: false` and `type: "object"`,
      * the two invariants participating at their virtual member positions in
      * the published order: `additionalProperties` sorts before `type`.
+     *
+     * @param \stdClass $root Schema document root to check.
+     *
+     * @throws SchemaAdmissionException `invalid-root` at the first missing
+     *                                  invariant.
+     *
+     * @since   0.1.0
      */
     private static function assertClosedObjectRoot(\stdClass $root): void
     {
@@ -834,7 +986,14 @@ final class SchemaPropertyProfile
     /**
      * Pick the first failure under the published diagnostic order.
      *
-     * @param list<SchemaAdmissionException> $failures
+     * @param \stdClass                      $root     Schema document the
+     *                                                 paths navigate.
+     * @param list<SchemaAdmissionException> $failures Candidate refusals.
+     *
+     * @return SchemaAdmissionException|null The earliest refusal, or null
+     *                                       when there is none.
+     *
+     * @since   0.1.0
      */
     private static function firstFailure(\stdClass $root, array $failures): ?SchemaAdmissionException
     {
@@ -855,6 +1014,15 @@ final class SchemaPropertyProfile
      * Compare two schema pointers in the order admission visits them,
      * navigating the document to tell array token order from object token
      * order.
+     *
+     * @param \stdClass $root  Schema document the pointers navigate.
+     * @param string    $left  Schema JSON Pointer.
+     * @param string    $right Schema JSON Pointer.
+     *
+     * @return int Negative, zero, or positive as $left is visited before,
+     *             with, or after $right.
+     *
+     * @since   0.1.0
      */
     private static function comparePaths(\stdClass $root, string $left, string $right): int
     {
@@ -892,7 +1060,11 @@ final class SchemaPropertyProfile
      * Split one JSON Pointer into unescaped tokens; the empty pointer has
      * none.
      *
+     * @param string $pointer JSON Pointer to split.
+     *
      * @return list<string>
+     *
+     * @since   0.1.0
      */
     private static function pointerTokens(string $pointer): array
     {
@@ -910,6 +1082,19 @@ final class SchemaPropertyProfile
     /**
      * Hold one member name to the safety and length rules; a failure points
      * at the member position unless a rejection path is given.
+     *
+     * @param string      $key           Member name to check.
+     * @param string      $path          Schema JSON Pointer to the holding
+     *                                   object, for the message.
+     * @param string|null $rejectionPath Pointer a refusal carries instead of
+     *                                   the member position.
+     *
+     * @throws SchemaAdmissionException `limit-exceeded` past the key-length
+     *                                  ceiling; `unsafe-member` for an empty,
+     *                                  prototype-polluting, or
+     *                                  control-character name.
+     *
+     * @since   0.1.0
      */
     private static function assertSafeObjectKey(string $key, string $path, ?string $rejectionPath = null): void
     {
@@ -944,7 +1129,18 @@ final class SchemaPropertyProfile
      * Resolve one local reference through the profile's position grammar,
      * reporting whether the target is a schema position and what it holds.
      *
-     * @return array{0: bool, 1: mixed}
+     * @param \stdClass $root      Schema document root to resolve against.
+     * @param string    $reference Portable local reference: `#` or a `#/`
+     *                             pointer.
+     * @param string    $path      Schema JSON Pointer a refusal carries.
+     *
+     * @return array{0: bool, 1: mixed} Whether the target is a schema
+     *                                  position, and the target value.
+     *
+     * @throws SchemaAdmissionException `invalid-reference` when the pointer
+     *                                  does not land on a boolean or object.
+     *
+     * @since   0.1.0
      */
     private static function resolveLocalReference(\stdClass $root, string $reference, string $path): array
     {
@@ -999,7 +1195,12 @@ final class SchemaPropertyProfile
     /**
      * Resolve every `$ref` of an admitted document for the interpreter.
      *
-     * @return \SplObjectStorage<\stdClass, \stdClass|bool>
+     * @param \stdClass $root Admitted schema document root.
+     *
+     * @return \SplObjectStorage<\stdClass, \stdClass|bool> Resolved target
+     *                                                      per referring node.
+     *
+     * @since   0.1.0
      */
     private static function resolveReferences(\stdClass $root): \SplObjectStorage
     {
@@ -1071,6 +1272,8 @@ final class SchemaPropertyProfile
      * @param  list<list<int>> $adjacency
      * @param  list<list<int>> $reverse
      * @return list<int> Component number per node.
+     *
+     * @since   0.1.0
      */
     private static function stronglyConnectedComponents(array $adjacency, array $reverse): array
     {
@@ -1129,6 +1332,13 @@ final class SchemaPropertyProfile
      * Measure the canonical byte budget iteratively, before sorting any
      * untrusted map. A value the canonical form would refuse defers to the
      * structural admission passes by staying inside the budget here.
+     *
+     * @param \stdClass $root Untrusted schema document root to measure.
+     *
+     * @return bool Whether the canonical UTF-8 size stays within
+     *              `maxSchemaBytes`.
+     *
+     * @since   0.1.0
      */
     private static function withinCanonicalByteBudget(\stdClass $root): bool
     {
@@ -1177,6 +1387,12 @@ final class SchemaPropertyProfile
     /**
      * Count the canonical encoded bytes of one string without materialising
      * the escape: ECMA-404 minimal escaping over the raw UTF-8 bytes.
+     *
+     * @param string $value Raw UTF-8 text to measure.
+     *
+     * @return int Encoded byte count, surrounding quotes included.
+     *
+     * @since   0.1.0
      */
     private static function canonicalStringBytes(string $value): int
     {
@@ -1201,7 +1417,11 @@ final class SchemaPropertyProfile
      * one, sorted by code unit — the bound that keeps hostile wide nodes
      * cheap while preserving the published first diagnostic.
      *
+     * @param \stdClass $value Schema node whose members are listed.
+     *
      * @return list<string>
+     *
+     * @since   0.1.0
      */
     private function boundedSchemaEntries(\stdClass $value): array
     {
@@ -1232,7 +1452,11 @@ final class SchemaPropertyProfile
     /**
      * List an object's member names as strings, in insertion order.
      *
+     * @param \stdClass $value Decoded JSON object.
+     *
      * @return list<string>
+     *
+     * @since   0.1.0
      */
     private static function memberNames(\stdClass $value): array
     {
@@ -1240,7 +1464,16 @@ final class SchemaPropertyProfile
     }
 
     /**
-     * Check a `$schema` operand against the one admissible dialect.
+     * Check a `$schema` operand against the one admissible dialect,
+     * JSON Schema Draft 2020-12.
+     *
+     * @param mixed  $value Keyword operand to check.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException `invalid-keyword-value` for any other
+     *                                  operand.
+     *
+     * @since   0.1.0
      */
     private static function assertDialect(mixed $value, string $path): void
     {
@@ -1255,6 +1488,16 @@ final class SchemaPropertyProfile
 
     /**
      * Check a bounded annotation string by code-point length.
+     *
+     * @param mixed  $value   Keyword operand; must be a string.
+     * @param string $path    Schema JSON Pointer to the operand.
+     * @param int    $maximum Most code points the string may hold.
+     *
+     * @throws SchemaAdmissionException `invalid-keyword-value` for a
+     *                                  non-string; `limit-exceeded` past the
+     *                                  length ceiling.
+     *
+     * @since   0.1.0
      */
     private static function visitBoundedString(mixed $value, string $path, int $maximum): void
     {
@@ -1277,6 +1520,14 @@ final class SchemaPropertyProfile
     /**
      * Check a non-negative integer operand, where an integral float counts
      * as an integer.
+     *
+     * @param mixed  $value Keyword operand to check.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException `invalid-keyword-value` for anything
+     *                                  else.
+     *
+     * @since   0.1.0
      */
     private static function visitNonNegativeInteger(mixed $value, string $path): void
     {
@@ -1293,6 +1544,14 @@ final class SchemaPropertyProfile
 
     /**
      * Check a finite number operand.
+     *
+     * @param mixed  $value Keyword operand to check.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException `invalid-keyword-value` for anything
+     *                                  else.
+     *
+     * @since   0.1.0
      */
     private static function visitFiniteNumber(mixed $value, string $path): void
     {
@@ -1307,6 +1566,14 @@ final class SchemaPropertyProfile
 
     /**
      * Check a `multipleOf` operand: finite and strictly positive.
+     *
+     * @param mixed  $value Keyword operand to check.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException `invalid-keyword-value` for anything
+     *                                  else.
+     *
+     * @since   0.1.0
      */
     private static function visitPositiveNumber(mixed $value, string $path): void
     {
@@ -1322,6 +1589,14 @@ final class SchemaPropertyProfile
 
     /**
      * Check a boolean operand.
+     *
+     * @param mixed  $value Keyword operand to check.
+     * @param string $path  Schema JSON Pointer to the operand.
+     *
+     * @throws SchemaAdmissionException `invalid-keyword-value` for anything
+     *                                  else.
+     *
+     * @since   0.1.0
      */
     private static function visitBoolean(mixed $value, string $path): void
     {
@@ -1338,7 +1613,11 @@ final class SchemaPropertyProfile
      * Say whether a value is a portable bounded local reference: the
      * grammar, length and control-character rules all hold.
      *
+     * @param mixed $value Candidate `$ref` operand.
+     *
      * @phpstan-assert-if-true string $value
+     *
+     * @since   0.1.0
      */
     private static function isPortableLocalReference(mixed $value): bool
     {
@@ -1349,7 +1628,12 @@ final class SchemaPropertyProfile
     }
 
     /**
-     * Append one token to a schema JSON Pointer.
+     * Append one token to a schema JSON Pointer, escaping `~` and `/`.
+     *
+     * @param string $pointer Pointer to extend; the empty string is the root.
+     * @param string $token   Unescaped token to append.
+     *
+     * @since   0.1.0
      */
     private static function appendPointer(string $pointer, string $token): string
     {
@@ -1359,6 +1643,10 @@ final class SchemaPropertyProfile
     /**
      * Render a pointer for a human-readable message: the empty pointer is
      * `schema root`.
+     *
+     * @param string $path Schema JSON Pointer to render.
+     *
+     * @since   0.1.0
      */
     private static function displayPath(string $path): string
     {
