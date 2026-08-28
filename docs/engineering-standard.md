@@ -39,7 +39,9 @@ Rules that keep the layers honest:
 
 - `declare(strict_types=1)` in every file; `final` classes by default; constructor injection only;
   no inheritance where composition serves; small classes named for their one responsibility.
-- Every public class and method carries a doc block that states its contract — what it accepts,
+- Every documentable member carries a doc block ending in `@since`, enforced by
+  `php tools/check-docblocks.php` in `composer check` and CI — an undocumented member fails the
+  build. A block states the member's contract — what it accepts,
   what it guarantees, what it throws and when — not a restatement of its name. `@since` records
   the version that introduced the member and is never rewritten.
 - No runtime Composer dependencies, ever (`php` + `ext-json` + `ext-mbstring` only). This is a
