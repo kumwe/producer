@@ -1,0 +1,39 @@
+{
+  "name": "kumwe/producer",
+  "description": "The PHP producer for Kumwe Studio: receives canonical Studio compositions and makes them real - validated wire handling, semantic server-side rendering, and design-token CSS - while your application keeps all authority and storage.",
+  "type": "library",
+  "license": "MIT",
+  "homepage": "https://github.com/kumwe/producer",
+  "support": {
+    "issues": "https://github.com/kumwe/producer/issues",
+    "source": "https://github.com/kumwe/producer"
+  },
+  "require": {
+    "php": ">=8.1",
+    "ext-json": "*",
+    "ext-mbstring": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Kumwe\\Producer\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Kumwe\\Producer\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "php tests/run.php",
+    "lint": "php tools/lint.php",
+    "contract": "php tools/verify-contract.php",
+    "check": [
+      "@lint",
+      "@contract",
+      "@test"
+    ]
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
