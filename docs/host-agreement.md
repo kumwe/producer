@@ -19,8 +19,8 @@ with its own services and hands them to Producer at the boundary:
 
 ## What the host embeds
 
-- Producer's render result — an HTML fragment, a stylesheet reference, an enhancement-runtime
-  requirement flag, and preload hints — inside the host's own templates. Producer never owns a
+- Producer's render result — an HTML fragment, its generated stylesheet, and the enhancement
+  need signal — inside the host's own templates. Producer never owns a
   page; the host's layout, navigation, language, and direction wrap the fragment.
 - Studio's prebuilt browser assets (the authoring archive and the public enhancement runtime),
   served as immutable static files under the host's cache and Content-Security-Policy discipline.
