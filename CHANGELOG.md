@@ -3,7 +3,7 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
-## Unreleased
+## 0.1.0 - 2026-08-28
 
 - The wire layer: request envelopes against the contract grammars with real duplicate-member
   detection, the closed operation registry of thirty-one operations across ten ports proven
