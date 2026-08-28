@@ -35,6 +35,9 @@ jobs:
       - name: Lint
         run: php tools/lint.php
 
+      - name: Verify member documentation
+        run: php tools/check-docblocks.php
+
       - name: Verify the pinned Studio contract
         run: php tools/verify-contract.php
 

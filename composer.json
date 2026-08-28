@@ -29,9 +29,11 @@
     "contract": "php tools/verify-contract.php",
     "check": [
       "@lint",
+      "@docs",
       "@contract",
       "@test"
-    ]
+    ],
+    "docs": "php tools/check-docblocks.php"
   },
   "config": {
     "sort-packages": true
