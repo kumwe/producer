@@ -17,7 +17,7 @@ tests it passes.
    contract; it invents no protocol of its own.
 2. **Host-neutral.** Any PHP application — whatever its framework, ORM, or template engine — can
    adopt Producer. Nothing in this repository may import, assume, or special-case a particular
-   host, including Kumwe App. Kumwe App is Producer's first consumer, never its owner.
+   host.
 3. **Proven, not trusted.** Every capability is demonstrated against the vendored, digest-verified
    Studio corpus. A renderer that is not exercised by the conformance vectors is not claimed.
 
@@ -52,7 +52,7 @@ tests it passes.
   [`resources/studio-contract/PIN.json`](resources/studio-contract/PIN.json). Producer never
   paraphrases a canonical document and never weakens a schema to make PHP convenient. A need the
   contract cannot express is a finding raised in the Studio repository, not a local workaround.
-- **With hosts** (Kumwe App first): the host implements Producer's port interfaces with its own
+- **With hosts**: the host implements Producer's port interfaces with its own
   authority and storage, embeds Producer's render results in its own templates, and serves
   Studio's prebuilt assets. The agreement is recorded in
   [`docs/host-agreement.md`](docs/host-agreement.md).
@@ -61,6 +61,6 @@ tests it passes.
 
 Work is recorded in [`docs/roadmap.md`](docs/roadmap.md) while open and in
   [`CHANGELOG.md`](CHANGELOG.md) when delivered; a claim states only what the check lane proves on a
-  clean clone. The check lane is `composer check`: lint, documentation, architecture and public
-  API gates, contract proof, Composer autoload smoke, and the dependency-free test suite. Every
-  commit passes it.
+  clean clone. The check lane is `php tools/check.php`: lint, documentation, architecture and
+  public API gates, contract proof, Composer autoload smoke, and the dependency-free test suite.
+  Every commit passes it.

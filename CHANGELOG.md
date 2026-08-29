@@ -6,12 +6,12 @@ Delivered, repository-verified behaviour only; roadmap position and claims live 
 ## 0.2.0 - 2026-08-29
 
 - Re-pinned Producer from an unreleased Studio branch commit to the exact coordinated Studio
-  `0.1.0-rc.1` release consumed by Kumwe App: byte-identical release records, protocol schemas,
+  `0.1.0-rc.1` release: byte-identical release records, protocol schemas,
   complete testkit corpus, manifest digests, package coordinates, protocol version, and profile
   claims are now one fail-closed contract proof.
 - Removed the seven post-release authoring operations, their three schemas, and the authoring port
   interface that were not part of Studio `0.1.0-rc.1`; the wire now reproduces the released
-  twenty-four-operation, nine-port registry exactly, without aliases or compatibility paths.
+  twenty-four-operation, nine-port registry exactly, with no alternate host-specific paths.
 - Replaced the split idempotency lookup/write seam with one host-atomic mutation boundary for
   keyed and unkeyed mutations. Hosts can commit trusted scope, mutation, audit, and an optional
   protected replay representation together; replay may deterministically rehydrate secrets, and
@@ -24,6 +24,9 @@ Delivered, repository-verified behaviour only; roadmap position and claims live 
   injection and exact inventory reconciliation plus available/hidden/unavailable binding results.
 - Added clean Composer install and strict PSR-4 smoke proof, a reviewed public-API snapshot, a
   package/layer architecture gate, and PHP 8.5 to both pull-request and release matrices.
+- Restricted Composer archives to the runtime library, public API manifest, exact Studio contract,
+  license, readme, and a shipped no-dev smoke; development and generated state never crosses the
+  distribution boundary.
 - Added a sealed, exact-corpus-backed document-schema registry for all thirteen published runtime
   document kinds, with closed local and cross-document references, bounded reviewed patterns,
   deterministic diagnostics, and hostile corpus proof. Added immutable typed release coordinates

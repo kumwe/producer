@@ -379,7 +379,7 @@ Alignment across the three parties is exact, never floating:
 - **Studio → Producer:** Producer vendors the Studio contract corpus (schemas plus conformance
   vectors) at one exact release, recorded through the release, schema, and corpus manifests in
   [`resources/studio-contract/PIN.json`](../resources/studio-contract/PIN.json).
-  `composer contract` fails when a vendored byte disagrees with a recorded digest, so the
+  `php tools/verify-contract.php` fails when a vendored byte disagrees with a recorded digest, so the
   contract your host runs against is provably the pinned one.
 - **Producer → host:** pin the exact Producer version in your `composer.json` — an exact version
   string, never a range (`^`/`~`) — while Studio's contract is pre-release, and record the

@@ -40,7 +40,7 @@ Rules that keep the layers honest:
 - `declare(strict_types=1)` in every file; `final` classes by default; constructor injection only;
   no inheritance where composition serves; small classes named for their one responsibility.
 - Every documentable member carries a doc block ending in `@since`, enforced by
-  `php tools/check-docblocks.php` in `composer check` and CI — an undocumented member fails the
+  `php tools/check-docblocks.php` in `php tools/check.php` and CI — an undocumented member fails the
   build. A block states the member's contract — what it accepts,
   what it guarantees, what it throws and when — not a restatement of its name. `@since` records
   the version that introduced the member and is never rewritten.
@@ -81,7 +81,7 @@ The suite exists to prove intended outcomes, and only that. The standard for eve
 
 ## The check lane
 
-`composer check` is the whole standard, executable: lint, public API and architecture gates,
+`php tools/check.php` is the whole standard, executable: lint, public API and architecture gates,
 contract digest verification, suite. Every commit passes it; CI runs it on PHP 8.1 through 8.5;
 a release re-proves it on the tagged
 commit. There is no path to publication that skips it.

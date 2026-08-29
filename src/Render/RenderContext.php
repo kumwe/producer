@@ -84,7 +84,8 @@ final class RenderContext
                 throw new \InvalidArgumentException('A preview marker inventory carries at most 100000 entries.');
             }
             foreach ($previewMarkerMap as $marker => $nodeId) {
-                if (!is_string($marker)
+                if (
+                    !is_string($marker)
                     || !is_string($nodeId)
                     || preg_match(
                         '%^studio\.preview/node/[0-9a-f]{64}/(?:0|[1-9][0-9]{0,4})$%D',

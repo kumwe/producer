@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $failures = [];
-$count = 0;
+$paths = [$root . '/smoke.php'];
 
 foreach (['examples', 'src', 'tests', 'tools'] as $directory) {
     $path = $root . '/' . $directory;
@@ -26,17 +26,21 @@ foreach (['examples', 'src', 'tests', 'tools'] as $directory) {
         if ($file->getExtension() !== 'php') {
             continue;
         }
-        $count++;
-        exec(
-            escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($file->getPathname()) . ' 2>&1',
-            $output,
-            $status,
-        );
-        if ($status !== 0) {
-            $failures[] = implode("\n", $output);
-        }
-        $output = [];
+        $paths[] = $file->getPathname();
     }
+}
+sort($paths);
+
+foreach ($paths as $path) {
+    exec(
+        escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($path) . ' 2>&1',
+        $output,
+        $status,
+    );
+    if ($status !== 0) {
+        $failures[] = implode("\n", $output);
+    }
+    $output = [];
 }
 
 if ($failures !== []) {
@@ -44,4 +48,4 @@ if ($failures !== []) {
     exit(1);
 }
 
-echo "Lint passed: {$count} PHP files.\n";
+echo 'Lint passed: ' . count($paths) . " PHP files.\n";

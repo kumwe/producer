@@ -14,41 +14,17 @@
     "ext-mbstring": "*"
   },
   "require-dev": {
-    "phpstan/phpstan": "^2.1"
+    "phpstan/phpstan": "^2.1",
+    "squizlabs/php_codesniffer": "^4.0"
   },
   "autoload": {
     "psr-4": {
       "Kumwe\\Producer\\": "src/"
     }
   },
-  "autoload-dev": {
-    "psr-4": {
-      "Kumwe\\Producer\\Tests\\": "tests/"
-    }
-  },
   "scripts": {
-    "analyse": "phpstan analyse --no-progress --memory-limit=1G",
-    "api": "php tools/verify-api.php",
-    "api:self-test": "php tools/verify-api.php --self-test",
-    "architecture": "php tools/verify-architecture.php",
-    "autoload-smoke": "php tools/autoload-smoke.php",
-    "style": "php tools/check-style.php",
-    "test": "php tests/run.php",
-    "lint": "php tools/lint.php",
-    "contract": "php tools/verify-contract.php",
-    "check": [
-      "@lint",
-      "@style",
-      "@docs",
-      "@architecture",
-      "@api",
-      "@api:self-test",
-      "@contract",
-      "@analyse",
-      "@autoload-smoke",
-      "@test"
-    ],
-    "docs": "php tools/check-docblocks.php"
+    "cs": "phpcs -q -n",
+    "smoke": "php smoke.php"
   },
   "config": {
     "sort-packages": true

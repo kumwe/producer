@@ -19,8 +19,9 @@ reality on a PHP host:
 Producer deliberately contains **no authority, no storage, no Node.js, and no render-time code
 generation** — your application keeps authentication, authorization, persistence, and templates,
 and implements Producer's small port interfaces with its own services. The full rules live in the
-[charter](CHARTER.md); the division of labour with Studio and with host applications is recorded in
-[`docs/host-agreement.md`](docs/host-agreement.md).
+[charter](https://github.com/kumwe/producer/blob/main/CHARTER.md); the division of labour with Studio
+and with host applications is recorded in the
+[host agreement](https://github.com/kumwe/producer/blob/main/docs/host-agreement.md).
 
 ## The pipeline
 
@@ -37,23 +38,24 @@ and implements Producer's small port interfaces with its own services. The full 
 The library is layered with one dependency direction — Canonical JSON, the schema-property
 profile, the error taxonomy, the wire layer, rendering, stylesheets — each proven by replaying the
 vendored Studio conformance corpora before the next layer consumes it. The
-[engineering standard](docs/engineering-standard.md) states the architecture, code, testing, and
-documentation rules in full: strict types, final classes, injected authority, centralized
-escaping, deterministic output, typed refusals with stable codes, and a suite that proves intended
-outcomes only — the conformance corpora are the spine, negative paths are first-class, and
-frivolous tests are forbidden.
+[engineering standard](https://github.com/kumwe/producer/blob/main/docs/engineering-standard.md)
+states the architecture, code, testing, and documentation rules in full: strict types, final
+classes, injected authority, centralized escaping, deterministic output, typed refusals with
+stable codes, and a suite that proves intended outcomes only — the conformance corpora are the
+spine, negative paths are first-class, and frivolous tests are forbidden.
 
 Producer is also written to be ported. The contract is language-neutral JSON, so a Python or
 TypeScript sibling implements the same corpora and claims conformance the same way; the
-[porting guide](docs/porting-guide.md) gives an implementer the order, the boundaries, and the
-subtleties, so a port needs this repository and nothing else.
+[porting guide](https://github.com/kumwe/producer/blob/main/docs/porting-guide.md) gives an
+implementer the order, the boundaries, and the subtleties, so a port needs this repository and
+nothing else.
 
 ## Exact document admission
 
 Hosts and extension tooling can validate decoded Studio documents through the one sealed,
 release-pinned authority. The registry accepts only the thirteen published document kinds and
 loads only Producer's digest-verified Composer resources; callers cannot inject schemas, roots,
-references, patterns, directories, or compatibility aliases.
+references, patterns, directories, or alternate schema paths.
 
 ```php
 use Kumwe\Producer\Schema\StudioDocumentSchemaRegistry;
@@ -81,7 +83,7 @@ The 0.2 release line is the supported host-integration foundation for the exact 
 validation, the twenty-four-operation wire, host-atomic mutation and protected replay, rendering,
 rich text, and stylesheets are corpus-proven. Deployment emitters and optional template bridges
 remain roadmap work and are not claimed. See
-[`docs/roadmap.md`](docs/roadmap.md) for the precise boundary.
+[the roadmap](https://github.com/kumwe/producer/blob/main/docs/roadmap.md) for the precise boundary.
 
 ## Requirements
 
@@ -89,8 +91,10 @@ PHP 8.1 or newer with `ext-json` and `ext-mbstring`. No runtime Composer depende
 
 ## Development
 
+From a repository checkout (development tooling is intentionally absent from package archives):
+
 ```sh
 composer validate --strict
 composer install --no-interaction
-composer check   # lint, API/architecture gates, contract proof, suite
+php tools/check.php   # lint, API/architecture gates, contract proof, suite
 ```

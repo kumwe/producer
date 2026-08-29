@@ -81,7 +81,7 @@ Learn them here instead of in production:
 1. The vendored, digest-verified contract at an exact Studio pin (its own `PIN.json`).
 2. Green replay of every vendored corpus it implements, in its own test suite.
 3. The charter's prohibitions restated in its own README, with the same force.
-4. A check lane equivalent to `composer check`, run in CI on every supported runtime version.
+4. A check lane equivalent to `php tools/check.php`, run in CI on every supported runtime version.
 
 A port that cannot yet do all four is welcome to exist — and states plainly which layers are
 proven and which are not, exactly as this repository's [roadmap](roadmap.md) does.

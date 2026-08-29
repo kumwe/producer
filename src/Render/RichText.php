@@ -694,12 +694,14 @@ final class RichText
         if (property_exists($value, 'attrs') && !$value->attrs instanceof \stdClass) {
             throw new RenderException('Parsed rich-text node attributes are malformed.');
         }
-        if (property_exists($value, 'content')
+        if (
+            property_exists($value, 'content')
             && (!is_array($value->content) || !array_is_list($value->content))
         ) {
             throw new RenderException('Parsed rich-text node content is not a list.');
         }
-        if (property_exists($value, 'marks')
+        if (
+            property_exists($value, 'marks')
             && (!is_array($value->marks) || !array_is_list($value->marks))
         ) {
             throw new RenderException('Parsed rich-text marks are not a list.');
@@ -901,7 +903,8 @@ final class RichText
      */
     private static function assertChecklistTree(mixed $value): void
     {
-        if (!$value instanceof \stdClass
+        if (
+            !$value instanceof \stdClass
             || !is_array($value->items ?? null)
             || !array_is_list($value->items)
         ) {
@@ -926,7 +929,8 @@ final class RichText
      */
     private static function assertChecklistEntry(mixed $value): void
     {
-        if (!$value instanceof \stdClass
+        if (
+            !$value instanceof \stdClass
             || !property_exists($value, 'children')
             || !property_exists($value, 'level')
             || !property_exists($value, 'node')

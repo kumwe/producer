@@ -280,7 +280,8 @@ final class CompositionRenderer
         }
         $coordinates = [];
         foreach ($blocks as $block) {
-            if (!$block instanceof \stdClass
+            if (
+                !$block instanceof \stdClass
                 || !is_string($block->type ?? null)
                 || !is_string($block->version ?? null)
                 || !is_string($block->revision ?? null)
