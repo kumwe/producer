@@ -6,13 +6,13 @@ completes it. A step is claimed only when `composer check` proves it on a clean 
 ## Position
 
 Runtime realization. Delivered and proven on a clean clone: the pinned contract lane (P-1), the
-canonical serializer (P-2), the wire layer with the closed thirty-one-operation registry and the
+canonical serializer (P-2), the wire layer with the closed twenty-four-operation registry and the
 port interfaces (P-3 and the interface half of P-9), the schema-property profile, the complete
 forty-five-type renderer with its escaping discipline and fallbacks (P-4, P-5), the stylesheet
 generator (P-6), rich-text projection rendering (P-7), and the enhancement need signal on the
-render result (the producer half of P-8). The Studio pin is a pre-release git source pin; it moves
-to the first coordinated published release when Studio ships it, and every consumer-facing claim
-waits for that re-pin.
+render result (the producer half of P-8). Producer is pinned to Studio's exact coordinated
+`0.1.0-rc.1` release, including its protocol and complete testkit manifests. Host integration may
+claim only the delivered surfaces above; P-10 and P-11 remain open.
 
 ## Steps
 
@@ -20,8 +20,8 @@ waits for that re-pin.
 | --- | --- | --- |
 | P-1 | Vendored, digest-verified Studio contract (schemas + conformance corpus) with `PIN.json` | `composer contract` |
 | P-2 | Canonical JSON encoder byte-identical to Studio's serialization | replay of the canonical vector corpus |
-| P-3 | Wire layer: envelope validation, closed operation registry incl. the seven authoring operations, strict responder, twelve-category error taxonomy | wire test suite + negative fixtures |
-| P-4 | Renderer engine: registry, dispatch, escaping discipline, unresolved-block semantic fallback | renderer unit suite |
+| P-3 | Wire layer: envelope validation, exact released twenty-four-operation registry, strict responder, twelve-category error taxonomy, host-atomic mutation/replay boundary | wire suite + released host fixtures |
+| P-4 | Renderer engine: exact published coordinates, closed preview markers, tri-state bindings, escaping, draft fallback | renderer unit suite |
 | P-5 | The complete Studio block catalog rendered with no-JavaScript fallbacks | replay of the renderer-web conformance vectors |
 | P-6 | Theme design tokens and layout vocabulary → generated static stylesheet | `cssContains` vector assertions + css suite |
 | P-7 | Rich-text projection rendering through the canonical grammar | rich-text conformance corpus replay |

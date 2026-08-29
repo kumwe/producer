@@ -26,9 +26,9 @@ tests it passes.
 1. **No authority.** Producer never decides who may do what. Authentication, authorization,
    capability checks, and policy belong to the host; Producer's interfaces hand the host every
    decision and fail closed when the host refuses.
-2. **No storage.** Producer never owns a database, a table, or a file store. It defines what
-   storable bytes must look like — canonical, schema-valid, digest-checked — and returns validated
-   artifacts for the host to store under its own revisions and audit.
+2. **No storage.** Producer never owns a database, a table, or a file store. It defines canonical
+   wire outcomes and validated artifacts; the host owns persistence, encryption, redaction,
+   protected capability handles, revisions, replay rehydration, and audit.
 3. **No Node.js.** Producer is pure PHP. It never compiles, bundles, or executes JavaScript or
    TypeScript. Prebuilt browser assets are Studio release artifacts that Producer pins and the
    host serves.
@@ -60,6 +60,7 @@ tests it passes.
 ## Governance
 
 Work is recorded in [`docs/roadmap.md`](docs/roadmap.md) while open and in
-[`CHANGELOG.md`](CHANGELOG.md) when delivered; a claim states only what the check lane proves on a
-clean clone. The check lane is `composer check`: lint, contract digest verification, and the
-dependency-free test suite. Every commit passes it.
+  [`CHANGELOG.md`](CHANGELOG.md) when delivered; a claim states only what the check lane proves on a
+  clean clone. The check lane is `composer check`: lint, documentation, architecture and public
+  API gates, contract proof, Composer autoload smoke, and the dependency-free test suite. Every
+  commit passes it.

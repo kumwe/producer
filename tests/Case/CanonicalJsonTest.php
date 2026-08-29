@@ -22,7 +22,7 @@ final class CanonicalJsonTest extends TestCase
 {
     public function testReplaysTheCompleteCanonicalCorpus(): void
     {
-        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/conformance/canonical';
+        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/testkit/vectors/canonical';
         $files = glob($directory . '/*.json') ?: [];
         sort($files);
         $this->assertTrue(count($files) >= 12, 'The canonical corpus must be vendored.');
@@ -69,6 +69,10 @@ final class CanonicalJsonTest extends TestCase
             $replacement !== false && $astral !== false && $astral < $replacement,
             'U+10000 must sort before U+FFFD: its lead surrogate D800 precedes FFFD in UTF-16 '
                 . 'code-unit order, the reverse of raw UTF-8 byte order.'
+        );
+        $this->assertTrue(
+            CanonicalJson::compareCodeUnits("\u{10000}", "\u{FFFD}") < 0,
+            'Host code can use the same public comparator without duplicating canonical ordering.',
         );
     }
 

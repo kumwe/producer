@@ -29,7 +29,7 @@ final class SchemaPropertyProfileTest extends TestCase
 {
     public function testReplaysTheCompleteSchemaProfileCorpus(): void
     {
-        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/conformance/schema-profile';
+        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/testkit/vectors/schema-profile';
         $files = glob($directory . '/*.json') ?: [];
         sort($files);
         $this->assertSame(62, count($files), 'The complete schema-profile corpus must be vendored.');
@@ -91,7 +91,7 @@ final class SchemaPropertyProfileTest extends TestCase
     public function testLimitsPinToTheVendoredMetaSchema(): void
     {
         $metaSchema = CanonicalJson::decode((string) file_get_contents(
-            dirname(__DIR__, 2) . '/resources/studio-contract/schemas/schema-profile.schema.json'
+            dirname(__DIR__, 2) . '/resources/studio-contract/protocol/schemas/schema-profile.schema.json'
         ));
         $published = $metaSchema->{'$defs'}->limits->const;
 

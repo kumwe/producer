@@ -21,7 +21,7 @@ final class RenderRichTextTest extends TestCase
 {
     public function testReplaysTheRichTextProjectionCorpus(): void
     {
-        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/conformance/rich-text';
+        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/testkit/conformance/rich-text';
         $files = glob($directory . '/*.json') ?: [];
         sort($files);
         $this->assertSame(8, count($files), 'The rich-text corpus must be vendored completely.');

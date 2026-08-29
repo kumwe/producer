@@ -72,7 +72,7 @@ final class StrictResponder
             )));
         }
 
-        return new Response($body, self::headers($body), false);
+        return new Response($body, self::headers($body));
     }
 
     /**
@@ -90,7 +90,7 @@ final class StrictResponder
     {
         $body = $error->toCanonicalJson();
 
-        return new Response($body, self::headers($body), true);
+        return new Response($body, self::headers($body), $error->category());
     }
 
     /**

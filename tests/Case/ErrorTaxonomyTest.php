@@ -57,12 +57,18 @@ final class ErrorTaxonomyTest extends TestCase
         }
     }
 
-    public function testConflictRequiresTheSafeCurrentRevisionAndOthersRefuseOne(): void
+    public function testConflictOptionallyCarriesTheSafeCurrentRevision(): void
     {
         $message = new MessageReference('kumwe.producer/test', 'A test refusal.');
         $conflict = HostError::conflict($message, 'blueprint-r9');
         $this->assertSame('blueprint-r9', $conflict->revision(), 'A conflict must return the safe current revision.');
         $this->assertSame('blueprint-r9', $conflict->toDocument()->revision, 'The document must carry the revision.');
+        $stateConflict = HostError::conflict($message);
+        $this->assertSame(null, $stateConflict->revision(), 'A non-revision conflict is representable directly.');
+        $this->assertTrue(
+            !property_exists($stateConflict->toDocument(), 'revision'),
+            'An in-flight or authority conflict does not invent a revision.'
+        );
 
         $this->assertThrows(
             static fn (): HostError => HostError::conflict($message, ''),
@@ -243,6 +249,40 @@ final class ErrorTaxonomyTest extends TestCase
             'sha256-m9ls9keJkJfs4m4TzPC6GlTsK5GUKY07PXREM9S9V2E=',
             CanonicalJson::digest(CanonicalJson::decode($error->toCanonicalJson())),
             'The digest of the emitted document must be stable.'
+        );
+    }
+
+    public function testCanonicalErrorsRoundTripForProtectedReplay(): void
+    {
+        $error = HostError::unavailable(
+            new MessageReference('studio.host/dependency', 'A dependency is temporarily unavailable.'),
+            true,
+            1500,
+            [new Diagnostic(
+                'studio.host/retry',
+                'warning',
+                new MessageReference('studio.host/retry', 'Retry after the dependency recovers.'),
+                new DiagnosticLocation('landing.blueprint', 'hero', ['media'], '/media'),
+                ['attempt' => 2],
+                ['studio.action/retry'],
+            )],
+            'requests/replay-1',
+        );
+        $bytes = $error->toCanonicalJson();
+        $replayed = HostError::fromCanonicalBytes($bytes);
+        $this->assertSame($bytes, $replayed->toCanonicalJson(), 'A stored logical error reconstructs exactly.');
+        $this->assertSame('unavailable', $replayed->category(), 'The typed category survives replay.');
+        $this->assertThrows(
+            static fn (): HostError => HostError::fromCanonicalBytes(str_replace(',', ', ', $bytes)),
+            \InvalidArgumentException::class,
+            'Non-canonical stored error bytes are refused.'
+        );
+        $unknown = CanonicalJson::decode($bytes);
+        $unknown->extra = true;
+        $this->assertThrows(
+            static fn (): HostError => HostError::fromCanonicalBytes(CanonicalJson::stringify($unknown)),
+            \InvalidArgumentException::class,
+            'Unknown stored error members are refused, never remapped.'
         );
     }
 

@@ -17,6 +17,7 @@ use Kumwe\Producer\Error\MessageReference;
 use Kumwe\Producer\Tests\TestCase;
 use Kumwe\Producer\Wire\HostResult;
 use Kumwe\Producer\Wire\JsonShapeViolation;
+use Kumwe\Producer\Wire\MutationOutcome;
 use Kumwe\Producer\Wire\StrictResponder;
 
 final class WireStrictResponderTest extends TestCase
@@ -26,6 +27,7 @@ final class WireStrictResponderTest extends TestCase
         $response = (new StrictResponder())->result(new HostResult(null));
         $this->assertSame('{"value":null}', $response->body, 'Nothing is an explicit null value, never an omission.');
         $this->assertSame(false, $response->refusal, 'A result is not a refusal.');
+        $this->assertSame(null, $response->refusalCategory, 'A result has no refusal category.');
     }
 
     public function testARevisionedResultOrdersMembersCanonically(): void
@@ -74,6 +76,7 @@ final class WireStrictResponderTest extends TestCase
         );
         $response = (new StrictResponder())->refusal($error);
         $this->assertSame(true, $response->refusal, 'A refusal is flagged as one.');
+        $this->assertSame('conflict', $response->refusalCategory, 'Transport policy receives the typed category.');
         $this->assertSame($error->toCanonicalJson(), $response->body, 'The body is exactly the canonical error.');
         $this->assertStringContains('"category":"conflict"', $response->body, 'The category is on the wire.');
         $this->assertStringContains('"revision":"blueprint-r9"', $response->body, 'The safe revision is on the wire.');
@@ -108,6 +111,42 @@ final class WireStrictResponderTest extends TestCase
             \InvalidArgumentException::class,
             'An empty revision must be refused.'
         );
+    }
+
+    public function testMutationOutcomesCarryLogicalValuesNotAStorageFormat(): void
+    {
+        $result = new HostResult((object) ['accepted' => true], 'blueprint-r2');
+        $record = new MutationOutcome(
+            'sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+            $result,
+        );
+        $this->assertSame($result, $record->outcome(), 'The logical result is preserved without prescribing storage.');
+        $this->assertTrue(
+            !property_exists($record, 'resultBytes'),
+            'A live capability is never implicitly made a plaintext storage field.'
+        );
+        $this->assertThrows(
+            static fn (): HostResult => HostResult::fromCanonicalBytes('{"value":null, "revision":"r2"}'),
+            \InvalidArgumentException::class,
+            'A non-canonical stored result is refused.'
+        );
+        $this->assertThrows(
+            static fn (): MutationOutcome => new MutationOutcome('not-a-digest', new HostResult(null)),
+            \InvalidArgumentException::class,
+            'A keyed outcome cannot carry an invented intent digest.'
+        );
+        $this->assertThrows(
+            static fn (): MutationOutcome => new MutationOutcome(
+                'sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB=',
+                new HostResult(null),
+            ),
+            \InvalidArgumentException::class,
+            'Non-zero SHA-256 base64 padding bits are not a canonical digest.',
+        );
+        $unkeyed = new MutationOutcome(null, HostError::validationFailed(
+            new MessageReference('studio.host/refused')
+        ));
+        $this->assertSame(null, $unkeyed->intentDigest, 'An unkeyed atomic mutation has no replay identity.');
     }
 
     public function testRespondingIsPure(): void

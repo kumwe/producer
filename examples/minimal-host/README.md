@@ -6,7 +6,7 @@ the port interfaces, one wire operation served end-to-end, and the demonstration
 rendered to a full HTML page under the guide's Content-Security-Policy.
 
 **This is a demonstration, never a production host.** Identity is a plain HTTP header, the
-idempotency ledger is a PHP array, and the one stored artifact is a fixture that resets on every
+mutation boundary is a request-lifetime PHP array, and the one stored artifact is a fixture that resets on every
 restart. Its purpose is to make the host guide's claims executable and its shapes copyable — the
 authority, durability, and storage a real host supplies are exactly the parts reduced to fixtures
 here.
@@ -56,7 +56,7 @@ this host does not provide (`/port/telemetry/emit`) each produce their own typed
 
 | File | What it demonstrates |
 | --- | --- |
-| [`MinimalHost.php`](MinimalHost.php) | The single-file in-memory host: authorization, ledger, artifact port, adapter, and the render recipe. |
+| [`MinimalHost.php`](MinimalHost.php) | The single-file in-memory host: authorization, mutation boundary, artifact port, adapter, and the render recipe. |
 | [`public/index.php`](public/index.php) | The front controller: the wire endpoint through `Dispatcher`, the page at `/`, the stylesheet at `/page.css`, the CSP header. |
 
 The test suite proves the example truthful: `tests/Case/ExampleHostTest.php` replays the wire and

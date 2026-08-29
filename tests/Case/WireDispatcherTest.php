@@ -21,16 +21,15 @@ use Kumwe\Producer\Error\MessageReference;
 use Kumwe\Producer\Tests\TestCase;
 use Kumwe\Producer\Wire\Dispatcher;
 use Kumwe\Producer\Wire\HostResult;
-use Kumwe\Producer\Wire\IdempotencyRecord;
+use Kumwe\Producer\Wire\MutationOutcome;
 use Kumwe\Producer\Wire\Operation;
 use Kumwe\Producer\Wire\Port\ArtifactPortInterface;
-use Kumwe\Producer\Wire\Port\AuthoringPortInterface;
 use Kumwe\Producer\Wire\Port\AuthorizationInterface;
 use Kumwe\Producer\Wire\Port\HostAdapterInterface;
-use Kumwe\Producer\Wire\Port\IdempotencyLedgerInterface;
 use Kumwe\Producer\Wire\Port\LocalizationPortInterface;
 use Kumwe\Producer\Wire\Port\MediaPortInterface;
 use Kumwe\Producer\Wire\Port\ModelPortInterface;
+use Kumwe\Producer\Wire\Port\MutationBoundaryInterface;
 use Kumwe\Producer\Wire\Port\PermissionPortInterface;
 use Kumwe\Producer\Wire\Port\PreviewPortInterface;
 use Kumwe\Producer\Wire\Port\RecoveryPortInterface;
@@ -60,26 +59,66 @@ final class FakeAuthorization implements AuthorizationInterface
     }
 }
 
-final class FakeIdempotencyLedger implements IdempotencyLedgerInterface
+final class FakeMutationBoundary implements MutationBoundaryInterface
 {
-    /** @var array<string, IdempotencyRecord> */
+    /** @var array<string, MutationOutcome> */
     public array $records = [];
 
     public int $recalls = 0;
 
     public int $recordings = 0;
 
-    public function recall(string $scopeKey): ?IdempotencyRecord
+    /** @var list<string> */
+    public array $events = [];
+
+    /** @var list<array{string|null, string|null}> */
+    public array $coordinates = [];
+
+    /** @var (callable(HostResult|HostError): (HostResult|HostError))|null */
+    public $store = null;
+
+    /** @var (callable(HostResult|HostError): (HostResult|HostError))|null */
+    public $restore = null;
+
+    public ?\Throwable $failure = null;
+
+    public function execute(
+        Operation $operation,
+        RequestEnvelope $request,
+        ?string $scopeKey,
+        ?string $intentDigest,
+        callable $mutation,
+    ): MutationOutcome
     {
         $this->recalls++;
+        $this->events[] = 'begin';
+        $this->coordinates[] = [$scopeKey, $intentDigest];
+        if ($this->failure !== null) {
+            throw $this->failure;
+        }
+        if ($scopeKey !== null && isset($this->records[$scopeKey])) {
+            $this->events[] = 'replay';
 
-        return $this->records[$scopeKey] ?? null;
-    }
+            $record = $this->records[$scopeKey];
+            $outcome = $record->outcome();
+            if (is_callable($this->restore)) {
+                $outcome = ($this->restore)($outcome);
+            }
 
-    public function record(string $scopeKey, IdempotencyRecord $record): void
-    {
-        $this->recordings++;
-        $this->records[$scopeKey] = $record;
+            return new MutationOutcome($record->intentDigest, $outcome);
+        }
+
+        $this->events[] = 'mutation';
+        $outcome = $mutation();
+        $stored = is_callable($this->store) ? ($this->store)($outcome) : $outcome;
+        $record = new MutationOutcome($intentDigest, $stored);
+        if ($scopeKey !== null) {
+            $this->recordings++;
+            $this->records[$scopeKey] = $record;
+        }
+        $this->events[] = 'commit';
+
+        return new MutationOutcome($intentDigest, $outcome);
     }
 }
 
@@ -129,14 +168,14 @@ final class FakeHost implements HostAdapterInterface
 {
     public FakeAuthorization $authorizationFake;
 
-    public FakeIdempotencyLedger $ledger;
+    public FakeMutationBoundary $mutations;
 
     public FakeArtifactPort $artifactFake;
 
     public function __construct()
     {
         $this->authorizationFake = new FakeAuthorization();
-        $this->ledger = new FakeIdempotencyLedger();
+        $this->mutations = new FakeMutationBoundary();
         $this->artifactFake = new FakeArtifactPort();
     }
 
@@ -145,19 +184,14 @@ final class FakeHost implements HostAdapterInterface
         return $this->authorizationFake;
     }
 
-    public function idempotency(): IdempotencyLedgerInterface
+    public function mutations(): MutationBoundaryInterface
     {
-        return $this->ledger;
+        return $this->mutations;
     }
 
     public function artifact(): ArtifactPortInterface
     {
         return $this->artifactFake;
-    }
-
-    public function authoring(): ?AuthoringPortInterface
-    {
-        return null;
     }
 
     public function localization(): ?LocalizationPortInterface
@@ -246,7 +280,7 @@ final class WireDispatcherTest extends TestCase
         $this->assertRefusalCategory($response, 'invalid-request', 'An unknown route is a typed refusal.');
         $this->assertSame([], $host->authorizationFake->decisions, 'No decision is asked for an unknown route.');
         $this->assertSame([], $host->artifactFake->calls, 'No port is touched for an unknown route.');
-        $this->assertSame(0, $host->ledger->recalls, 'The ledger is not consulted for an unknown route.');
+        $this->assertSame(0, $host->mutations->recalls, 'The mutation boundary is not consulted for an unknown route.');
     }
 
     public function testAMalformedBodyIsRefusedBeforeAuthorization(): void
@@ -329,8 +363,8 @@ final class WireDispatcherTest extends TestCase
             'The host decided exactly this operation.'
         );
         $this->assertSame([], $host->artifactFake->calls, 'The port is never touched after a refusal.');
-        $this->assertSame(0, $host->ledger->recalls, 'The ledger is never consulted after a refusal.');
-        $this->assertSame(0, $host->ledger->recordings, 'Nothing is recorded after a refusal.');
+        $this->assertSame(0, $host->mutations->recalls, 'The mutation boundary is never consulted after a refusal.');
+        $this->assertSame(0, $host->mutations->recordings, 'Nothing is recorded after a refusal.');
     }
 
     public function testAnAuthorizationFailureFailsClosedWithoutDisclosure(): void
@@ -368,7 +402,33 @@ final class WireDispatcherTest extends TestCase
         $this->assertSame('load', $method, 'The registry method name is used.');
         $this->assertSame('vector.blueprint', $arguments->id, 'The decoded argument reaches the port.');
         $this->assertSame('requests/test-1', $context->requestId, 'The validated context reaches the port.');
-        $this->assertSame(0, $host->ledger->recalls, 'An unkeyed read never consults the ledger.');
+        $this->assertSame(0, $host->mutations->recalls, 'A read never consults the mutation boundary.');
+    }
+
+    public function testAnUnkeyedMutationKeepsTheHostAtomicBoundary(): void
+    {
+        $host = new FakeHost();
+        $host->artifactFake->behaviours['publish'] = static fn (): HostResult => new HostResult(
+            null,
+            'vector.blueprint-r2',
+        );
+        $response = (new Dispatcher($host))->dispatch('artifact/publish', self::body(
+            'studio.operation/artifact.publish',
+            ['expectedRevision' => 'vector.blueprint-r1'],
+        ));
+
+        $this->assertSame(false, $response->refusal, 'The unkeyed publish succeeds.');
+        $this->assertSame(
+            ['begin', 'mutation', 'commit'],
+            $host->mutations->events,
+            'Transaction and audit ownership do not depend on an idempotency key.',
+        );
+        $this->assertSame(
+            [[null, null]],
+            $host->mutations->coordinates,
+            'An unkeyed mutation has no invented replay coordinates.',
+        );
+        $this->assertSame(0, $host->mutations->recordings, 'An unkeyed mutation creates no replay entry.');
     }
 
     public function testAKeyedMutationRecordsThenReplaysWithoutReapplying(): void
@@ -389,12 +449,22 @@ final class WireDispatcherTest extends TestCase
             'A protected mutation returns the advanced revision.'
         );
         $this->assertSame(1, count($host->artifactFake->calls), 'The mutation ran once.');
-        $this->assertSame(1, $host->ledger->recordings, 'The accepted outcome is recorded.');
+        $this->assertSame(1, $host->mutations->recordings, 'The accepted outcome is recorded.');
+        $this->assertSame(
+            ['begin', 'mutation', 'commit'],
+            $host->mutations->events,
+            'The host atomic boundary surrounds mutation and replay persistence.'
+        );
 
         $replay = $dispatcher->dispatch('artifact/save', $body);
         $this->assertSame($first->body, $replay->body, 'The replay returns the original outcome.');
         $this->assertSame(1, count($host->artifactFake->calls), 'The mutation is not applied twice.');
-        $this->assertSame(1, $host->ledger->recordings, 'A replay records nothing new.');
+        $this->assertSame(1, $host->mutations->recordings, 'A replay records nothing new.');
+        $this->assertSame(
+            ['begin', 'mutation', 'commit', 'begin', 'replay'],
+            $host->mutations->events,
+            'A replay returns from the same boundary without entering the mutation callback.'
+        );
 
         $requestIdChanged = $dispatcher->dispatch('artifact/save', self::body('studio.operation/artifact.save', [
             'expectedRevision' => 'vector.blueprint-r1',
@@ -411,7 +481,7 @@ final class WireDispatcherTest extends TestCase
         ]));
         $this->assertSame(false, $otherScope->refusal, 'The same key in another resource context is a new scope.');
         $this->assertSame(2, count($host->artifactFake->calls), 'The other scope applies its own mutation.');
-        $this->assertSame(2, $host->ledger->recordings, 'The other scope records its own outcome.');
+        $this->assertSame(2, $host->mutations->recordings, 'The other scope records its own outcome.');
     }
 
     public function testAKeyReusedWithChangedIntentIsRefused(): void
@@ -440,6 +510,106 @@ final class WireDispatcherTest extends TestCase
         $this->assertSame(1, count($host->artifactFake->calls), 'Neither changed retry reached the port.');
     }
 
+    public function testACommittedRefusalCommitsAndReplaysWithoutReapplying(): void
+    {
+        $host = new FakeHost();
+        $host->artifactFake->behaviours['save'] = static function (): HostResult {
+            throw new HostRefusal(
+                HostError::validationFailed(new MessageReference(
+                    'studio.media/upload-verification-failed',
+                    'The uploaded bytes failed verification.',
+                )),
+                commitsState: true,
+            );
+        };
+        $dispatcher = new Dispatcher($host);
+        $body = self::body('studio.operation/artifact.save', [
+            'expectedRevision' => 'vector.blueprint-r1',
+            'idempotencyKey' => 'idempotency/failed-save-1',
+        ]);
+
+        $first = $dispatcher->dispatch('artifact/save', $body);
+        $this->assertRefusalCategory($first, 'validation-failed', 'The committed failure is delivered.');
+        $this->assertSame('validation-failed', $first->refusalCategory, 'Transport sees the category directly.');
+        $this->assertSame(1, $host->mutations->recordings, 'The safe failure outcome is committed for replay.');
+        $replay = $dispatcher->dispatch('artifact/save', $body);
+        $this->assertSame($first->body, $replay->body, 'The committed refusal replays exactly.');
+        $this->assertSame(1, count($host->artifactFake->calls), 'Replay does not repeat the failed lifecycle mutation.');
+    }
+
+    public function testTheHostCanStoreAProtectedProjectionAndRehydrateReplay(): void
+    {
+        $host = new FakeHost();
+        $grant = (object) [
+            'grantId' => 'grants/1',
+            'headers' => (object) ['X-Studio-Upload-Token' => 'derived-token'],
+        ];
+        $host->artifactFake->behaviours['save'] = static fn (): HostResult => new HostResult(
+            $grant,
+            'vector.blueprint-r2',
+        );
+        $host->mutations->store = static function (HostResult|HostError $outcome): HostResult|HostError {
+            if (!$outcome instanceof HostResult || !$outcome->value instanceof \stdClass) {
+                return $outcome;
+            }
+            $stored = clone $outcome->value;
+            $stored->headers = clone $stored->headers;
+            unset($stored->headers->{'X-Studio-Upload-Token'});
+
+            return new HostResult($stored, $outcome->revision);
+        };
+        $host->mutations->restore = static function (HostResult|HostError $outcome): HostResult|HostError {
+            if (!$outcome instanceof HostResult || !$outcome->value instanceof \stdClass) {
+                return $outcome;
+            }
+            $restored = clone $outcome->value;
+            $restored->headers = clone $restored->headers;
+            $restored->headers->{'X-Studio-Upload-Token'} = 'derived-token';
+
+            return new HostResult($restored, $outcome->revision);
+        };
+        $dispatcher = new Dispatcher($host);
+        $body = self::body('studio.operation/artifact.save', [
+            'expectedRevision' => 'vector.blueprint-r1',
+            'idempotencyKey' => 'idempotency/protected-1',
+        ]);
+
+        $first = $dispatcher->dispatch('artifact/save', $body);
+        $stored = array_values($host->mutations->records)[0]->outcome();
+        $this->assertTrue($stored instanceof HostResult, 'The host stored its protected logical projection.');
+        $this->assertStringExcludes(
+            'derived-token',
+            CanonicalJson::stringify($stored->toDocument()),
+            'The live capability is absent from idempotency storage.',
+        );
+        $replay = $dispatcher->dispatch('artifact/save', $body);
+        $this->assertSame($first->body, $replay->body, 'Verified deterministic rehydration restores exact wire behavior.');
+        $this->assertSame(1, count($host->artifactFake->calls), 'Rehydration never repeats the mutation.');
+    }
+
+    public function testAnAtomicExecutionFailureRefusesBeforeTheMutationRuns(): void
+    {
+        $host = new FakeHost();
+        $host->mutations->failure = new \RuntimeException('database-transaction-secret');
+        $response = (new Dispatcher($host))->dispatch('artifact/save', self::body(
+            'studio.operation/artifact.save',
+            [
+                'expectedRevision' => 'vector.blueprint-r1',
+                'idempotencyKey' => 'idempotency/save-1',
+            ]
+        ));
+
+        $this->assertRefusalCategory($response, 'internal', 'An unavailable atomic boundary fails closed.');
+        $this->assertStringContains(
+            'kumwe.producer/mutation-transaction-failed',
+            $response->body,
+            'The refusal names the atomic boundary.'
+        );
+        $this->assertStringExcludes('database-transaction-secret', $response->body, 'Storage details stay private.');
+        $this->assertSame([], $host->artifactFake->calls, 'The mutation cannot run outside the atomic boundary.');
+        $this->assertSame(0, $host->mutations->recordings, 'No replay record is left behind.');
+    }
+
     public function testAHostConflictPassesThroughVerbatimAndIsNotRecorded(): void
     {
         $host = new FakeHost();
@@ -457,7 +627,7 @@ final class WireDispatcherTest extends TestCase
         $document = CanonicalJson::decode($response->body);
         $this->assertSame('vector.blueprint-r3', $document->revision, 'The safe current revision is on the wire.');
         $this->assertSame(false, $document->retryable, 'A conflict is not retryable as-is.');
-        $this->assertSame(0, $host->ledger->recordings, 'Refused mutations are never recorded for replay.');
+        $this->assertSame(0, $host->mutations->recordings, 'Refused mutations are never recorded for replay.');
     }
 
     public function testAPortExceptionBecomesANonDisclosingInternalRefusal(): void
@@ -482,7 +652,7 @@ final class WireDispatcherTest extends TestCase
         ]));
         $this->assertRefusalCategory($response, 'internal', 'A protected mutation must return its revision.');
         $this->assertStringContains('kumwe.producer/missing-revision', $response->body, 'Named rule.');
-        $this->assertSame(0, $host->ledger->recordings, 'A contract-breaking outcome is not recorded for replay.');
+        $this->assertSame(0, $host->mutations->recordings, 'A contract-breaking outcome is not recorded for replay.');
     }
 
     public function testAnAbsentOptionalPortIsUnavailableNotGuessed(): void
