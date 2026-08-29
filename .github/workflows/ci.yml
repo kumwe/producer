@@ -31,14 +31,16 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      - name: Validate Composer metadata
-        run: composer validate --strict
-
-      - name: Install the library cleanly
-        run: composer install --no-interaction --no-progress --prefer-dist
-
-      - name: Prove strict PSR-4 autoloading
-        run: composer dump-autoload --strict-psr --optimize
+      - name: Install the validated package toolchain
+        run: |
+          composer validate --strict
+          composer install --no-interaction --no-progress --prefer-dist
+          composer audit --abandoned=fail
 
       - name: Run the complete quality lane
         run: composer check
+
+      - name: Verify the authoritative no-dev package autoloader
+        run: |
+          composer install --no-interaction --no-progress --prefer-dist --no-dev --classmap-authoritative
+          php tools/autoload-smoke.php

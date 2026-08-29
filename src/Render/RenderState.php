@@ -136,8 +136,18 @@ final class RenderState
     public function slotNodes(\stdClass $node, string $slot): array
     {
         $children = $node->slots->{$slot} ?? null;
+        if (!is_array($children) || !array_is_list($children)) {
+            return [];
+        }
+        $nodes = [];
+        foreach ($children as $child) {
+            if (!$child instanceof \stdClass) {
+                throw new RenderException('Blueprint nodes must be decoded objects.');
+            }
+            $nodes[] = $child;
+        }
 
-        return is_array($children) ? $children : [];
+        return $nodes;
     }
 
     /**
@@ -159,9 +169,11 @@ final class RenderState
                 : BindingResolution::available($candidate);
         } else {
             $binding = $node->bindings->{$port} ?? null;
-            $resolution = ($binding->source->kind ?? null) === 'static-value'
-                && property_exists($binding->source, 'value')
-                ? BindingResolution::available($binding->source->value)
+            $source = $binding instanceof \stdClass ? ($binding->source ?? null) : null;
+            $resolution = $source instanceof \stdClass
+                && ($source->kind ?? null) === 'static-value'
+                && property_exists($source, 'value')
+                ? BindingResolution::available($source->value)
                 : BindingResolution::unavailable();
         }
         if ($resolution->isHidden()) {

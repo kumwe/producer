@@ -22,7 +22,12 @@ use Kumwe\ProducerExamples\MinimalHost;
 
 require dirname(__DIR__) . '/MinimalHost.php';
 
-$path = (string) parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+if (!is_string($requestUri)) {
+    $requestUri = '/';
+}
+$parsedPath = parse_url($requestUri, PHP_URL_PATH);
+$path = is_string($parsedPath) ? $parsedPath : '/';
 
 if (str_starts_with($path, '/port/')) {
     if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {

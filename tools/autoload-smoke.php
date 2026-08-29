@@ -17,9 +17,16 @@ if (!is_file($autoload)) {
 require $autoload;
 
 $snapshot = json_decode((string) file_get_contents($root . '/resources/public-api.json'), true);
+if (!is_array($snapshot)
+    || ($snapshot['schema'] ?? null) !== 2
+    || !is_array($snapshot['types'] ?? null)
+) {
+    fwrite(STDERR, "The public API manifest is malformed.\n");
+    exit(1);
+}
+$types = $snapshot['types'];
 $errors = [];
-foreach ($snapshot['types'] ?? [] as $entry) {
-    $type = is_array($entry) ? ($entry['type'] ?? null) : null;
+foreach ($types as $type => $entry) {
     $kind = is_array($entry) ? ($entry['kind'] ?? null) : null;
     if (!is_string($type) || !is_string($kind)) {
         $errors[] = 'Malformed public API snapshot entry.';
@@ -41,4 +48,4 @@ if ($errors !== []) {
     exit(1);
 }
 
-echo 'Composer autoload verified: ' . count($snapshot['types']) . " public types.\n";
+echo 'Composer autoload verified: ' . count($types) . " public types.\n";

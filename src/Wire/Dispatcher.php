@@ -311,7 +311,12 @@ final class Dispatcher
         $port = $this->port($operation);
         $arguments = $envelope->hasArguments() ? $envelope->arguments() : null;
         try {
-            return $port->{$operation->method}($arguments, $envelope->context());
+            $result = $port->{$operation->method}($arguments, $envelope->context());
+            if (!$result instanceof HostResult) {
+                throw new \UnexpectedValueException('A Producer port returned no HostResult.');
+            }
+
+            return $result;
         } catch (HostRefusal $thrown) {
             throw $thrown;
         } catch (\Throwable) {
@@ -398,6 +403,7 @@ final class Dispatcher
             'recovery' => $this->host->recovery(),
             'resource' => $this->host->resource(),
             'telemetry' => $this->host->telemetry(),
+            default => null,
         };
         if ($port === null) {
             throw new HostRefusal(HostError::unavailable(new MessageReference(

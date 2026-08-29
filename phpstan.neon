@@ -1,0 +1,14 @@
+parameters:
+  level: max
+  phpVersion: 80100
+  paths:
+    - src
+    - tools/autoload-smoke.php
+    - tools/verify-api.php
+    - tests/TestCase.php
+    - tests/Case/PublicApiManifestTest.php
+    - examples
+  tmpDir: .phpstan.cache
+  treatPhpDocTypesAsCertain: false
+  reportUnmatchedIgnoredErrors: true
+  checkUninitializedProperties: true

@@ -573,11 +573,25 @@ final class HostError
             if (!$document->parameters instanceof \stdClass) {
                 throw new \InvalidArgumentException('Stored diagnostic parameters must be an object.');
             }
-            $parameters = get_object_vars($document->parameters);
+            foreach (get_object_vars($document->parameters) as $name => $value) {
+                if (!is_string($name)
+                    || (!is_bool($value) && !is_float($value) && !is_int($value) && !is_string($value) && $value !== null)
+                ) {
+                    throw new \InvalidArgumentException('A stored diagnostic parameter has an invalid value.');
+                }
+                $parameters[$name] = $value;
+            }
         }
         $remediations = property_exists($document, 'remediations') ? $document->remediations : [];
         if (!is_array($remediations) || !array_is_list($remediations)) {
             throw new \InvalidArgumentException('Stored diagnostic remediations must be a list.');
+        }
+        $remediationList = [];
+        foreach ($remediations as $remediation) {
+            if (!is_string($remediation)) {
+                throw new \InvalidArgumentException('A stored diagnostic remediation must be text.');
+            }
+            $remediationList[] = $remediation;
         }
         $diagnostic = new Diagnostic(
             $document->code,
@@ -585,7 +599,7 @@ final class HostError
             self::messageFromDocument($document->message ?? null),
             $location,
             $parameters,
-            $remediations,
+            $remediationList,
         );
         if (CanonicalJson::stringify($document) !== CanonicalJson::stringify($diagnostic->toDocument())) {
             throw new \InvalidArgumentException('A stored diagnostic carries an unknown member.');
@@ -616,12 +630,22 @@ final class HostError
         $jsonPointer = property_exists($document, 'jsonPointer') ? $document->jsonPointer : null;
         if (($artifactId !== null && !is_string($artifactId))
             || ($nodeId !== null && !is_string($nodeId))
-            || ($fieldPath !== null && !is_array($fieldPath))
+            || ($fieldPath !== null && (!is_array($fieldPath) || !array_is_list($fieldPath)))
             || ($jsonPointer !== null && !is_string($jsonPointer))
         ) {
             throw new \InvalidArgumentException('A stored diagnostic location has a mistyped member.');
         }
-        $location = new DiagnosticLocation($artifactId, $nodeId, $fieldPath, $jsonPointer);
+        $validatedFieldPath = null;
+        if (is_array($fieldPath)) {
+            $validatedFieldPath = [];
+            foreach ($fieldPath as $segment) {
+                if (!is_string($segment)) {
+                    throw new \InvalidArgumentException('A stored diagnostic field path must contain text segments.');
+                }
+                $validatedFieldPath[] = $segment;
+            }
+        }
+        $location = new DiagnosticLocation($artifactId, $nodeId, $validatedFieldPath, $jsonPointer);
         if (CanonicalJson::stringify($document) !== CanonicalJson::stringify($location->toDocument())) {
             throw new \InvalidArgumentException('A stored diagnostic location carries an unknown member.');
         }

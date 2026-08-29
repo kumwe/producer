@@ -16,7 +16,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 # Serialized so two pushes cannot race past the tag-existence check; the
 # later run then finds the tag and verifies instead of colliding.
@@ -47,27 +47,32 @@ jobs:
           coverage: none
           tools: composer:v2
 
-      - name: Validate Composer metadata
-        run: composer validate --strict
-
-      - name: Install the library cleanly
-        run: composer install --no-interaction --no-progress --prefer-dist
-
-      - name: Prove strict PSR-4 autoloading
-        run: composer dump-autoload --strict-psr --optimize
+      - name: Install the validated package toolchain
+        run: |
+          composer validate --strict
+          composer install --no-interaction --no-progress --prefer-dist
+          composer audit --abandoned=fail
 
       - name: Run the complete quality lane
         run: composer check
+
+      - name: Verify the authoritative no-dev package autoloader
+        run: |
+          composer install --no-interaction --no-progress --prefer-dist --no-dev --classmap-authoritative
+          php tools/autoload-smoke.php
 
   release:
     name: Release the recorded version
     needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     steps:
       - name: Check out the pushed commit
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
       # The newest release record is the FIRST second-level heading, so a
@@ -94,9 +99,11 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      # Only a confirmed 404 means the tag is missing; any other probe
-      # failure stops the run rather than colliding with an existing tag.
-      - name: Create the version tag when it is missing
+      # Probe the release before the tag so recovery cannot publish a
+      # pre-positioned, untested tag. A version already published may be an
+      # ancestor of later main commits; a first publication must target the
+      # exact commit that just passed the full matrix.
+      - name: Verify or create the recorded version tag
         if: steps.record.outputs.version != ''
         env:
           GH_TOKEN: ${{ github.token }}
@@ -104,17 +111,58 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          probe_status=0
-          probe="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" 2>&1)" || probe_status=$?
-          if [ "$probe_status" -eq 0 ]; then
-            echo "Tag v$VERSION already exists; leaving it untouched."
-          elif grep -q 'HTTP 404' <<<"$probe"; then
+
+          release_status=0
+          release_probe="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" 2>&1)" || release_status=$?
+          if [ "$release_status" -eq 0 ]; then
+            release_exists=true
+          elif grep -q 'HTTP 404' <<<"$release_probe"; then
+            release_exists=false
+          else
+            echo "$release_probe"
+            echo "::error::Could not determine whether release v$VERSION exists."
+            exit 1
+          fi
+
+          tag_status=0
+          tag_probe="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" 2>&1)" || tag_status=$?
+          if [ "$tag_status" -eq 0 ]; then
+            tag_type="$(jq -r '.object.type' <<<"$tag_probe")"
+            tag_sha="$(jq -r '.object.sha' <<<"$tag_probe")"
+            if [ "$tag_type" != commit ]; then
+              echo "::error::Tag v$VERSION points to $tag_type $tag_sha instead of a lightweight release commit."
+              exit 1
+            fi
+            if ! git merge-base --is-ancestor "$tag_sha" "$GITHUB_SHA"; then
+              echo "::error::Tag v$VERSION points outside the pushed main history: $tag_sha."
+              exit 1
+            fi
+            tagged_heading="$(git show "$tag_sha:CHANGELOG.md" | grep -m 1 -E '^## ')"
+            if [ "$tagged_heading" = "## Unreleased" ] || [ "$tagged_heading" = "## [Unreleased]" ]; then
+              tagged_heading="$(git show "$tag_sha:CHANGELOG.md" | grep -E '^## ' | sed -n 2p)"
+            fi
+            tagged_version="$(sed -nE 's/^## \[?([0-9]+\.[0-9]+\.[0-9]+)\]?( .*)?$/\1/p' <<<"$tagged_heading")"
+            if [ "$tagged_version" != "$VERSION" ]; then
+              echo "::error::Tag v$VERSION targets a commit whose newest release record is $tagged_version."
+              exit 1
+            fi
+
+            if [ "$release_exists" = false ] && [ "$tag_sha" != "$GITHUB_SHA" ]; then
+              echo "::error::Unpublished tag v$VERSION targets $tag_sha, not the fully tested commit $GITHUB_SHA."
+              exit 1
+            fi
+            echo "Verified tag v$VERSION at release commit $tag_sha (published: $release_exists)."
+          elif grep -q 'HTTP 404' <<<"$tag_probe"; then
+            if [ "$release_exists" = true ]; then
+              echo "::error::Release v$VERSION exists but its repository tag is missing."
+              exit 1
+            fi
             gh api "repos/$GITHUB_REPOSITORY/git/refs" \
               --field ref="refs/tags/v$VERSION" \
               --field sha="$GITHUB_SHA"
-            echo "Created tag v$VERSION at $GITHUB_SHA."
+            echo "Created tag v$VERSION at release commit $GITHUB_SHA."
           else
-            echo "$probe"
+            echo "$tag_probe"
             echo "::error::Could not determine whether tag v$VERSION exists."
             exit 1
           fi

@@ -136,8 +136,12 @@ final class LayoutBlocks implements BlockRenderer
     private function responsiveLayout(\stdClass $node, string $kind, string $scope, RenderState $state): string
     {
         $compact = Properties::integerProperty(Properties::property($node, 'columns'), 1, 12, 1);
-        $medium = Properties::integerProperty($node->responsive->columns->medium ?? null, 1, 12, $compact);
-        $expanded = Properties::integerProperty($node->responsive->columns->expanded ?? null, 1, 12, $medium);
+        $responsive = $node->responsive ?? null;
+        $columns = $responsive instanceof \stdClass ? ($responsive->columns ?? null) : null;
+        $mediumValue = $columns instanceof \stdClass ? ($columns->medium ?? null) : null;
+        $expandedValue = $columns instanceof \stdClass ? ($columns->expanded ?? null) : null;
+        $medium = Properties::integerProperty($mediumValue, 1, 12, $compact);
+        $expanded = Properties::integerProperty($expandedValue, 1, 12, $medium);
         $state->css[] = '[data-studio-scope="' . $scope . '"]{--studio-columns-compact:' . $compact
             . ';--studio-columns-medium:' . $medium . ';--studio-columns-expanded:' . $expanded . '}';
 
