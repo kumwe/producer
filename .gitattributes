@@ -1,1 +1,4 @@
 * text=auto eol=lf
+/vendor export-ignore
+/.phpstan.cache export-ignore
+/composer.lock export-ignore
