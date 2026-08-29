@@ -71,6 +71,10 @@ foreach ($files as $path) {
 }
 
 $composer = json_decode((string) file_get_contents($root . '/composer.json'), true);
+$license = $composer['license'] ?? null;
+if ($license !== 'Apache-2.0') {
+    $errors[] = 'composer.json must advertise the repository Apache-2.0 license exactly.';
+}
 $runtime = is_array($composer['require'] ?? null) ? array_keys($composer['require']) : [];
 sort($runtime);
 if ($runtime !== ['ext-json', 'ext-mbstring', 'php']) {

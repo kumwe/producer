@@ -2,7 +2,7 @@
   "name": "kumwe/producer",
   "description": "The PHP producer for Kumwe Studio: receives canonical Studio compositions and makes them real - validated wire handling, semantic server-side rendering, and design-token CSS - while your application keeps all authority and storage.",
   "type": "library",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "homepage": "https://github.com/kumwe/producer",
   "support": {
     "issues": "https://github.com/kumwe/producer/issues",
