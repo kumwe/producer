@@ -7,6 +7,8 @@ parameters:
     - tools/verify-api.php
     - tests/TestCase.php
     - tests/Case/PublicApiManifestTest.php
+    - tests/Case/StudioContractResourcesTest.php
+    - tests/Case/StudioDocumentSchemaRegistryTest.php
     - examples
   tmpDir: .phpstan.cache
   treatPhpDocTypesAsCertain: false

@@ -42,7 +42,7 @@ final class PublicApiManifestTest extends TestCase
         if (!is_array($types)) {
             throw new \RuntimeException('The API manifest has no canonical type map.');
         }
-        $this->assertSame(63, count($types), 'Exactly the reviewed Producer public types must ship.');
+        $this->assertSame(67, count($types), 'Exactly the reviewed Producer public types must ship.');
         $response = $types['Kumwe\\Producer\\Wire\\Response'] ?? null;
         $this->assertTrue(
             is_array($response)
@@ -57,6 +57,26 @@ final class PublicApiManifestTest extends TestCase
                 && is_array($policy['enum'] ?? null)
                 && is_array($policy['enum']['cases'] ?? null),
             'Public enum cases must be compatibility-pinned.',
+        );
+        $registry = $types['Kumwe\\Producer\\Schema\\StudioDocumentSchemaRegistry'] ?? null;
+        $this->assertTrue(
+            is_array($registry)
+                && is_array($registry['methods'] ?? null)
+                && is_array($registry['methods']['fromVendoredCorpus'] ?? null)
+                && is_array($registry['methods']['validate'] ?? null)
+                && is_array($registry['constants'] ?? null)
+                && is_array($registry['constants']['CONTRIBUTION_KINDS'] ?? null)
+                && is_array($registry['constants']['DOCUMENT_KINDS'] ?? null),
+            'The sealed Studio document-registry seam must be compatibility-pinned.',
+        );
+        $resources = $types['Kumwe\\Producer\\Schema\\StudioContractResources'] ?? null;
+        $this->assertTrue(
+            is_array($resources)
+                && is_array($resources['methods'] ?? null)
+                && is_array($resources['methods']['releaseRecord'] ?? null)
+                && is_array($resources['methods']['testkitManifestBytes'] ?? null)
+                && is_array($resources['methods']['testkitBytes'] ?? null),
+            'The manifest-bound Studio resource seam must be compatibility-pinned.',
         );
     }
 

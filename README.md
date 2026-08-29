@@ -48,12 +48,39 @@ TypeScript sibling implements the same corpora and claims conformance the same w
 [porting guide](docs/porting-guide.md) gives an implementer the order, the boundaries, and the
 subtleties, so a port needs this repository and nothing else.
 
+## Exact document admission
+
+Hosts and extension tooling can validate decoded Studio documents through the one sealed,
+release-pinned authority. The registry accepts only the thirteen published document kinds and
+loads only Producer's digest-verified Composer resources; callers cannot inject schemas, roots,
+references, patterns, directories, or compatibility aliases.
+
+```php
+use Kumwe\Producer\Schema\StudioDocumentSchemaRegistry;
+
+$validation = StudioDocumentSchemaRegistry::fromVendoredCorpus()
+    ->validate('blueprint', $decodedDocument);
+
+if (!$validation->valid()) {
+    foreach ($validation->diagnostics() as $diagnostic) {
+        // $diagnostic->instancePath, ->keyword, ->message
+    }
+}
+```
+
+`StudioContractResources::releaseRecord()` exposes immutable typed release coordinates, while
+`testkitBytes()` reads only digest-verified corpus-manifest members for consumer conformance
+tests. Neither API exposes the package root or a generalized filesystem reader. Decoded inputs
+must use the canonical JSON shape (`stdClass` objects and list arrays) and the interoperable
+ECMAScript safe-integer range.
+
 ## Status
 
 The 0.2 release line is the supported host-integration foundation for the exact coordinated Studio
-`0.1.0-rc.1` release. Canonical JSON, schema-profile validation, the twenty-four-operation wire,
-host-atomic mutation and protected replay, rendering, rich text, and stylesheets are corpus-proven.
-Deployment emitters and optional template bridges remain roadmap work and are not claimed. See
+`0.1.0-rc.1` release. Canonical JSON, exact document-schema admission, contributed schema-profile
+validation, the twenty-four-operation wire, host-atomic mutation and protected replay, rendering,
+rich text, and stylesheets are corpus-proven. Deployment emitters and optional template bridges
+remain roadmap work and are not claimed. See
 [`docs/roadmap.md`](docs/roadmap.md) for the precise boundary.
 
 ## Requirements

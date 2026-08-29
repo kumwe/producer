@@ -48,4 +48,20 @@ if ($errors !== []) {
     exit(1);
 }
 
+$release = \Kumwe\Producer\Schema\StudioContractResources::releaseRecord();
+if ($release->release() !== '0.1.0-rc.1') {
+    fwrite(STDERR, "The installed Studio release coordinate did not autoload exactly.\n");
+    exit(1);
+}
+$fixture = \Kumwe\Producer\Schema\StudioContractResources::testkitBytes(
+    'fixtures/blueprint.product.example.json'
+);
+$document = \Kumwe\Producer\Canonical\CanonicalJson::decode($fixture);
+$validation = \Kumwe\Producer\Schema\StudioDocumentSchemaRegistry::fromVendoredCorpus()
+    ->validate('blueprint', $document);
+if (!$validation->valid() || $validation->diagnostics() !== []) {
+    fwrite(STDERR, "The no-dev package could not validate its exact Studio fixture.\n");
+    exit(1);
+}
+
 echo 'Composer autoload verified: ' . count($types) . " public types.\n";

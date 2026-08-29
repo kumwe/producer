@@ -24,6 +24,14 @@ Delivered, repository-verified behaviour only; roadmap position and claims live 
   injection and exact inventory reconciliation plus available/hidden/unavailable binding results.
 - Added clean Composer install and strict PSR-4 smoke proof, a reviewed public-API snapshot, a
   package/layer architecture gate, and PHP 8.5 to both pull-request and release matrices.
+- Added a sealed, exact-corpus-backed document-schema registry for all thirteen published runtime
+  document kinds, with closed local and cross-document references, bounded reviewed patterns,
+  deterministic diagnostics, and hostile corpus proof. Added immutable typed release coordinates
+  plus manifest-bound testkit resource access so consumers can delete schema/corpus mirrors.
+- Hardened canonical admission to reject invalid UTF-8, non-JSON PHP shapes, excessive nesting,
+  non-finite numbers, and values outside the interoperable ECMAScript safe-integer range; schema
+  equality now keeps adjacent large integers exact, and package-resource reads are bounded,
+  regular-file-only, identity-checked operations.
 
 ## 0.1.0 - 2026-08-28
 
