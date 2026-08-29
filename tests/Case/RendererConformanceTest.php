@@ -68,7 +68,7 @@ final class RendererConformanceTest extends TestCase
      */
     private function vectors(): array
     {
-        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/conformance/renderer-web';
+        $directory = dirname(__DIR__, 2) . '/resources/studio-contract/testkit/conformance/renderer-web';
         $files = glob($directory . '/*.json') ?: [];
         sort($files);
         $this->assertSame(8, count($files), 'The renderer-web corpus must be vendored completely.');

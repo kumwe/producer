@@ -36,6 +36,10 @@ $totalTests = 0;
 $totalAssertions = 0;
 $failures = [];
 
+if ($files === []) {
+    $failures[] = 'No test files were discovered.';
+}
+
 foreach ($files as $file) {
     $class = 'Kumwe\\Producer\\Tests\\Case\\' . basename($file, '.php');
     if (!class_exists($class)) {
@@ -62,6 +66,9 @@ foreach ($files as $file) {
                 $error->getLine()
             );
         }
+    }
+    if ($ran === 0) {
+        $failures[] = "{$file} declares no public test methods.";
     }
     $totalAssertions += $case->assertionCount();
     echo sprintf("%-52s %3d tests\n", basename($file), $ran);

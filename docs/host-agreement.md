@@ -13,7 +13,7 @@ with its own services and hands them to Producer at the boundary:
 | --- | --- | --- |
 | Authorization | The decision for every operation, re-checked per request, item-scoped | Fails closed on refusal; never caches an allow |
 | Artifact storage | Versioned persistence with expected-revision writes | Hands over only canonical, schema-valid bytes |
-| Idempotency | A durable ledger keyed by the caller's operation identity | Deterministic replay detection semantics |
+| Mutation boundary | One transaction spanning mutation, audit, and optional trusted replay scope; protected outcome storage and rehydration | Deterministic replay identity, changed-intent refusal, and no prescribed plaintext storage shape |
 | Media | Upload sessions and asset resolution through the host's media service | Policy-vector-conformant refusals |
 | Localization | Message catalogues through the host's translation chain | Falls back rather than throwing on a missing key |
 
@@ -33,10 +33,14 @@ with its own services and hands them to Producer at the boundary:
   output bytes.
 - Published HTML works without JavaScript; enhancements are additive and come only from Studio's
   versioned runtime, requested through data attributes, never generated.
-- Unknown or unresolved blocks render as a bounded semantic fallback; a published page never
-  breaks because one block cannot resolve.
+- Draft and preview rendering use bounded semantic fallback for unresolved blocks. Published
+  rendering requires every node's exact type/version/revision lock to be bound by the trusted host
+  and fails closed before returning markup when one is unavailable or ambiguous.
 - No hidden I/O: Producer performs no network, filesystem, or database access of its own at
   runtime. Every effect flows through a host-implemented interface.
+- Every mutation is released only after the host's atomic execution boundary commits its effect
+  and audit. A keyed mutation also commits a protected replay representation; explicitly safe
+  failed state may commit with its typed refusal, while every ordinary failure rolls back.
 
 ## The pin protocol
 

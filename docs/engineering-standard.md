@@ -15,7 +15,7 @@ in this table and never the ones below:
 | Schema | `Kumwe\Producer\Schema` | The schema-property profile: admission and instance validation | HTTP, rendering, hosts |
 | Error | `Kumwe\Producer\Error` | The closed host-error taxonomy | rendering, hosts |
 | Wire | `Kumwe\Producer\Wire` | Envelopes, the operation registry, dispatch, port interfaces | rendering internals, any concrete host |
-| Render | `Kumwe\Producer\Render` | Composition to semantic HTML, escaping, fallbacks | HTTP, storage, any concrete host |
+| Render | `Kumwe\Producer\Render` | Composition to semantic HTML, escaping, fallbacks; reuses the Error layer's contract string grammar | HTTP, storage, any concrete host |
 | Css | `Kumwe\Producer\Css` | Design tokens and layout vocabulary to static stylesheets | HTTP, storage |
 
 Rules that keep the layers honest:
@@ -81,6 +81,7 @@ The suite exists to prove intended outcomes, and only that. The standard for eve
 
 ## The check lane
 
-`composer check` is the whole standard, executable: lint, contract digest verification, suite.
-Every commit passes it; CI runs it on PHP 8.1 through 8.4; a release re-proves it on the tagged
+`composer check` is the whole standard, executable: lint, public API and architecture gates,
+contract digest verification, suite. Every commit passes it; CI runs it on PHP 8.1 through 8.5;
+a release re-proves it on the tagged
 commit. There is no path to publication that skips it.

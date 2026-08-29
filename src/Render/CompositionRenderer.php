@@ -30,8 +30,9 @@ final class CompositionRenderer
     private readonly BlockRendererRegistry $registry;
 
     /**
-     * @param   ?BlockRendererRegistry  $registry  The renderer mapping to
-     *     consult; null means the complete core catalog.
+     * @param   ?BlockRendererRegistry  $registry  The exact registrations
+     *     and draft implementations to consult; null means the complete
+     *     non-authoritative core draft catalog.
      * @since   0.1.0
      */
     public function __construct(?BlockRendererRegistry $registry = null)
@@ -56,8 +57,47 @@ final class CompositionRenderer
      */
     public function render(array $roots, ?RenderContext $context = null): RenderResult
     {
-        $state = new RenderState($context ?? new RenderContext(), $this);
+        return $this->renderWithCoordinates($roots, $context ?? new RenderContext(), []);
+    }
+
+    /**
+     * Render roots against a preflighted dependency-lock index.
+     *
+     * Strict published policy first proves every lock has one trusted exact
+     * registration. Draft policy may use the sole registered revision for
+     * a type/version and retains renderer-web's bounded fallback.
+     *
+     * @param   list<\stdClass>                     $roots        Blueprint roots.
+     * @param   RenderContext                       $context      Host authority.
+     * @param   array<string, BlockCoordinate|null> $coordinates Exact locks;
+     *                                                          null is ambiguous.
+     *
+     * @return  RenderResult  Immutable rendering outcome.
+     *
+     * @throws  RenderException  When strict lock proof or rendering fails.
+     *
+     * @since   0.2.0
+     */
+    private function renderWithCoordinates(
+        array $roots,
+        RenderContext $context,
+        array $coordinates,
+    ): RenderResult {
+        if ($context->policy === RenderPolicy::RequireRegistered) {
+            foreach ($coordinates as $coordinate) {
+                if (!$coordinate instanceof BlockCoordinate || !$this->registry->supports($coordinate)) {
+                    throw new RenderException('A published block dependency lock is ambiguous or unavailable.');
+                }
+            }
+        }
+        $state = new RenderState($context, $this, $coordinates);
         $html = $this->renderNodes($roots, $state);
+        if (
+            $state->context->previewMarkerMap !== null
+            && count($state->previewMarkers) !== count($state->context->previewMarkerMap)
+        ) {
+            throw new RenderException('The preview marker inventory does not match the rendered tree.');
+        }
         $parts = [BaseStylesheet::css(), ...$state->css];
         $css = implode("\n", array_values(array_filter($parts, static fn (string $part): bool => $part !== '')));
 
@@ -83,7 +123,11 @@ final class CompositionRenderer
             throw new RenderException('A Blueprint document must carry a roots list.');
         }
 
-        return $this->render($roots, $context);
+        return $this->renderWithCoordinates(
+            $roots,
+            $context ?? new RenderContext(),
+            self::blockCoordinates($document),
+        );
     }
 
     /**
@@ -140,40 +184,112 @@ final class CompositionRenderer
         $presentation = $this->presentationAttributes($node, $scope, $state);
         $type = Properties::stringValue($node->type ?? null);
         $content = $this->renderType($node, $type, $scope, $state);
+        $previewMarker = '';
+        if ($state->context->previewMarkerMap !== null) {
+            $marker = $state->context->previewMarkerFor($id);
+            if ($marker === null || isset($state->previewMarkers[$marker])) {
+                throw new RenderException('The preview marker inventory does not identify each node exactly once.');
+            }
+            $state->previewMarkers[$marker] = true;
+            $previewMarker = ' data-studio-preview-marker="' . SafeMarkup::escapeAttribute($marker) . '"';
+        }
         $attributes = 'data-studio-block="' . SafeMarkup::escapeAttribute(self::blockName($type)) . '"'
             . ' data-studio-node="' . SafeMarkup::escapeAttribute($id) . '"'
-            . ' data-studio-scope="' . $scope . '"' . $presentation;
+            . ' data-studio-scope="' . $scope . '"' . $previewMarker . $presentation;
+        $hidden = $state->isNodeHidden($id) ? ' hidden' : '';
         if ($type === BlockTypes::DESCRIPTION_ITEM) {
-            return '<div data-studio-description-item ' . $attributes . '>' . $content . '</div>';
+            return '<div data-studio-description-item ' . $attributes . $hidden . '>' . $content . '</div>';
         }
         if ($type === BlockTypes::NAVIGATION_ITEM) {
-            return '<li data-studio-navigation-item ' . $attributes . '>' . $content . '</li>';
+            return '<li data-studio-navigation-item ' . $attributes . $hidden . '>' . $content . '</li>';
         }
 
-        return '<div ' . $attributes . '>' . $content . '</div>';
+        return '<div ' . $attributes . $hidden . '>' . $content . '</div>';
     }
 
     /**
-     * The node's inner markup from its registered renderer, or — for a
-     * type without one — the reference's bounded unknown-type fallback: a
-     * labeled status paragraph naming the escaped type. An unknown type is
-     * never an error; the page still renders.
+     * The node's inner markup from its coordinate-bound renderer. Draft
+     * policy keeps the reference's bounded unknown-type fallback. Strict
+     * published policy refuses a missing, ambiguous, or unregistered lock.
      *
      * @param   \stdClass    $node   The decoded Blueprint node.
      * @param   string       $type   The node's block type identifier.
      * @param   string       $scope  The node's CSS-safe scope token.
      * @param   RenderState  $state  The per-render accumulation.
      * @return  string  Escaped inner markup for the node.
-     * @since   0.1.0
+     * @throws  RenderException  When strict policy cannot resolve exactly.
+     *
+     * @since   0.2.0
      */
     private function renderType(\stdClass $node, string $type, string $scope, RenderState $state): string
     {
-        $renderer = $this->registry->rendererFor($type);
+        $version = Properties::stringValue($node->version ?? null);
+        $coordinate = $state->blockCoordinates[$type . "\0" . $version] ?? null;
+        if ($state->context->policy === RenderPolicy::RequireRegistered) {
+            if (!$coordinate instanceof BlockCoordinate) {
+                throw new RenderException('A published node has no unambiguous dependency lock.');
+            }
+            $renderer = $this->registry->rendererFor($coordinate);
+            if ($renderer === null) {
+                throw new RenderException('A published node renderer is unavailable at its exact coordinate.');
+            }
+
+            return $renderer->render($node, $scope, $state);
+        }
+        $renderer = $coordinate instanceof BlockCoordinate
+            ? $this->registry->rendererFor($coordinate)
+            : null;
+        $renderer ??= $this->registry->draftRendererFor($type, $version);
         if ($renderer === null) {
             return '<p role="status">Unsupported Studio block ' . SafeMarkup::escapeHtml($type) . '</p>';
         }
 
         return $renderer->render($node, $scope, $state);
+    }
+
+    /**
+     * Index a Blueprint's exact type/version/revision block locks.
+     *
+     * Duplicate type/version keys are retained as null ambiguity so strict
+     * policy fails closed before any markup is returned.
+     *
+     * @param   \stdClass  $document  Decoded Blueprint.
+     *
+     * @return  array<string, BlockCoordinate|null>  Lock index.
+     *
+     * @throws  RenderException  When the lock shape is malformed.
+     *
+     * @since   0.2.0
+     */
+    private static function blockCoordinates(\stdClass $document): array
+    {
+        $dependencyLock = $document->dependencyLock ?? null;
+        if ($dependencyLock === null) {
+            return [];
+        }
+        $blocks = $dependencyLock instanceof \stdClass ? ($dependencyLock->blocks ?? null) : null;
+        if (!is_array($blocks) || !array_is_list($blocks) || count($blocks) > 1000) {
+            throw new RenderException('A Blueprint block dependency lock must be a list of at most 1000 entries.');
+        }
+        $coordinates = [];
+        foreach ($blocks as $block) {
+            if (!$block instanceof \stdClass
+                || !is_string($block->type ?? null)
+                || !is_string($block->version ?? null)
+                || !is_string($block->revision ?? null)
+            ) {
+                throw new RenderException('A Blueprint block dependency coordinate is malformed.');
+            }
+            try {
+                $coordinate = new BlockCoordinate($block->type, $block->version, $block->revision);
+            } catch (\InvalidArgumentException $exception) {
+                throw new RenderException('A Blueprint block dependency coordinate is invalid.', 0, $exception);
+            }
+            $key = $coordinate->versionKey();
+            $coordinates[$key] = array_key_exists($key, $coordinates) ? null : $coordinate;
+        }
+
+        return $coordinates;
     }
 
     /**

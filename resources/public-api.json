@@ -1,0 +1,320 @@
+{
+    "schema": "kumwe-producer-public-api-v1",
+    "types": [
+        {
+            "type": "Kumwe\\Producer\\Canonical\\CanonicalEncodingException",
+            "kind": "class",
+            "file": "src/Canonical/CanonicalEncodingException.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Canonical\\CanonicalJson",
+            "kind": "class",
+            "file": "src/Canonical/CanonicalJson.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Css\\BaseStylesheet",
+            "kind": "class",
+            "file": "src/Css/BaseStylesheet.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Css\\CssException",
+            "kind": "class",
+            "file": "src/Css/CssException.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Css\\ScopedStylesheet",
+            "kind": "class",
+            "file": "src/Css/ScopedStylesheet.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Css\\ThemeStylesheet",
+            "kind": "class",
+            "file": "src/Css/ThemeStylesheet.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Error\\ContractGrammar",
+            "kind": "class",
+            "file": "src/Error/ContractGrammar.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Error\\Diagnostic",
+            "kind": "class",
+            "file": "src/Error/Diagnostic.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Error\\DiagnosticLocation",
+            "kind": "class",
+            "file": "src/Error/DiagnosticLocation.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Error\\HostError",
+            "kind": "class",
+            "file": "src/Error/HostError.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Error\\HostRefusal",
+            "kind": "class",
+            "file": "src/Error/HostRefusal.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Error\\MessageReference",
+            "kind": "class",
+            "file": "src/Error/MessageReference.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\BindingResolution",
+            "kind": "class",
+            "file": "src/Render/BindingResolution.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\BlockCoordinate",
+            "kind": "class",
+            "file": "src/Render/BlockCoordinate.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\BlockRenderer",
+            "kind": "interface",
+            "file": "src/Render/BlockRenderer.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\BlockRendererRegistry",
+            "kind": "class",
+            "file": "src/Render/BlockRendererRegistry.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\BlockTypes",
+            "kind": "class",
+            "file": "src/Render/BlockTypes.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\Block\\DataBlocks",
+            "kind": "class",
+            "file": "src/Render/Block/DataBlocks.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\Block\\InteractiveBlocks",
+            "kind": "class",
+            "file": "src/Render/Block/InteractiveBlocks.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\Block\\LayoutBlocks",
+            "kind": "class",
+            "file": "src/Render/Block/LayoutBlocks.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\Block\\MediaBlocks",
+            "kind": "class",
+            "file": "src/Render/Block/MediaBlocks.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\Block\\TextBlocks",
+            "kind": "class",
+            "file": "src/Render/Block/TextBlocks.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\CompositionRenderer",
+            "kind": "class",
+            "file": "src/Render/CompositionRenderer.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\Enhancement",
+            "kind": "class",
+            "file": "src/Render/Enhancement.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\ProductionValues",
+            "kind": "class",
+            "file": "src/Render/ProductionValues.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\Properties",
+            "kind": "class",
+            "file": "src/Render/Properties.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\RenderContext",
+            "kind": "class",
+            "file": "src/Render/RenderContext.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\RenderException",
+            "kind": "class",
+            "file": "src/Render/RenderException.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\RenderPolicy",
+            "kind": "enum",
+            "file": "src/Render/RenderPolicy.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\RenderResult",
+            "kind": "class",
+            "file": "src/Render/RenderResult.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\RenderState",
+            "kind": "class",
+            "file": "src/Render/RenderState.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\ResolvedMedia",
+            "kind": "class",
+            "file": "src/Render/ResolvedMedia.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\ResolvedResource",
+            "kind": "class",
+            "file": "src/Render/ResolvedResource.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\RichText",
+            "kind": "class",
+            "file": "src/Render/RichText.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Render\\SafeMarkup",
+            "kind": "class",
+            "file": "src/Render/SafeMarkup.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Schema\\CodeUnitOrder",
+            "kind": "class",
+            "file": "src/Schema/CodeUnitOrder.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Schema\\SchemaAdmissionException",
+            "kind": "class",
+            "file": "src/Schema/SchemaAdmissionException.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Schema\\SchemaInstanceDiagnostic",
+            "kind": "class",
+            "file": "src/Schema/SchemaInstanceDiagnostic.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Schema\\SchemaPropertyProfile",
+            "kind": "class",
+            "file": "src/Schema/SchemaPropertyProfile.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Schema\\SchemaPropertyValidator",
+            "kind": "class",
+            "file": "src/Schema/SchemaPropertyValidator.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Dispatcher",
+            "kind": "class",
+            "file": "src/Wire/Dispatcher.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\HostResult",
+            "kind": "class",
+            "file": "src/Wire/HostResult.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\JsonShapeViolation",
+            "kind": "class",
+            "file": "src/Wire/JsonShapeViolation.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\JsonValueGuard",
+            "kind": "class",
+            "file": "src/Wire/JsonValueGuard.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\MutationOutcome",
+            "kind": "class",
+            "file": "src/Wire/MutationOutcome.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Operation",
+            "kind": "class",
+            "file": "src/Wire/Operation.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\OperationRegistry",
+            "kind": "class",
+            "file": "src/Wire/OperationRegistry.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\ArtifactPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/ArtifactPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\AuthorizationInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/AuthorizationInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\HostAdapterInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/HostAdapterInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\LocalizationPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/LocalizationPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\MediaPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/MediaPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\ModelPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/ModelPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\MutationBoundaryInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/MutationBoundaryInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\PermissionPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/PermissionPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\PreviewPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/PreviewPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\RecoveryPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/RecoveryPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\ResourcePortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/ResourcePortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Port\\TelemetryPortInterface",
+            "kind": "interface",
+            "file": "src/Wire/Port/TelemetryPortInterface.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\RequestContext",
+            "kind": "class",
+            "file": "src/Wire/RequestContext.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\RequestEnvelope",
+            "kind": "class",
+            "file": "src/Wire/RequestEnvelope.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\Response",
+            "kind": "class",
+            "file": "src/Wire/Response.php"
+        },
+        {
+            "type": "Kumwe\\Producer\\Wire\\StrictResponder",
+            "kind": "class",
+            "file": "src/Wire/StrictResponder.php"
+        }
+    ]
+}

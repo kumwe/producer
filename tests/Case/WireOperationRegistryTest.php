@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The closed operation registry: all thirty-one pinned operations with their
+ * The closed operation registry: all twenty-four pinned operations with their
  * exact metadata, refusal of anything outside the registry, and byte
  * equality with the pinned contract's canonical registry document.
  *
@@ -20,30 +20,25 @@ use Kumwe\Producer\Wire\OperationRegistry;
 
 final class WireOperationRegistryTest extends TestCase
 {
-    /**
-     * The canonical digest of the pinned release's host-operations
-     * registry document (schemas/examples/host-operations.example.json at
-     * the pinned Studio commit), computed under the contract's canonical
-     * serialization.
-     */
-    private const PINNED_REGISTRY_DIGEST = 'sha256-+boZ8kg/01UlASgJqxOmcAoX6fMXmytRBDOwGnSAtA4=';
-
     public function testTheRegistryReproducesThePinnedDocumentByteForByte(): void
     {
         $document = OperationRegistry::document();
+        $fixture = CanonicalJson::decode((string) file_get_contents(
+            dirname(__DIR__, 2) . '/resources/studio-contract/testkit/fixtures/host-operations.example.json'
+        ));
         $this->assertSame('host-operations', $document->kind, 'The registry document kind is fixed.');
         $this->assertSame(OperationRegistry::CONTRACT_VERSION, $document->contractVersion, 'The contract version is pinned.');
         $this->assertSame(
-            self::PINNED_REGISTRY_DIGEST,
-            CanonicalJson::digest($document),
-            'The registry must be canonically identical to the pinned contract registry.'
+            CanonicalJson::stringify($fixture),
+            CanonicalJson::stringify($document),
+            'The registry must be canonically identical to the released Studio registry fixture.'
         );
     }
 
-    public function testTheRegistryIsClosedAtThirtyOneOperationsAcrossTenPorts(): void
+    public function testTheRegistryIsClosedAtTwentyFourOperationsAcrossNinePorts(): void
     {
         $operations = OperationRegistry::all();
-        $this->assertSame(31, count($operations), 'The pinned registry binds exactly thirty-one operations.');
+        $this->assertSame(24, count($operations), 'The pinned registry binds exactly twenty-four operations.');
 
         $ports = [];
         $capabilities = [];
@@ -58,13 +53,13 @@ final class WireOperationRegistryTest extends TestCase
         $portNames = array_keys($ports);
         sort($portNames, SORT_STRING);
         $this->assertSame(
-            ['artifact', 'authoring', 'localization', 'media', 'model', 'permission', 'preview', 'recovery', 'resource', 'telemetry'],
+            ['artifact', 'localization', 'media', 'model', 'permission', 'preview', 'recovery', 'resource', 'telemetry'],
             $portNames,
-            'Exactly the ten contract ports appear.'
+            'Exactly the nine contract ports appear.'
         );
         $this->assertSame(count($capabilities), count(array_unique($capabilities)), 'Capabilities are unique.');
         $this->assertSame(count($routes), count(array_unique($routes)), 'Routes are unique.');
-        $this->assertSame(31, count($methodsByPort), 'Method names are unique within their port.');
+        $this->assertSame(24, count($methodsByPort), 'Method names are unique within their port.');
 
         $sorted = $capabilities;
         sort($sorted, SORT_STRING);
@@ -101,10 +96,6 @@ final class WireOperationRegistryTest extends TestCase
                 'studio.operation/artifact.publish',
                 'studio.operation/artifact.save',
                 'studio.operation/artifact.unpublish',
-                'studio.operation/authoring.save-as-new-type',
-                'studio.operation/authoring.save-item',
-                'studio.operation/authoring.save-new-type-version',
-                'studio.operation/authoring.start',
                 'studio.operation/media.abort-upload',
                 'studio.operation/media.authorize-upload',
                 'studio.operation/media.complete-upload',
@@ -137,9 +128,9 @@ final class WireOperationRegistryTest extends TestCase
         $this->assertSame('studio.port/artifact', $save->portCapability, 'The port capability matches the pin.');
         $this->assertSame($save, OperationRegistry::byRoute('artifact/save'), 'Both indexes hold one instance.');
 
-        $listTypes = OperationRegistry::byRoute('authoring/list-types');
-        $this->assertSame('listTypes', $listTypes->method, 'Wire spellings map to identifier methods.');
-        $this->assertSame('list-types', $listTypes->toDocument()->operation, 'The operation local name derives from the route.');
+        $abort = OperationRegistry::byRoute('media/abort-upload');
+        $this->assertSame('abortUpload', $abort->method, 'Wire spellings map to identifier methods.');
+        $this->assertSame('abort-upload', $abort->toDocument()->operation, 'The operation local name derives from the route.');
 
         $this->assertTrue(OperationRegistry::isCapability('studio.operation/telemetry.emit'), 'Known capability.');
         $this->assertTrue(OperationRegistry::isRoute('telemetry/emit'), 'Known route.');

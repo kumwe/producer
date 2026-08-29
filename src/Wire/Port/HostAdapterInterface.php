@@ -3,9 +3,9 @@
 /**
  * Everything a host hands Producer at the wire boundary.
  *
- * Authorization and the idempotency ledger are always present — Producer
- * fails closed without a decision and never applies a keyed mutation it
- * cannot prove unreplayed. The artifact port is the registry's one
+ * Authorization and the host-atomic mutation boundary are always present —
+ * Producer fails closed without a decision and never applies a mutation
+ * outside the host transaction. The artifact port is the registry's one
  * required port; every other port is optional, and a request addressed to
  * an absent optional port is refused as unavailable rather than guessed
  * at.
@@ -19,12 +19,12 @@ namespace Kumwe\Producer\Wire\Port;
 
 /**
  * The host's side of the wire, complete: the authorities the dispatcher
- * always consults and the ten operation ports of the pinned registry.
+ * always consults and the nine operation ports of the pinned registry.
  *
  * What the host must guarantee: {@see authorization()},
- * {@see idempotency()}, and {@see artifact()} always return an
+ * {@see mutations()}, and {@see artifact()} always return an
  * implementation — the dispatcher fails closed without an authorization
- * decision, never applies a keyed mutation it cannot prove unreplayed,
+ * decision, never applies a mutation outside the host's atomic boundary,
  * and the artifact port is the registry's one required port. Each other
  * accessor either returns its port or null; null is a stable statement
  * that this host does not serve the port, which the dispatcher turns into
@@ -48,15 +48,16 @@ interface HostAdapterInterface
     public function authorization(): AuthorizationInterface;
 
     /**
-     * The host's durable idempotency ledger for keyed mutations.
+     * The host's atomic transaction, audit, and optional replay boundary.
      *
-     * @return  IdempotencyLedgerInterface  Always an implementation — a
-     *                                      mutation whose replay cannot be
-     *                                      ruled out is refused.
+     * @return  MutationBoundaryInterface  Always an implementation — it
+     *                                     commits mutation, audit, and any
+     *                                     protected replay representation in
+     *                                     one host transaction.
      *
      * @since   0.1.0
      */
-    public function idempotency(): IdempotencyLedgerInterface;
+    public function mutations(): MutationBoundaryInterface;
 
     /**
      * The artifact port, studio.port/artifact — required of every
@@ -67,16 +68,6 @@ interface HostAdapterInterface
      * @since   0.1.0
      */
     public function artifact(): ArtifactPortInterface;
-
-    /**
-     * The optional authoring port, studio.port/authoring.
-     *
-     * @return  AuthoringPortInterface|null  The port, or null when this
-     *                                       host does not serve it.
-     *
-     * @since   0.1.0
-     */
-    public function authoring(): ?AuthoringPortInterface;
 
     /**
      * The optional localization port, studio.port/localization.

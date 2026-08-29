@@ -50,9 +50,11 @@ subtleties, so a port needs this repository and nothing else.
 
 ## Status
 
-Founding stage. The contract is vendored from a pre-release Studio pin and the surface below is
-under active construction; nothing here is a supported release yet. See
-[`docs/roadmap.md`](docs/roadmap.md) for what exists, what is proven, and what is next.
+The 0.2 release line is the supported host-integration foundation for the exact coordinated Studio
+`0.1.0-rc.1` release. Canonical JSON, schema-profile validation, the twenty-four-operation wire,
+host-atomic mutation and protected replay, rendering, rich text, and stylesheets are corpus-proven.
+Deployment emitters and optional template bridges remain roadmap work and are not claimed. See
+[`docs/roadmap.md`](docs/roadmap.md) for the precise boundary.
 
 ## Requirements
 
@@ -61,5 +63,7 @@ PHP 8.1 or newer with `ext-json` and `ext-mbstring`. No runtime Composer depende
 ## Development
 
 ```sh
-composer check   # lint, contract digest verification, dependency-free test suite
+composer validate --strict
+composer install --no-interaction
+composer check   # lint, API/architecture gates, contract proof, suite
 ```

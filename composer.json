@@ -24,13 +24,21 @@
     }
   },
   "scripts": {
+    "api": "php tools/verify-api.php",
+    "architecture": "php tools/verify-architecture.php",
+    "autoload-smoke": "php tools/autoload-smoke.php",
+    "style": "php tools/check-style.php",
     "test": "php tests/run.php",
     "lint": "php tools/lint.php",
     "contract": "php tools/verify-contract.php",
     "check": [
       "@lint",
+      "@style",
       "@docs",
+      "@architecture",
+      "@api",
       "@contract",
+      "@autoload-smoke",
       "@test"
     ],
     "docs": "php tools/check-docblocks.php"

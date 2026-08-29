@@ -17,15 +17,6 @@ namespace Kumwe\Producer\Render;
 interface BlockRenderer
 {
     /**
-     * The block types this renderer claims. Stable for the life of the
-     * instance: the registry reads it once, at registration.
-     *
-     * @return  list<string>  The block type identifiers this renderer serves.
-     * @since   0.1.0
-     */
-    public function types(): array;
-
-    /**
      * Produce the inner semantic HTML for one node of a claimed type. The
      * result must be fully escaped markup — every dynamic value routed
      * through {@see SafeMarkup} — and must degrade to usable no-JavaScript

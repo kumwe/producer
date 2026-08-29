@@ -3,6 +3,28 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
+## 0.2.0 - 2026-08-29
+
+- Re-pinned Producer from an unreleased Studio branch commit to the exact coordinated Studio
+  `0.1.0-rc.1` release consumed by Kumwe App: byte-identical release records, protocol schemas,
+  complete testkit corpus, manifest digests, package coordinates, protocol version, and profile
+  claims are now one fail-closed contract proof.
+- Removed the seven post-release authoring operations, their three schemas, and the authoring port
+  interface that were not part of Studio `0.1.0-rc.1`; the wire now reproduces the released
+  twenty-four-operation, nine-port registry exactly, without aliases or compatibility paths.
+- Replaced the split idempotency lookup/write seam with one host-atomic mutation boundary for
+  keyed and unkeyed mutations. Hosts can commit trusted scope, mutation, audit, and an optional
+  protected replay representation together; replay may deterministically rehydrate secrets, and
+  an explicitly safe failed lifecycle can commit and replay its typed refusal without repeating
+  the mutation.
+- Added typed refusal categories on responses, canonical HostError replay decoding, optional
+  revisions on non-artifact conflicts, and the public UTF-16 member comparator needed by hosts.
+- Made published rendering fail closed on exact host-bound type/version/revision coordinates;
+  the core draft catalog no longer invents block revisions. Added closed preview-marker
+  injection and exact inventory reconciliation plus available/hidden/unavailable binding results.
+- Added clean Composer install and strict PSR-4 smoke proof, a reviewed public-API snapshot, a
+  package/layer architecture gate, and PHP 8.5 to both pull-request and release matrices.
+
 ## 0.1.0 - 2026-08-28
 
 - The wire layer: request envelopes against the contract grammars with real duplicate-member

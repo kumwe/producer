@@ -18,22 +18,21 @@
  * 3. Authorization first, from the host, for every operation. A returned
  *    HostError is emitted verbatim; an authorization failure of any other
  *    kind fails closed as internal. Nothing later runs after a refusal.
- * 4. Idempotent replay for a keyed mutation: the scope key digests
- *    (idempotencyKey, operationId, resourceContextKey,
- *    sessionGeneration); the intent digest fingerprints the argument
- *    plus expectedRevision, locale, and protocolVersion with absent
- *    optionals omitted. A matching record replays the stored outcome
- *    without touching the port; a key reused with changed intent is
- *    refused as invalid-request — the pinned sequence vectors' exact
- *    policy.
+ * 4. Host-atomic execution for every mutation. A keyed mutation adds a
+ *    scope digest of (idempotencyKey, operationId, resourceContextKey,
+ *    sessionGeneration) and an intent digest of the argument plus
+ *    expectedRevision, locale, and protocolVersion. A matching record
+ *    replays the protected, rehydrated outcome without touching the port;
+ *    changed intent is refused as invalid-request. An unkeyed mutation has
+ *    no replay coordinates but keeps the same transaction and audit
+ *    boundary. The host adds trusted actor/session scope and owns storage.
  * 5. The port call, on the host's implementation. An absent optional port
  *    is refused as unavailable (retryable false). A thrown
  *    {@see HostRefusal} passes through verbatim; any other throwable
  *    becomes a non-disclosing internal refusal.
  * 6. Result discipline: a concurrency-protected operation must return the
- *    advanced revision (fail closed as internal otherwise), and the
- *    accepted outcome of a keyed mutation is recorded in the ledger
- *    before the response is released.
+ *    advanced revision (fail closed as internal otherwise). A keyed result
+ *    is released only after the host's atomic boundary has committed it.
  *
  * The registry does not say which operations take an argument, so the
  * dispatcher passes the argument (or null when absent) through unjudged;
@@ -74,7 +73,7 @@ final class Dispatcher
      *
      * @param   HostAdapterInterface  $host              The host's ports,
      *                                                   authorization, and
-     *                                                   idempotency ledger.
+     *                                                   atomic mutation boundary.
      * @param   StrictResponder       $responder         Serializes outcomes to
      *                                                   canonical bytes.
      * @param   int                   $maximumBodyBytes  The request body bound
@@ -124,9 +123,8 @@ final class Dispatcher
      * The dispatch stages in their fixed order: registry resolution,
      * envelope parsing, the registry cross-checks (route agreement,
      * expectedRevision exactly on concurrency-protected operations, an
-     * idempotency key only on a mutating one), authorization, replay,
-     * port call, result discipline, and — for a keyed mutation — the
-     * ledger write before the response is released.
+     * idempotency key only on a mutating one), authorization, host-atomic
+     * execution or replay, port call, and result discipline.
      *
      * @param   string  $route  The transport route addressed.
      * @param   string  $body   The raw request body bytes.
@@ -171,32 +169,13 @@ final class Dispatcher
 
         $this->authorize($operation, $envelope);
 
-        $scopeKey = null;
-        $intentDigest = null;
-        if ($operation->mutating && $context->idempotencyKey !== null) {
-            $scopeKey = self::scopeKey($operation, $context);
-            $intentDigest = self::intentDigest($envelope);
-            $record = $this->recall($scopeKey);
-            if ($record !== null) {
-                if ($record->intentDigest !== $intentDigest) {
-                    self::refuseInvalid(
-                        'kumwe.producer/idempotent-intent-changed',
-                        'This idempotency key was accepted for a different request.'
-                    );
-                }
-
-                return $this->respond($operation, $record->result);
-            }
+        if ($operation->mutating) {
+            return $this->executeMutation($operation, $envelope);
         }
 
         $result = $this->invoke($operation, $envelope);
-        $response = $this->respond($operation, $result);
 
-        if ($scopeKey !== null && $intentDigest !== null) {
-            $this->record($scopeKey, new IdempotencyRecord($intentDigest, $result));
-        }
-
-        return $response;
+        return $this->respond($operation, $result);
     }
 
     /**
@@ -232,58 +211,83 @@ final class Dispatcher
     }
 
     /**
-     * Recalls the ledger record for a scope key. A ledger that cannot
-     * answer fails closed as internal: when replay cannot be ruled out,
-     * the mutation must not run.
+     * Hand every mutation to the host's single atomic execution boundary.
      *
-     * @param   string  $scopeKey  The canonical scope key digest.
+     * Producer supplies deterministic replay digests only when the request
+     * is keyed. The host adds trusted actor/session scope, replays a
+     * completed logical outcome when present, or commits the mutation and
+     * audit together. It owns protected storage and rehydration. Any failure
+     * rolls back and fails closed; unkeyed mutations retain the same atomic
+     * transaction and audit guarantee without creating a replay identity.
      *
-     * @return  IdempotencyRecord|null  The accepted outcome, or null when
-     *                                  the key is unseen.
+     * @param   Operation        $operation  The resolved mutating registry row.
+     * @param   RequestEnvelope  $envelope   Validated mutation request.
      *
-     * @throws  HostRefusal  When the ledger fails to answer.
+     * @return  Response  Newly committed or exactly replayed result.
      *
-     * @since   0.1.0
+     * @throws  HostRefusal  When execution, storage, or replay fails.
+     *
+     * @since   0.2.0
      */
-    private function recall(string $scopeKey): ?IdempotencyRecord
+    private function executeMutation(Operation $operation, RequestEnvelope $envelope): Response
     {
-        try {
-            return $this->host->idempotency()->recall($scopeKey);
-        } catch (HostRefusal $thrown) {
-            throw $thrown;
-        } catch (\Throwable) {
-            throw new HostRefusal(HostError::internal(new MessageReference(
-                'kumwe.producer/idempotency-unavailable',
-                'Replay of this mutation could not be ruled out, so the request is refused.'
-            )));
-        }
-    }
+        $keyed = $envelope->context()->idempotencyKey !== null;
+        $scopeKey = $keyed ? self::scopeKey($operation, $envelope->context()) : null;
+        $intentDigest = $keyed ? self::intentDigest($envelope) : null;
 
-    /**
-     * Records the accepted outcome of a keyed mutation in the ledger. A
-     * failed write is an internal refusal: an outcome that cannot be
-     * recorded for replay is not released.
-     *
-     * @param   string             $scopeKey  The canonical scope key digest.
-     * @param   IdempotencyRecord  $record    The intent digest and result to
-     *                                        store.
-     *
-     * @throws  HostRefusal  When the ledger write fails.
-     *
-     * @since   0.1.0
-     */
-    private function record(string $scopeKey, IdempotencyRecord $record): void
-    {
         try {
-            $this->host->idempotency()->record($scopeKey, $record);
+            $record = $this->host->mutations()->execute(
+                $operation,
+                $envelope,
+                $scopeKey,
+                $intentDigest,
+                function () use ($operation, $envelope): HostResult|HostError {
+                    try {
+                        $result = $this->invoke($operation, $envelope);
+                        $this->assertResult($operation, $result);
+
+                        return $result;
+                    } catch (HostRefusal $refusal) {
+                        if (!$refusal->commitsState()) {
+                            throw $refusal;
+                        }
+
+                        return $refusal->error();
+                    }
+                },
+            );
         } catch (HostRefusal $thrown) {
             throw $thrown;
         } catch (\Throwable) {
             throw new HostRefusal(HostError::internal(new MessageReference(
-                'kumwe.producer/idempotency-record-failed',
-                'The mutation outcome could not be recorded for replay.'
+                'kumwe.producer/mutation-transaction-failed',
+                'The mutation, audit, and replay state could not be committed atomically.'
             )));
         }
+
+        if (($record->intentDigest === null) !== ($intentDigest === null)) {
+            throw new HostRefusal(HostError::internal(new MessageReference(
+                'kumwe.producer/mutation-coordinate-invalid',
+                'The host returned a mutation outcome with invalid replay coordinates.'
+            )));
+        }
+        if (
+            $intentDigest !== null
+            && $record->intentDigest !== null
+            && !hash_equals($record->intentDigest, $intentDigest)
+        ) {
+            self::refuseInvalid(
+                'kumwe.producer/idempotent-intent-changed',
+                'This idempotency key was accepted for a different request.'
+            );
+        }
+
+        $outcome = $record->outcome();
+        if ($outcome instanceof HostError) {
+            return $this->responder->refusal($outcome);
+        }
+
+        return $this->respond($operation, $outcome);
     }
 
     /**
@@ -337,19 +341,40 @@ final class Dispatcher
      */
     private function respond(Operation $operation, HostResult $result): Response
     {
+        $this->assertResult($operation, $result);
+
+        return $this->responder->result($result);
+    }
+
+    /**
+     * Enforce operation-specific result discipline before commit or output.
+     *
+     * This check runs inside the host's atomic callback for a keyed
+     * mutation, so an invalid result aborts its authoritative transaction
+     * rather than leaving an unreplayable accepted effect behind.
+     *
+     * @param   Operation   $operation  The resolved registry row.
+     * @param   HostResult  $result     The host outcome to prove.
+     *
+     * @return  void
+     *
+     * @throws  HostRefusal  When a protected mutation omits its revision.
+     *
+     * @since   0.2.0
+     */
+    private function assertResult(Operation $operation, HostResult $result): void
+    {
         if ($operation->expectsRevision && $result->revision === null) {
             throw new HostRefusal(HostError::internal(new MessageReference(
                 'kumwe.producer/missing-revision',
                 'The host accepted a concurrency-protected mutation without returning the advanced revision.'
             )));
         }
-
-        return $this->responder->result($result);
     }
 
     /**
      * Resolves the operation's port on the host. The match is closed over
-     * the registry's ten port names; an absent optional port is refused as
+     * the registry's nine port names; an absent optional port is refused as
      * unavailable with retryable false, never guessed at.
      *
      * @param   Operation  $operation  The resolved registry row.
@@ -365,7 +390,6 @@ final class Dispatcher
     {
         $port = match ($operation->port) {
             'artifact' => $this->host->artifact(),
-            'authoring' => $this->host->authoring(),
             'localization' => $this->host->localization(),
             'media' => $this->host->media(),
             'model' => $this->host->model(),
@@ -386,7 +410,7 @@ final class Dispatcher
     }
 
     /**
-     * The deterministic ledger key of a keyed mutation: the canonical
+     * The deterministic replay scope key of a keyed mutation: the canonical
      * digest of exactly (idempotencyKey, operationId, resourceContextKey,
      * sessionGeneration), per the pinned host sequence vectors.
      *

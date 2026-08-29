@@ -15,10 +15,15 @@ declare(strict_types=1);
 namespace Kumwe\Producer\Tests\Case;
 
 use Kumwe\Producer\Canonical\CanonicalJson;
+use Kumwe\Producer\Render\BindingResolution;
+use Kumwe\Producer\Render\Block\TextBlocks;
+use Kumwe\Producer\Render\BlockCoordinate;
+use Kumwe\Producer\Render\BlockRendererRegistry;
 use Kumwe\Producer\Render\CompositionRenderer;
 use Kumwe\Producer\Render\RenderContext;
 use Kumwe\Producer\Render\RenderException;
 use Kumwe\Producer\Render\ResolvedMedia;
+use Kumwe\Producer\Render\RenderPolicy;
 use Kumwe\Producer\Render\SafeMarkup;
 use Kumwe\Producer\Tests\TestCase;
 
@@ -107,6 +112,125 @@ final class RenderSafetyTest extends TestCase
         $this->assertStringExcludes('do-not-leak', $result->html, 'Unknown block properties must not leak.');
         $this->assertStringExcludes('secret-value', $result->html, 'Unknown block bindings must not leak.');
         $this->assertStringExcludes('<script', $result->html, 'The fallback must escape the type id.');
+    }
+
+    public function testPreviewMarkersAreClosedAndReconciledExactly(): void
+    {
+        $marker = 'studio.preview/node/' . str_repeat('a', 64) . '/0';
+        $node = self::node('preview-heading', 'studio.core/heading', [], [], ['text' => 'Preview']);
+        $context = new RenderContext(previewMarkerMap: [$marker => 'preview-heading']);
+        $result = (new CompositionRenderer())->render([$node], $context);
+        $this->assertStringContains(
+            'data-studio-preview-marker="' . $marker . '"',
+            $result->html,
+            'Producer owns the one fixed authoring marker attribute.',
+        );
+        $public = (new CompositionRenderer())->render([$node]);
+        $this->assertStringExcludes('data-studio-preview-marker', $public->html, 'Public rendering stays marker-free.');
+        $this->assertThrows(
+            static fn (): mixed => (new CompositionRenderer())->render(
+                [$node],
+                new RenderContext(previewMarkerMap: [$marker => 'another-node']),
+            ),
+            RenderException::class,
+            'A marker inventory that diverges from the tree is refused.',
+        );
+        $this->assertThrows(
+            static fn (): RenderContext => new RenderContext(previewMarkerMap: ['invented' => 'preview-heading']),
+            \InvalidArgumentException::class,
+            'An invented marker is refused before markup.',
+        );
+    }
+
+    public function testBindingResolutionPreservesHiddenUnavailableAndNull(): void
+    {
+        $node = self::node('hidden-heading', 'studio.core/heading', [], [], ['text' => 'must-not-resolve']);
+        $result = (new CompositionRenderer())->render(
+            [$node],
+            new RenderContext(
+                resolveBinding: static fn (): BindingResolution => BindingResolution::hidden(),
+            ),
+        );
+        $this->assertStringContains('data-studio-node="hidden-heading"', $result->html, 'The marker wrapper remains.');
+        $this->assertStringContains(' hidden>', $result->html, 'Hidden policy suppresses the wrapper semantically.');
+        $this->assertStringExcludes('must-not-resolve', $result->html, 'A hidden resolution exposes no source value.');
+        $this->assertSame(false, BindingResolution::unavailable()->isAvailable(), 'Unavailable stays distinct.');
+        $this->assertSame(true, BindingResolution::available(null)->isAvailable(), 'Available null stays available.');
+    }
+
+    public function testPublishedPolicyRequiresExactRegisteredCoordinates(): void
+    {
+        $registry = new BlockRendererRegistry();
+        $coordinate = new BlockCoordinate('studio.core/heading', '1.0.0', 'heading-r1');
+        $registry->register($coordinate, new TextBlocks());
+        $renderer = new CompositionRenderer($registry);
+        $document = (object) [
+            'dependencyLock' => (object) ['blocks' => [(object) [
+                'revision' => 'heading-r1',
+                'type' => 'studio.core/heading',
+                'version' => '1.0.0',
+            ]]],
+            'roots' => [self::node(
+                'published-heading',
+                'studio.core/heading',
+                [],
+                [],
+                ['text' => 'Published'],
+            )],
+        ];
+        $strict = new RenderContext(policy: RenderPolicy::RequireRegistered);
+        $result = $renderer->renderDocument($document, $strict);
+        $this->assertStringContains('Published', $result->html, 'An exact trusted coordinate renders.');
+
+        $mismatch = clone $document;
+        $mismatch->dependencyLock = (object) ['blocks' => [(object) [
+            'revision' => 'heading-r2',
+            'type' => 'studio.core/heading',
+            'version' => '1.0.0',
+        ]]];
+        $this->assertThrows(
+            static fn (): mixed => $renderer->renderDocument($mismatch, $strict),
+            RenderException::class,
+            'Published rendering never falls through to another registered revision.',
+        );
+        $this->assertThrows(
+            static function () use ($registry, $coordinate): void {
+                $registry->register($coordinate, new TextBlocks());
+            },
+            RenderException::class,
+            'Registration order cannot overwrite an exact trusted owner binding.',
+        );
+
+        $core = BlockRendererRegistry::withCoreCatalog();
+        $implementation = $core->draftRendererFor('studio.core/heading', '1.0.0');
+        $this->assertTrue(
+            $implementation instanceof TextBlocks,
+            'A core implementation is discoverable without inventing a definition revision.',
+        );
+        $this->assertSame(
+            false,
+            $core->supports($coordinate),
+            'The draft catalog never claims that a renderer release is an admitted block lock.',
+        );
+    }
+
+    public function testBlockCoordinatesUseTheExactContractGrammar(): void
+    {
+        $this->assertThrows(
+            static fn (): BlockCoordinate => new BlockCoordinate('studio.core/heading', '1.0.0-01', 'heading-r1'),
+            \InvalidArgumentException::class,
+            'A numeric prerelease identifier cannot carry a leading zero.',
+        );
+        $this->assertThrows(
+            static fn (): BlockCoordinate => new BlockCoordinate('studio..core/heading', '1.0.0', 'heading-r1'),
+            \InvalidArgumentException::class,
+            'A block type cannot use a relaxed local name grammar.',
+        );
+        $this->assertThrows(
+            static fn (): BlockCoordinate => new BlockCoordinate('studio.core/heading', '1.0.0', "\xff"),
+            \InvalidArgumentException::class,
+            'A block revision must be valid UTF-8 before its length is measured.',
+        );
     }
 
     public function testSafeMarkupFragmentFailsClosed(): void

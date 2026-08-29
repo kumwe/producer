@@ -5,7 +5,8 @@
  *
  * Everything the host agreement says a host supplies, reduced to fixtures:
  * an authorization that allows exactly one demonstration actor, an
- * idempotency ledger in a PHP array, and an artifact port holding one
+ * single-process mutation boundary with keyed replay in a PHP array, and an
+ * artifact port holding one
  * composition. It exists so the host guide's claims are runnable and
  * testable on a clean clone — it is a demonstration, never a production
  * host, and it deliberately implements nothing durable.
@@ -26,16 +27,15 @@ use Kumwe\Producer\Error\MessageReference;
 use Kumwe\Producer\Render\CompositionRenderer;
 use Kumwe\Producer\Render\RenderResult;
 use Kumwe\Producer\Wire\HostResult;
-use Kumwe\Producer\Wire\IdempotencyRecord;
+use Kumwe\Producer\Wire\MutationOutcome;
 use Kumwe\Producer\Wire\Operation;
 use Kumwe\Producer\Wire\Port\ArtifactPortInterface;
-use Kumwe\Producer\Wire\Port\AuthoringPortInterface;
 use Kumwe\Producer\Wire\Port\AuthorizationInterface;
 use Kumwe\Producer\Wire\Port\HostAdapterInterface;
-use Kumwe\Producer\Wire\Port\IdempotencyLedgerInterface;
 use Kumwe\Producer\Wire\Port\LocalizationPortInterface;
 use Kumwe\Producer\Wire\Port\MediaPortInterface;
 use Kumwe\Producer\Wire\Port\ModelPortInterface;
+use Kumwe\Producer\Wire\Port\MutationBoundaryInterface;
 use Kumwe\Producer\Wire\Port\PermissionPortInterface;
 use Kumwe\Producer\Wire\Port\PreviewPortInterface;
 use Kumwe\Producer\Wire\Port\RecoveryPortInterface;
@@ -305,23 +305,33 @@ final class DemoAuthorization implements AuthorizationInterface
 }
 
 /**
- * A durable ledger reduced to a request-lifetime array — enough to make the
- * dispatcher's replay semantics observable, durable for exactly as long as
- * a demonstration needs.
+ * The atomic mutation contract reduced to one request-lifetime array —
+ * enough to make keyed replay semantics observable in a single process,
+ * durable for exactly as long as a demonstration needs. Production hosts
+ * include mutation and audit in one transaction and protect stored replay
+ * material; this deliberately tiny example has no database or secrets.
  */
-final class DemoIdempotencyLedger implements IdempotencyLedgerInterface
+final class DemoMutationBoundary implements MutationBoundaryInterface
 {
-    /** @var array<string, IdempotencyRecord> */
+    /** @var array<string, MutationOutcome> */
     private array $records = [];
 
-    public function recall(string $scopeKey): ?IdempotencyRecord
-    {
-        return $this->records[$scopeKey] ?? null;
-    }
+    public function execute(
+        Operation $operation,
+        RequestEnvelope $request,
+        ?string $scopeKey,
+        ?string $intentDigest,
+        callable $mutation,
+    ): MutationOutcome {
+        if ($scopeKey !== null && isset($this->records[$scopeKey])) {
+            return $this->records[$scopeKey];
+        }
+        $outcome = new MutationOutcome($intentDigest, $mutation());
+        if ($scopeKey === null) {
+            return $outcome;
+        }
 
-    public function record(string $scopeKey, IdempotencyRecord $record): void
-    {
-        $this->records[$scopeKey] = $record;
+        return $this->records[$scopeKey] = $outcome;
     }
 }
 
@@ -414,14 +424,14 @@ final class MinimalHost implements HostAdapterInterface
 
     private readonly DemoAuthorization $authorization;
 
-    private readonly DemoIdempotencyLedger $idempotency;
+    private readonly DemoMutationBoundary $mutations;
 
     private readonly DemoArtifactPort $artifact;
 
     public function __construct(?string $actor)
     {
         $this->authorization = new DemoAuthorization($actor);
-        $this->idempotency = new DemoIdempotencyLedger();
+        $this->mutations = new DemoMutationBoundary();
         $this->artifact = new DemoArtifactPort();
     }
 
@@ -430,19 +440,14 @@ final class MinimalHost implements HostAdapterInterface
         return $this->authorization;
     }
 
-    public function idempotency(): IdempotencyLedgerInterface
+    public function mutations(): MutationBoundaryInterface
     {
-        return $this->idempotency;
+        return $this->mutations;
     }
 
     public function artifact(): ArtifactPortInterface
     {
         return $this->artifact;
-    }
-
-    public function authoring(): ?AuthoringPortInterface
-    {
-        return null;
     }
 
     public function localization(): ?LocalizationPortInterface

@@ -276,7 +276,7 @@ final class CanonicalJson
      *
      * @since   0.1.0
      */
-    private static function compareCodeUnits(string $left, string $right): int
+    public static function compareCodeUnits(string $left, string $right): int
     {
         $a = self::utf16CodeUnits($left);
         $b = self::utf16CodeUnits($right);

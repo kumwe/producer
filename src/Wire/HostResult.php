@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 namespace Kumwe\Producer\Wire;
 
+use Kumwe\Producer\Canonical\CanonicalJson;
 use Kumwe\Producer\Error\ContractGrammar;
 
 /**
@@ -78,5 +79,51 @@ final class HostResult
         $document->value = $this->value;
 
         return $document;
+    }
+
+    /**
+     * Reconstruct a result only from exact canonical host-result bytes.
+     *
+     * This is the durable idempotency read path. It accepts precisely one
+     * object with `value` and optional `revision`, proves the normal value
+     * and revision bounds through the constructor, then requires byte
+     * equality with Producer's canonical serialization.
+     *
+     * @param   string  $bytes  Persisted canonical host-result bytes.
+     *
+     * @return  self  Reconstructed, fully proved host result.
+     *
+     * @throws  \InvalidArgumentException  When storage is malformed,
+     *                                     non-canonical, or out of contract.
+     *
+     * @since   0.2.0
+     */
+    public static function fromCanonicalBytes(string $bytes): self
+    {
+        try {
+            $document = CanonicalJson::decode($bytes);
+            if (!$document instanceof \stdClass || !property_exists($document, 'value')) {
+                throw new \InvalidArgumentException('A stored host result must be an object carrying value.');
+            }
+            $members = array_keys(get_object_vars($document));
+            sort($members, SORT_STRING);
+            if ($members !== ['value'] && $members !== ['revision', 'value']) {
+                throw new \InvalidArgumentException('A stored host result carries an unknown member.');
+            }
+            $revision = property_exists($document, 'revision') ? $document->revision : null;
+            if ($revision !== null && !is_string($revision)) {
+                throw new \InvalidArgumentException('A stored host result revision must be text.');
+            }
+            $result = new self($document->value, $revision);
+            if (!hash_equals($bytes, CanonicalJson::stringify($result->toDocument()))) {
+                throw new \InvalidArgumentException('A stored host result is not canonical.');
+            }
+
+            return $result;
+        } catch (\InvalidArgumentException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new \InvalidArgumentException('A stored host result is corrupt.', 0, $exception);
+        }
     }
 }

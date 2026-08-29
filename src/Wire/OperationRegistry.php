@@ -3,7 +3,7 @@
 /**
  * The closed registry of every host port and operation on the wire.
  *
- * Exactly the thirty-one operations the pinned contract's host-operations
+ * Exactly the twenty-four operations the pinned contract's host-operations
  * registry binds — the capability a host advertises, the transport route a
  * request addresses, the typed method a port interface exposes, and the
  * concurrency/mutation/requiredness flags. The enums in the vendored
@@ -27,8 +27,8 @@ use Kumwe\Producer\Error\HostRefusal;
 use Kumwe\Producer\Error\MessageReference;
 
 /**
- * The pinned operation registry as a closed lookup: thirty-one operations,
- * ten ports, nothing else.
+ * The pinned operation registry as a closed lookup: twenty-four operations,
+ * nine ports, nothing else.
  *
  * The table below reproduces the pinned release's canonical registry
  * document byte for byte — {@see document()} rebuilds that document and
@@ -61,13 +61,6 @@ final class OperationRegistry
         'studio.operation/artifact.publish' => ['artifact/publish', 'publish', 'artifact', 'studio.port/artifact', true, true, true],
         'studio.operation/artifact.save' => ['artifact/save', 'save', 'artifact', 'studio.port/artifact', true, true, true],
         'studio.operation/artifact.unpublish' => ['artifact/unpublish', 'unpublish', 'artifact', 'studio.port/artifact', true, true, true],
-        'studio.operation/authoring.list-types' => ['authoring/list-types', 'listTypes', 'authoring', 'studio.port/authoring', false, false, false],
-        'studio.operation/authoring.plan-save' => ['authoring/plan-save', 'planSave', 'authoring', 'studio.port/authoring', false, false, false],
-        'studio.operation/authoring.resolve-target' => ['authoring/resolve-target', 'resolveTarget', 'authoring', 'studio.port/authoring', false, false, false],
-        'studio.operation/authoring.save-as-new-type' => ['authoring/save-as-new-type', 'saveAsNewType', 'authoring', 'studio.port/authoring', false, true, false],
-        'studio.operation/authoring.save-item' => ['authoring/save-item', 'saveItem', 'authoring', 'studio.port/authoring', false, true, false],
-        'studio.operation/authoring.save-new-type-version' => ['authoring/save-new-type-version', 'saveNewTypeVersion', 'authoring', 'studio.port/authoring', false, true, false],
-        'studio.operation/authoring.start' => ['authoring/start', 'start', 'authoring', 'studio.port/authoring', false, true, false],
         'studio.operation/localization.messages' => ['localization/messages', 'messages', 'localization', 'studio.port/localization', false, false, false],
         'studio.operation/media.abort-upload' => ['media/abort-upload', 'abortUpload', 'media', 'studio.port/media', false, true, false],
         'studio.operation/media.authorize-upload' => ['media/authorize-upload', 'authorizeUpload', 'media', 'studio.port/media', false, true, false],
@@ -121,7 +114,7 @@ final class OperationRegistry
     /**
      * Every operation on the wire, in canonical (capability) order.
      *
-     * @return  list<Operation>  The thirty-one pinned operations.
+     * @return  list<Operation>  The twenty-four pinned operations.
      *
      * @since   0.1.0
      */
@@ -135,7 +128,7 @@ final class OperationRegistry
      *
      * @param   string  $capability  The qualified operation name to test.
      *
-     * @return  bool  True only for one of the thirty-one pinned
+     * @return  bool  True only for one of the twenty-four pinned
      *                capabilities.
      *
      * @since   0.1.0
@@ -150,7 +143,7 @@ final class OperationRegistry
      *
      * @param   string  $route  The route to test, e.g. `artifact/save`.
      *
-     * @return  bool  True only for one of the thirty-one pinned routes.
+     * @return  bool  True only for one of the twenty-four pinned routes.
      *
      * @since   0.1.0
      */

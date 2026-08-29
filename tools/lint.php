@@ -14,7 +14,7 @@ $root = dirname(__DIR__);
 $failures = [];
 $count = 0;
 
-foreach (['src', 'tests', 'tools'] as $directory) {
+foreach (['examples', 'src', 'tests', 'tools'] as $directory) {
     $path = $root . '/' . $directory;
     if (!is_dir($path)) {
         continue;
@@ -27,7 +27,11 @@ foreach (['src', 'tests', 'tools'] as $directory) {
             continue;
         }
         $count++;
-        exec('php -l ' . escapeshellarg($file->getPathname()) . ' 2>&1', $output, $status);
+        exec(
+            escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($file->getPathname()) . ' 2>&1',
+            $output,
+            $status,
+        );
         if ($status !== 0) {
             $failures[] = implode("\n", $output);
         }

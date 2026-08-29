@@ -34,16 +34,19 @@ When Kumwe's Flutter client needs composition realization, this is the map.
 Each layer is proven before the next begins, because each later layer consumes the earlier one.
 
 1. **Canonical JSON** (`src/Canonical/`). Prove with
-   `conformance/canonical/` — all vectors, including both rejection vectors. Read the subtleties
+   `resources/studio-contract/testkit/vectors/canonical/` — all vectors, including both rejection vectors. Read the subtleties
    list below first; this layer is where ports fail.
-2. **The schema-property profile** (`src/Schema/`). Prove with `conformance/schema-profile/` —
+2. **The schema-property profile** (`src/Schema/`). Prove with
+   `resources/studio-contract/testkit/vectors/schema-profile/` —
    admission codes and schema pointers, instance verdicts with keyword and instance pointers,
    byte-budget and graph bounds enforced before expensive work.
 3. **The error taxonomy and wire layer** (`src/Error/`, `src/Wire/`). Shapes come from
-   `schemas/host-error.schema.json`, `host-request`, `host-result`, `host-operations`. The
+   `resources/studio-contract/protocol/schemas/host-error.schema.json`, `host-request`,
+   `host-result`, `host-operations`. The
    operation registry is closed; port interfaces stay minimal and authority-free.
-4. **Rendering** (`src/Render/`). Prove with `conformance/renderer-web/` (contains/excludes/css/
-   enhancements assertions) and `conformance/rich-text/`. Escaping is centralized; unknown blocks
+4. **Rendering** (`src/Render/`). Prove with
+   `resources/studio-contract/testkit/conformance/renderer-web/` (contains/excludes/css/
+   enhancements assertions) and `testkit/conformance/rich-text/`. Escaping is centralized; unknown blocks
    render the bounded semantic fallback; output is deterministic bytes.
 5. **Stylesheets** (`src/Css/`). Design tokens to custom properties, the layout attribute
    vocabulary, the reduced-motion base — static, deterministically ordered output.

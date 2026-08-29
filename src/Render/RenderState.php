@@ -38,15 +38,37 @@ final class RenderState
     public array $enhancements = [];
 
     /**
+     * Preview markers consumed by rendered nodes, for exact inventory
+     * reconciliation after the walk.
+     *
+     * @var array<string, true>
+     *
+     * @since   0.2.0
+     */
+    public array $previewMarkers = [];
+
+    /**
+     * Nodes suppressed by a hidden binding resolution.
+     *
+     * @var array<string, true>
+     *
+     * @since   0.2.0
+     */
+    private array $hiddenNodes = [];
+
+    /**
      * @param   RenderContext        $context   The host authority for this
      *     render.
      * @param   CompositionRenderer  $renderer  The engine that walks child
      *     nodes on this state's behalf.
+     * @param   array<string, BlockCoordinate|null>  $blockCoordinates  Exact
+     *     type/version locks from the Blueprint; null marks ambiguity.
      * @since   0.1.0
      */
     public function __construct(
         public readonly RenderContext $context,
         private readonly CompositionRenderer $renderer,
+        public readonly array $blockCoordinates = [],
     ) {
     }
 
@@ -119,26 +141,69 @@ final class RenderState
     }
 
     /**
-     * The value bound to a node port: the host's resolver when it provides
-     * one, otherwise only the static value stored on the node's binding —
-     * any other binding source resolves to null without a host.
+     * Resolve a node port without conflating null, hidden, and unavailable.
      *
      * @param   \stdClass  $node  The bound node.
      * @param   string     $port  The port name.
-     * @return  mixed  The resolved value, or null when nothing resolves.
+     * @return  BindingResolution  Closed trusted outcome.
+     *
+     * @since   0.2.0
+     */
+    public function bindingResolution(\stdClass $node, string $port): BindingResolution
+    {
+        $resolver = $this->context->resolveBinding;
+        if ($resolver !== null) {
+            $candidate = $resolver($node, $port);
+            $resolution = $candidate instanceof BindingResolution
+                ? $candidate
+                : BindingResolution::available($candidate);
+        } else {
+            $binding = $node->bindings->{$port} ?? null;
+            $resolution = ($binding->source->kind ?? null) === 'static-value'
+                && property_exists($binding->source, 'value')
+                ? BindingResolution::available($binding->source->value)
+                : BindingResolution::unavailable();
+        }
+        if ($resolution->isHidden()) {
+            $id = Properties::stringValue($node->id ?? null);
+            $this->hiddenNodes["node\0" . $id] = true;
+        }
+
+        return $resolution;
+    }
+
+    /**
+     * The available value bound to a node port, or null for hidden and
+     * unavailable outcomes.
+     *
+     * Call {@see bindingResolution()} when available null must remain
+     * distinct. This convenience method preserves the renderer-web
+     * catalog's value-oriented block API.
+     *
+     * @param   \stdClass  $node  The bound node.
+     * @param   string     $port  The port name.
+     *
+     * @return  mixed  Available value, or null.
+     *
      * @since   0.1.0
      */
     public function bindingValue(\stdClass $node, string $port): mixed
     {
-        $resolver = $this->context->resolveBinding;
-        if ($resolver !== null) {
-            return $resolver($node, $port);
-        }
-        $binding = $node->bindings->{$port} ?? null;
+        return $this->bindingResolution($node, $port)->value();
+    }
 
-        return ($binding->source->kind ?? null) === 'static-value'
-            ? ($binding->source->value ?? null)
-            : null;
+    /**
+     * Whether binding policy has hidden one node during rendering.
+     *
+     * @param   string  $nodeId  Stable Blueprint node identity.
+     *
+     * @return  bool  True when at least one binding resolved hidden.
+     *
+     * @since   0.2.0
+     */
+    public function isNodeHidden(string $nodeId): bool
+    {
+        return isset($this->hiddenNodes["node\0" . $nodeId]);
     }
 
     /**

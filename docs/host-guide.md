@@ -22,9 +22,9 @@ Adopting Producer means three things:
   them contract-shaped, and then hands every decision to your code through
   `Kumwe\Producer\Wire\Port\HostAdapterInterface`. Two members of that adapter are always
   consulted and always required: `AuthorizationInterface` (your allow/refuse decision, asked
-  first, for every operation) and `IdempotencyLedgerInterface` (your durable storage for mutation
-  replay detection). The artifact port (`ArtifactPortInterface`, your versioned persistence) is
-  the one required operation port; the other nine ports — authoring, localization, media, model,
+  first, for every operation) and `MutationBoundaryInterface` (your host-atomic mutation, audit,
+  and optional replay boundary). The artifact port (`ArtifactPortInterface`, your versioned persistence) is
+  the one required operation port; the other eight ports — localization, media, model,
   permission, preview, recovery, resource, telemetry — are optional, and a request addressed to a
   port you return `null` for is refused as `unavailable`, never guessed at.
 - **You embed the render result.** Rendering a published composition yields a
@@ -40,7 +40,7 @@ Adopting Producer means three things:
 
 ## Wiring the wire
 
-Studio's client speaks a closed set of thirty-one operations, each addressed to a transport route
+Studio's client speaks a closed set of twenty-four operations, each addressed to a transport route
 such as `artifact/load` or `media/list` (`Kumwe\Producer\Wire\OperationRegistry` holds the full
 table). The host exposes **one HTTP endpoint** that receives those requests and drives each one
 through `Kumwe\Producer\Wire\Dispatcher`:
@@ -56,8 +56,10 @@ through `Kumwe\Producer\Wire\Dispatcher`:
    `HostError` refuses it and is emitted verbatim. Producer never caches an allow, and if your
    implementation throws, the request fails closed as `internal`. Nothing later runs after a
    refusal.
-4. For a mutation carrying an idempotency key, your ledger is consulted; a matching record replays
-   the stored outcome without touching the port, and a key reused with changed intent is refused.
+4. Every mutation crosses your atomic boundary. An unkeyed mutation commits the port effect and
+   audit together. For a keyed mutation, your boundary additionally namespaces Producer's digest
+   with trusted actor/session identity, then either replays a completed logical outcome or invokes
+   the port exactly once. Changed intent is refused.
 5. The operation reaches your port implementation, which returns a
    `Kumwe\Producer\Wire\HostResult` or throws `Kumwe\Producer\Error\HostRefusal`.
 6. `StrictResponder` turns the outcome into a `Kumwe\Producer\Wire\Response`: canonical JSON
@@ -86,7 +88,19 @@ $response = $dispatcher->dispatch($route, $body);
 foreach ($response->headers as $name => $value) {
     header($name . ': ' . $value);
 }
-http_response_code(200); // outcomes are distinguished by body shape, never by status
+$status = match ($response->refusalCategory) {
+    null => 200,
+    'unauthenticated' => 401,
+    'forbidden' => 403,
+    'not-found' => 404,
+    'conflict' => 409,
+    'limit-exceeded' => 413,
+    'validation-failed', 'invalid-request', 'incompatible' => 422,
+    'rate-limited' => 429,
+    'unavailable' => 503,
+    default => 500,
+};
+http_response_code($status); // host transport policy; no JSON parsing or text matching
 echo $response->body;
 ```
 
@@ -96,9 +110,9 @@ knobs exist and both default sensibly: a `StrictResponder` instance and `maximum
 (default `RequestEnvelope::DEFAULT_MAXIMUM_BODY_BYTES`, 1 MiB; raise it explicitly if your
 artifacts are larger).
 
-`Response` carries no HTTP status on purpose: the contract distinguishes a success (a host-result
-document) from a refusal (a host-error document) by body shape alone. The `refusal` flag tells
-your transport which shape it is holding, for your own logging or status policy.
+`Response` carries no HTTP status on purpose: status remains host transport policy. Its nullable
+`refusalCategory` is the stable typed signal for that policy, so the transport never parses or
+remaps canonical JSON. The derived `refusal` flag remains a convenient shape discriminator.
 
 ### What each refusal means to an operator
 
@@ -113,7 +127,7 @@ Match on the category and the stable message key — never on message text.
 | `unauthenticated` | Your authorization found no usable identity on the transport. |
 | `forbidden` | Your authorization refused this actor this operation on this item. |
 | `not-found` | Your port could not find the addressed resource. |
-| `conflict` | An `expectedRevision` no longer matches. `revision` carries the safe current revision to rebase on without a second read. |
+| `conflict` | Current host state conflicts with the request. An optimistic artifact conflict carries the safe current `revision`; contention and authority conflicts may omit it. |
 | `validation-failed` | The argument fit the wire shape but your port refused its semantics. |
 | `incompatible` | The envelope names a wire `protocolVersion` this pin does not speak; the pins have drifted. Fix the pins, not the request. |
 | `limit-exceeded` | The body exceeded the configured byte bound. |
@@ -127,6 +141,28 @@ Refusals Producer raises itself carry `kumwe.producer/…` message keys (for exa
 `kumwe.producer/idempotent-intent-changed`); refusals your host raises carry your keys and pass
 through verbatim.
 
+### The atomic mutation rule
+
+`MutationBoundaryInterface::execute()` is deliberately one operation rather than separate lookup,
+mutation, audit, and record calls. A production implementation begins its authoritative
+transaction before invoking the supplied callback. It commits the effect and audit together for
+every mutation; a null scope and intent mean the mutation is unkeyed and no replay row is created.
+
+For a keyed mutation, claim the complete trusted actor/session/resource/operation/key scope inside
+that same transaction and invoke the callback at most once. The host owns the durable format. It
+may encrypt the logical outcome, store a redacted projection, or store a handle to protected
+material, then integrity-check and deterministically rehydrate the exact `HostResult` or
+`HostError` on replay. Never persist a plaintext upload token merely because the fresh result
+contains one. `HostResult::fromCanonicalBytes()` and `HostError::fromCanonicalBytes()` are
+available when canonical logical bytes are the host's chosen protected representation; Producer
+does not require that representation.
+
+An ordinary thrown `HostRefusal` or any other failure rolls the entire transaction back. A host
+port may throw `HostRefusal(..., commitsState: true)` only when a safe failed lifecycle and its
+audit must commit and replay together; the boundary receives that typed `HostError` as the logical
+callback result. Producer releases no outcome until `execute()` returns a `MutationOutcome` after
+commit, and proves keyed intent equality before responding.
+
 ## Rendering published pages
 
 A published composition is canonical JSON your application stored through the artifact port.
@@ -139,12 +175,30 @@ release, identical output bytes:
 declare(strict_types=1);
 
 use Kumwe\Producer\Canonical\CanonicalJson;
+use Kumwe\Producer\Render\BlockCoordinate;
+use Kumwe\Producer\Render\BlockRendererRegistry;
 use Kumwe\Producer\Render\CompositionRenderer;
 use Kumwe\Producer\Render\RenderContext;
+use Kumwe\Producer\Render\RenderPolicy;
 
 $document = CanonicalJson::decode($storedCompositionJson); // keeps {} and [] distinct
-$renderer = new CompositionRenderer();                     // complete pinned core catalog
-$result = $renderer->renderDocument($document, new RenderContext());
+$registry = BlockRendererRegistry::withCoreCatalog();       // draft implementations, no invented revisions
+foreach ($verifiedBlockLocks as $lock) {                    // host verified owner/definition/integrity first
+    $implementation = $registry->draftRendererFor($lock->type, $lock->version)
+        ?? $yourTrustedExtensionRenderers->forLock($lock);
+    if ($implementation === null) {
+        throw new RuntimeException('No trusted implementation exists for the published block lock.');
+    }
+    $registry->register(
+        new BlockCoordinate($lock->type, $lock->version, $lock->revision),
+        $implementation,
+    );
+}
+$renderer = new CompositionRenderer($registry);
+$result = $renderer->renderDocument(
+    $document,
+    new RenderContext(policy: RenderPolicy::RequireRegistered),
+);
 
 $result->html;               // semantic, fully escaped fragment — embed in your template
 $result->css;                // static stylesheet text — deliver through your pipeline
@@ -158,18 +212,29 @@ renderer relies on (objects decode to `stdClass`, arrays to lists).
 absent:
 
 - `resolveBinding` — a `callable(\stdClass $node, string $port): mixed` resolving a node's port
-  value from your data. Without it, only `static-value` bindings stored on the node resolve.
+  value from your data. Return `BindingResolution::available($value)`, `::hidden()`, or
+  `::unavailable()` when null, hidden, and unavailable must remain distinct. A raw return is
+  normalized to available. Without the callback, only `static-value` bindings stored on the node
+  resolve.
 - `resolveMedia` — a `callable(\stdClass $reference): ?ResolvedMedia` resolving a media reference
   through your media service. Without it, every media block renders its unavailable fallback.
   Whatever URL you resolve is still vetted against the closed allowlist before it reaches a page.
 - `allowBlobMedia` — default `false`; only an explicit `true` lets vetted `blob:` URLs through.
 - `scopedStyles` — per-node structured style intent, keyed by node id, compiled through the closed
   scoped-CSS vocabulary (`Kumwe\Producer\Css\ScopedStylesheet::compile()`).
+- `previewMarkerMap` — an optional exact marker-to-node inventory for authoring preview. Producer
+  admits only the pinned marker grammar, emits only `data-studio-preview-marker` on its fixed
+  wrapper, and refuses missing, duplicate, extra, or mismatched markers. Public rendering passes
+  null and emits none.
+- `policy` — `Fallback` for draft/preview; `RequireRegistered` for published output. Strict policy
+  derives each node's type/version/revision from `dependencyLock` and refuses an absent,
+  ambiguous, or unregistered coordinate before returning markup.
 
-A block type without a registered renderer is not an error: the page renders a bounded, labeled
-semantic fallback (`Unsupported Studio block …`) and everything else still works. A host with its
-own block types registers additional renderers on a `BlockRendererRegistry` and passes it to the
-`CompositionRenderer` constructor.
+In draft/preview fallback policy, an unresolved block renders the bounded, labeled semantic
+fallback (`Unsupported Studio block …`) and everything else still works. Published rendering is
+different by design: the trusted host explicitly registers each exact `BlockCoordinate`, after its
+own owner, signature, definition, and integrity checks, and strict policy fails closed if any lock
+does not resolve. Renderer implementations never self-declare or widen their authority.
 
 ### Embedding with Twig
 
@@ -312,7 +377,7 @@ vocabulary, and raw HTML strings have no representation at all. The host must no
 Alignment across the three parties is exact, never floating:
 
 - **Studio → Producer:** Producer vendors the Studio contract corpus (schemas plus conformance
-  vectors) at one exact release, recorded with per-file SHA-256 digests in
+  vectors) at one exact release, recorded through the release, schema, and corpus manifests in
   [`resources/studio-contract/PIN.json`](../resources/studio-contract/PIN.json).
   `composer contract` fails when a vendored byte disagrees with a recorded digest, so the
   contract your host runs against is provably the pinned one.

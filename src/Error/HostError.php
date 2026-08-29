@@ -7,10 +7,11 @@
  * own named constructor so the schema's semantic ties hold by construction
  * and a violation is refused, never emitted:
  *
- * - `revision` travels only with `conflict`, where it is required — the
- *   host-request schema fixes that "a mismatch conflicts and the host
- *   returns the safe current revision", and the host conformance vector
- *   schema calls it "the safe current revision a conflict MUST return".
+ * - `revision` travels only with `conflict`, where it is optional. An
+ *   optimistic-concurrency conflict should return the safe current
+ *   revision; other conflicts (such as a live idempotency claim) have no
+ *   meaningful revision. This is the exact optionality of the pinned
+ *   host-error schema.
  * - `retryAfterMilliseconds` is a retry hint, so it travels only with a
  *   retryable refusal: always permitted on `rate-limited` (retryable by
  *   definition, per the host sequence vectors) and on `unavailable` only
@@ -38,8 +39,8 @@ use Kumwe\Producer\Canonical\CanonicalJson;
  * One refusal from the closed host error taxonomy, valid by construction.
  *
  * Instances exist only through the twelve named constructors, one per
- * category, so every semantic tie the schema fixes — `revision` only and
- * always on `conflict`, a retry hint only on a retryable refusal,
+ * category, so every semantic tie the schema fixes — `revision` only on
+ * `conflict`, a retry hint only on a retryable refusal,
  * `retryable` false on every deterministic category — holds before the
  * document can be serialized. Free-text matching is never needed: the
  * category string is the stable code a caller switches on.
@@ -97,7 +98,7 @@ final class HostError
      *                                                     stable id — or null.
      * @param   int|null          $retryAfterMilliseconds  A retry hint, only with a retryable
      *                                                     refusal, 0 to 86400000.
-     * @param   string|null       $revision                The safe current revision, required on
+     * @param   string|null       $revision                The safe current revision, optional on
      *                                                     conflict and forbidden elsewhere.
      *
      * @throws  \InvalidArgumentException  When any member breaks its bound
@@ -136,11 +137,13 @@ final class HostError
                 throw new \InvalidArgumentException('retryAfterMilliseconds must lie between 0 and 86400000.');
             }
         }
-        if ($category === 'conflict') {
-            if ($revision === null) {
-                throw new \InvalidArgumentException('A conflict must return the safe current revision.');
-            }
-        } elseif ($revision !== null) {
+        if (
+            ($category === 'rate-limited' && !$retryable)
+            || ($category !== 'rate-limited' && $category !== 'unavailable' && $retryable)
+        ) {
+            throw new \InvalidArgumentException('Retryability does not match the host error category.');
+        }
+        if ($category !== 'conflict' && $revision !== null) {
             throw new \InvalidArgumentException('Only a conflict carries the safe current revision.');
         }
         if ($revision !== null && !ContractGrammar::isRevision($revision)) {
@@ -240,14 +243,15 @@ final class HostError
     }
 
     /**
-     * `conflict` — an expectedRevision mismatch on a concurrency-protected
-     * operation. The safe current revision is mandatory here and travels
-     * with no other category. Retryable is fixed false: the caller must
-     * resolve against the returned revision, not repeat the request.
+     * `conflict` — the request conflicts with current host state. Supply a
+     * safe current revision for optimistic-concurrency conflicts; omit it
+     * when the conflict has no revision coordinate. No other category may
+     * carry one. Retryable is fixed false.
      *
      * @param   MessageReference  $message          The non-disclosing refusal message.
-     * @param   string            $currentRevision  The safe current revision the caller
-     *                                              resolves against without a second read.
+     * @param   string|null       $currentRevision  The safe current revision the caller
+     *                                              resolves against without a second read,
+     *                                              or null when not applicable.
      * @param   list<Diagnostic>  $diagnostics      At most 1000 structured diagnostics.
      * @param   string|null       $correlationId    A host trace identifier, or null.
      *
@@ -259,7 +263,7 @@ final class HostError
      */
     public static function conflict(
         MessageReference $message,
-        string $currentRevision,
+        ?string $currentRevision = null,
         array $diagnostics = [],
         ?string $correlationId = null,
     ): self {
@@ -439,6 +443,193 @@ final class HostError
     }
 
     /**
+     * Reconstruct an error only from exact canonical host-error bytes.
+     *
+     * This is the durable replay decode path. It rebuilds every nested
+     * value through the same public constructors used for fresh refusals,
+     * then requires byte equality with canonical serialization. Unknown,
+     * missing, mistyped, non-canonical, or semantically invalid storage is
+     * refused rather than remapped.
+     *
+     * @param   string  $bytes  Persisted canonical host-error bytes.
+     *
+     * @return  self  Reconstructed, fully proved host error.
+     *
+     * @throws  \InvalidArgumentException  When storage is malformed,
+     *                                     non-canonical, or out of contract.
+     *
+     * @since   0.2.0
+     */
+    public static function fromCanonicalBytes(string $bytes): self
+    {
+        try {
+            $document = CanonicalJson::decode($bytes);
+            if (!$document instanceof \stdClass) {
+                throw new \InvalidArgumentException('A stored host error must be an object.');
+            }
+            if (($document->contractVersion ?? null) !== self::CONTRACT_VERSION
+                || ($document->kind ?? null) !== 'host-error'
+                || !is_string($document->category ?? null)
+                || !is_bool($document->retryable ?? null)
+            ) {
+                throw new \InvalidArgumentException('A stored host error has invalid required members.');
+            }
+            $message = self::messageFromDocument($document->message ?? null);
+            $diagnostics = [];
+            if (property_exists($document, 'diagnostics')) {
+                if (!is_array($document->diagnostics) || !array_is_list($document->diagnostics)) {
+                    throw new \InvalidArgumentException('Stored host error diagnostics must be a list.');
+                }
+                foreach ($document->diagnostics as $diagnostic) {
+                    $diagnostics[] = self::diagnosticFromDocument($diagnostic);
+                }
+            }
+            $correlationId = property_exists($document, 'correlationId')
+                ? $document->correlationId
+                : null;
+            $retryAfter = property_exists($document, 'retryAfterMilliseconds')
+                ? $document->retryAfterMilliseconds
+                : null;
+            $revision = property_exists($document, 'revision') ? $document->revision : null;
+            if (($correlationId !== null && !is_string($correlationId))
+                || ($retryAfter !== null && !is_int($retryAfter))
+                || ($revision !== null && !is_string($revision))
+            ) {
+                throw new \InvalidArgumentException('A stored host error has a mistyped optional member.');
+            }
+            $error = new self(
+                $document->category,
+                $message,
+                $document->retryable,
+                $diagnostics,
+                $correlationId,
+                $retryAfter,
+                $revision,
+            );
+            if (!hash_equals($bytes, $error->toCanonicalJson())) {
+                throw new \InvalidArgumentException('A stored host error is not canonical.');
+            }
+
+            return $error;
+        } catch (\InvalidArgumentException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            throw new \InvalidArgumentException('A stored host error is corrupt.', 0, $exception);
+        }
+    }
+
+    /**
+     * Rebuild one exact message-reference document.
+     *
+     * @param   mixed  $document  Decoded candidate.
+     *
+     * @return  MessageReference  Proved message reference.
+     *
+     * @throws  \InvalidArgumentException  When the candidate is not exact.
+     *
+     * @since   0.2.0
+     */
+    private static function messageFromDocument(mixed $document): MessageReference
+    {
+        if (!$document instanceof \stdClass || !is_string($document->key ?? null)) {
+            throw new \InvalidArgumentException('A stored message reference is malformed.');
+        }
+        $fallback = property_exists($document, 'defaultMessage') ? $document->defaultMessage : null;
+        if ($fallback !== null && !is_string($fallback)) {
+            throw new \InvalidArgumentException('A stored message fallback must be text.');
+        }
+        $message = new MessageReference($document->key, $fallback);
+        if (CanonicalJson::stringify($document) !== CanonicalJson::stringify($message->toDocument())) {
+            throw new \InvalidArgumentException('A stored message reference carries an unknown member.');
+        }
+
+        return $message;
+    }
+
+    /**
+     * Rebuild one exact diagnostic document.
+     *
+     * @param   mixed  $document  Decoded candidate.
+     *
+     * @return  Diagnostic  Proved diagnostic.
+     *
+     * @throws  \InvalidArgumentException  When the candidate is not exact.
+     *
+     * @since   0.2.0
+     */
+    private static function diagnosticFromDocument(mixed $document): Diagnostic
+    {
+        if (!$document instanceof \stdClass
+            || !is_string($document->code ?? null)
+            || !is_string($document->severity ?? null)
+        ) {
+            throw new \InvalidArgumentException('A stored diagnostic is malformed.');
+        }
+        $location = property_exists($document, 'location')
+            ? self::locationFromDocument($document->location)
+            : null;
+        $parameters = [];
+        if (property_exists($document, 'parameters')) {
+            if (!$document->parameters instanceof \stdClass) {
+                throw new \InvalidArgumentException('Stored diagnostic parameters must be an object.');
+            }
+            $parameters = get_object_vars($document->parameters);
+        }
+        $remediations = property_exists($document, 'remediations') ? $document->remediations : [];
+        if (!is_array($remediations) || !array_is_list($remediations)) {
+            throw new \InvalidArgumentException('Stored diagnostic remediations must be a list.');
+        }
+        $diagnostic = new Diagnostic(
+            $document->code,
+            $document->severity,
+            self::messageFromDocument($document->message ?? null),
+            $location,
+            $parameters,
+            $remediations,
+        );
+        if (CanonicalJson::stringify($document) !== CanonicalJson::stringify($diagnostic->toDocument())) {
+            throw new \InvalidArgumentException('A stored diagnostic carries an unknown member.');
+        }
+
+        return $diagnostic;
+    }
+
+    /**
+     * Rebuild one exact diagnostic-location document.
+     *
+     * @param   mixed  $document  Decoded candidate.
+     *
+     * @return  DiagnosticLocation  Proved location.
+     *
+     * @throws  \InvalidArgumentException  When the candidate is not exact.
+     *
+     * @since   0.2.0
+     */
+    private static function locationFromDocument(mixed $document): DiagnosticLocation
+    {
+        if (!$document instanceof \stdClass) {
+            throw new \InvalidArgumentException('A stored diagnostic location must be an object.');
+        }
+        $artifactId = property_exists($document, 'artifactId') ? $document->artifactId : null;
+        $nodeId = property_exists($document, 'nodeId') ? $document->nodeId : null;
+        $fieldPath = property_exists($document, 'fieldPath') ? $document->fieldPath : null;
+        $jsonPointer = property_exists($document, 'jsonPointer') ? $document->jsonPointer : null;
+        if (($artifactId !== null && !is_string($artifactId))
+            || ($nodeId !== null && !is_string($nodeId))
+            || ($fieldPath !== null && !is_array($fieldPath))
+            || ($jsonPointer !== null && !is_string($jsonPointer))
+        ) {
+            throw new \InvalidArgumentException('A stored diagnostic location has a mistyped member.');
+        }
+        $location = new DiagnosticLocation($artifactId, $nodeId, $fieldPath, $jsonPointer);
+        if (CanonicalJson::stringify($document) !== CanonicalJson::stringify($location->toDocument())) {
+            throw new \InvalidArgumentException('A stored diagnostic location carries an unknown member.');
+        }
+
+        return $location;
+    }
+
+    /**
      * The stable category code a caller switches on.
      *
      * @return  string  One of the twelve stable categories.
@@ -512,10 +703,9 @@ final class HostError
     }
 
     /**
-     * The safe current revision, present exactly when the category is
-     * conflict.
+     * The safe current revision, present only when a conflict has one.
      *
-     * @return  string|null  The revision a conflict must return, or null.
+     * @return  string|null  The safe current revision, or null.
      *
      * @since   0.1.0
      */
