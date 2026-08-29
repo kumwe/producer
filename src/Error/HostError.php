@@ -467,7 +467,8 @@ final class HostError
             if (!$document instanceof \stdClass) {
                 throw new \InvalidArgumentException('A stored host error must be an object.');
             }
-            if (($document->contractVersion ?? null) !== self::CONTRACT_VERSION
+            if (
+                ($document->contractVersion ?? null) !== self::CONTRACT_VERSION
                 || ($document->kind ?? null) !== 'host-error'
                 || !is_string($document->category ?? null)
                 || !is_bool($document->retryable ?? null)
@@ -491,7 +492,8 @@ final class HostError
                 ? $document->retryAfterMilliseconds
                 : null;
             $revision = property_exists($document, 'revision') ? $document->revision : null;
-            if (($correlationId !== null && !is_string($correlationId))
+            if (
+                ($correlationId !== null && !is_string($correlationId))
                 || ($retryAfter !== null && !is_int($retryAfter))
                 || ($revision !== null && !is_string($revision))
             ) {
@@ -559,7 +561,8 @@ final class HostError
      */
     private static function diagnosticFromDocument(mixed $document): Diagnostic
     {
-        if (!$document instanceof \stdClass
+        if (
+            !$document instanceof \stdClass
             || !is_string($document->code ?? null)
             || !is_string($document->severity ?? null)
         ) {
@@ -574,7 +577,8 @@ final class HostError
                 throw new \InvalidArgumentException('Stored diagnostic parameters must be an object.');
             }
             foreach (get_object_vars($document->parameters) as $name => $value) {
-                if (!is_string($name)
+                if (
+                    !is_string($name)
                     || (!is_bool($value) && !is_float($value) && !is_int($value) && !is_string($value) && $value !== null)
                 ) {
                     throw new \InvalidArgumentException('A stored diagnostic parameter has an invalid value.');
@@ -628,7 +632,8 @@ final class HostError
         $nodeId = property_exists($document, 'nodeId') ? $document->nodeId : null;
         $fieldPath = property_exists($document, 'fieldPath') ? $document->fieldPath : null;
         $jsonPointer = property_exists($document, 'jsonPointer') ? $document->jsonPointer : null;
-        if (($artifactId !== null && !is_string($artifactId))
+        if (
+            ($artifactId !== null && !is_string($artifactId))
             || ($nodeId !== null && !is_string($nodeId))
             || ($fieldPath !== null && (!is_array($fieldPath) || !array_is_list($fieldPath)))
             || ($jsonPointer !== null && !is_string($jsonPointer))

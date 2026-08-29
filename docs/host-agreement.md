@@ -1,8 +1,7 @@
 # The host agreement
 
-This document records the contract between Producer and a host application, and between Producer
-and Studio. Kumwe App is the first host; every clause is written so a second host needs no new
-agreement.
+This document records the contract between Producer and any host application, and between Producer
+and Studio. Every clause is host-neutral; adopting another host needs no new agreement.
 
 ## What the host implements
 
@@ -48,7 +47,7 @@ with its own services and hands them to Producer at the boundary:
    version, and the corpus digest).
 2. Producer vendors that corpus under [`resources/studio-contract/`](../resources/studio-contract/)
    with [`PIN.json`](../resources/studio-contract/PIN.json) recording the exact source, and
-   `composer contract` fails when a vendored byte disagrees with the recorded digests.
+   `php tools/verify-contract.php` fails when a vendored byte disagrees with the recorded digests.
 3. The host pins Producer exactly (no version ranges while Studio's contract is pre-release), and
    records the Producer and Studio pins it qualified in its own release evidence.
 4. A Studio contract change reaches a host only as: Studio release → Producer re-pin (one change,

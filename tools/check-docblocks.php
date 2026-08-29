@@ -8,7 +8,7 @@
  * ending in an @since tag, and a constructor's block must name every
  * parameter, promoted properties included, with an @param line. A convention
  * without a gate is a suggestion; this is the gate, and it runs in
- * `composer check` and CI so an undocumented member fails the build.
+ * `php tools/check.php` and CI so an undocumented member fails the build.
  *
  * Dependency-free line scanner: deliberate simplicity over a full parser,
  * matching how the library is actually written (one member per declaration

@@ -43,7 +43,7 @@ jobs:
         uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2.35.5
         with:
           php-version: ${{ matrix.php }}
-          extensions: json, mbstring
+          extensions: json, mbstring, simplexml, tokenizer, xmlwriter
           coverage: none
           tools: composer:v2
 
@@ -54,12 +54,30 @@ jobs:
           composer audit --abandoned=fail
 
       - name: Run the complete quality lane
-        run: composer check
+        run: php tools/check.php
 
-      - name: Verify the authoritative no-dev package autoloader
+      - name: Prove the exact no-dev Composer archive
+        shell: bash
         run: |
-          composer install --no-interaction --no-progress --prefer-dist --no-dev --classmap-authoritative
-          php tools/autoload-smoke.php
+          set -euo pipefail
+          archive_dir="$(mktemp -d)"
+          package_dir="$(mktemp -d)"
+          composer archive --format=zip --dir="$archive_dir"
+          archives=("$archive_dir"/*.zip)
+          if [ "${#archives[@]}" -ne 1 ] || [ ! -f "${archives[0]}" ]; then
+            echo "::error::Composer did not create exactly one ZIP archive."
+            exit 1
+          fi
+          unzip -q "${archives[0]}" -d "$package_dir"
+          php tools/verify-archive.php "$package_dir"
+          composer validate --strict --working-dir="$package_dir"
+          composer install \
+            --working-dir="$package_dir" \
+            --no-interaction \
+            --no-progress \
+            --no-dev \
+            --classmap-authoritative
+          composer run smoke --working-dir="$package_dir"
 
   release:
     name: Release the recorded version

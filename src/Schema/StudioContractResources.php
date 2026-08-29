@@ -76,7 +76,8 @@ final class StudioContractResources
         $pin = self::objectDocument($root . '/PIN.json');
         $binding = $pin->release_record ?? null;
         $record = self::decodeObject($recordBytes, $recordPath);
-        if (self::sortedMemberNames($pin) !== [
+        if (
+            self::sortedMemberNames($pin) !== [
             'claimed_profiles',
             'corpus_manifest_digest',
             'files',
@@ -85,7 +86,7 @@ final class StudioContractResources
             'protocol_version',
             'release_record',
             'source',
-        ]
+            ]
             || self::sortedMemberNames($record) !== [
                 'claimedProfiles',
                 'contractVersion',
@@ -106,7 +107,8 @@ final class StudioContractResources
         }
 
         $source = $pin->source ?? null;
-        if (!$source instanceof \stdClass
+        if (
+            !$source instanceof \stdClass
             || ($source->repository ?? null) !== 'https://github.com/kumwe/studio'
             || ($source->kind ?? null) !== 'coordinated-release'
             || ($source->release ?? null) !== ($record->release ?? null)
@@ -128,7 +130,8 @@ final class StudioContractResources
             $claimedProfiles[] = $profile;
         }
         $packages = self::packageMap($packageObject);
-        if (($pin->protocol_version ?? null) !== ($record->protocolVersion ?? null)
+        if (
+            ($pin->protocol_version ?? null) !== ($record->protocolVersion ?? null)
             || ($pin->corpus_manifest_digest ?? null) !== ($record->corpusManifestDigest ?? null)
             || ($pin->claimed_profiles ?? null) !== $profiles
             || !($pin->packages ?? null) instanceof \stdClass
@@ -171,7 +174,8 @@ final class StudioContractResources
         foreach ($entries as $entry) {
             $file = $entry instanceof \stdClass ? ($entry->file ?? null) : null;
             $sha256 = $entry instanceof \stdClass ? ($entry->sha256 ?? null) : null;
-            if (!is_string($file)
+            if (
+                !is_string($file)
                 || !isset($bytes[$file])
                 || !is_string($sha256)
                 || preg_match('/^[a-f0-9]{64}$/', $sha256) !== 1
@@ -283,7 +287,8 @@ final class StudioContractResources
         $root = self::testkitRoot();
         $candidate = $root . '/' . $relative;
         $resolved = realpath($candidate);
-        if ($resolved === false
+        if (
+            $resolved === false
             || !is_file($candidate)
             || is_link($candidate)
             || $resolved !== $candidate
@@ -327,7 +332,8 @@ final class StudioContractResources
         foreach ($groups as $group) {
             $path = $group instanceof \stdClass ? ($group->path ?? null) : null;
             $entries = $group instanceof \stdClass ? ($group->files ?? null) : null;
-            if (!is_string($path)
+            if (
+                !is_string($path)
                 || !self::safeRelative($path)
                 || !is_array($entries)
                 || !array_is_list($entries)
@@ -338,7 +344,8 @@ final class StudioContractResources
                 $file = $entry instanceof \stdClass ? ($entry->file ?? null) : null;
                 $digest = $entry instanceof \stdClass ? ($entry->digest ?? null) : null;
                 $relative = is_string($file) ? $path . '/' . $file : '';
-                if (!is_string($file)
+                if (
+                    !is_string($file)
                     || !self::safeRelative($file)
                     || !is_string($digest)
                     || !self::sha256Sri($digest)
@@ -442,7 +449,8 @@ final class StudioContractResources
         }
         try {
             $before = fstat($handle);
-            if (!is_array($before)
+            if (
+                !is_array($before)
                 || !self::regularFileStat($before)
                 || !self::sameFileIdentity($pathStat, $before)
                 || $before['size'] > self::MAX_RESOURCE_BYTES
@@ -451,7 +459,8 @@ final class StudioContractResources
             }
             $bytes = stream_get_contents($handle, self::MAX_RESOURCE_BYTES + 1);
             $after = fstat($handle);
-            if (!is_string($bytes)
+            if (
+                !is_string($bytes)
                 || strlen($bytes) > self::MAX_RESOURCE_BYTES
                 || !is_array($after)
                 || !self::sameFileSnapshot($before, $after)
@@ -520,7 +529,8 @@ final class StudioContractResources
      */
     private static function safeRelative(string $relative): bool
     {
-        if ($relative === ''
+        if (
+            $relative === ''
             || strlen($relative) > 500
             || !mb_check_encoding($relative, 'UTF-8')
             || str_starts_with($relative, '/')

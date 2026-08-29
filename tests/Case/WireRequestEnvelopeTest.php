@@ -180,7 +180,7 @@ final class WireRequestEnvelopeTest extends TestCase
             'A missing context must be refused.'
         );
         $this->assertRefused(
-            '{"context":{"actor":"someone",' . substr($context, 1) . '}' ,
+            '{"context":{"actor":"someone",' . substr($context, 1) . '}',
             'invalid-request',
             'An unknown context member must be refused — an actor value is display context, never authentication.'
         );

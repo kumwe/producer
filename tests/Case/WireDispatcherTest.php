@@ -88,8 +88,7 @@ final class FakeMutationBoundary implements MutationBoundaryInterface
         ?string $scopeKey,
         ?string $intentDigest,
         callable $mutation,
-    ): MutationOutcome
-    {
+    ): MutationOutcome {
         $this->recalls++;
         $this->events[] = 'begin';
         $this->coordinates[] = [$scopeKey, $intentDigest];

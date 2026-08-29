@@ -43,7 +43,8 @@ final class StudioContractRelease
         if ($contractVersion === '' || strlen($contractVersion) > 100 || !mb_check_encoding($contractVersion, 'UTF-8')) {
             throw new \InvalidArgumentException('The Studio release contract version is malformed.');
         }
-        if (!self::semanticVersion($release)
+        if (
+            !self::semanticVersion($release)
             || !self::semanticVersion($protocolVersion)
         ) {
             throw new \InvalidArgumentException('The Studio release or protocol version is not Semantic Versioning.');
@@ -65,7 +66,8 @@ final class StudioContractRelease
             throw new \InvalidArgumentException('The Studio release must carry a named package map.');
         }
         foreach ($packages as $package => $version) {
-            if (!is_string($package)
+            if (
+                !is_string($package)
                 || preg_match('/^@kumwe\/[a-z][a-z0-9-]*$/', $package) !== 1
                 || !is_string($version)
                 || !self::semanticVersion($version)

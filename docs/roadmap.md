@@ -1,7 +1,7 @@
 # Producer roadmap
 
 Forward work only; delivered work moves to [`CHANGELOG.md`](../CHANGELOG.md) in the change that
-completes it. A step is claimed only when `composer check` proves it on a clean clone.
+completes it. A step is claimed only when `php tools/check.php` proves it on a clean clone.
 
 ## Position
 
@@ -19,7 +19,7 @@ claim only the delivered surfaces above; P-10 and P-11 remain open.
 
 | # | Step | Proof |
 | --- | --- | --- |
-| P-1 | Vendored, digest-verified Studio contract (schemas + conformance corpus) with `PIN.json` | `composer contract` |
+| P-1 | Vendored, digest-verified Studio contract (schemas + conformance corpus) with `PIN.json` | `php tools/verify-contract.php` |
 | P-2 | Canonical JSON encoder byte-identical to Studio's serialization | replay of the canonical vector corpus |
 | P-3 | Wire layer: envelope validation, exact released twenty-four-operation registry, strict responder, twelve-category error taxonomy, host-atomic mutation/replay boundary | wire suite + released host fixtures |
 | P-4 | Renderer engine: exact published coordinates, closed preview markers, tri-state bindings, escaping, draft fallback | renderer unit suite |

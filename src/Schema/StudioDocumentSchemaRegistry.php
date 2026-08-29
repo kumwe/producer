@@ -16,7 +16,7 @@ use Kumwe\Producer\Canonical\CanonicalEncodingException;
  * interpreter grammar, compiles the reviewed lexical patterns, and resolves
  * every local or cross-document reference without network access. Only the
  * published document kinds can be validated. Callers cannot inject roots,
- * references, patterns, custom directories or compatibility aliases.
+ * references, patterns, custom directories or alternate schema paths.
  *
  * The contributed-property profile remains a separate trust boundary:
  * {@see SchemaPropertyProfile::admit()} continues to admit only its smaller,
@@ -516,7 +516,8 @@ final class StudioDocumentSchemaRegistry
         $cost = 2;
         for ($index = 0; $index < $length; $index++) {
             $byte = ord($value[$index]);
-            if ($byte === 0x22
+            if (
+                $byte === 0x22
                 || $byte === 0x5c
                 || $byte === 0x08
                 || $byte === 0x09
@@ -623,7 +624,8 @@ final class StudioDocumentSchemaRegistry
         $manifest = self::decodeObject($manifestBytes, $manifestPath);
         $epoch = $manifest->epoch ?? null;
         $entries = $manifest->schemas ?? null;
-        if (($manifest->kind ?? null) !== 'schema-manifest'
+        if (
+            ($manifest->kind ?? null) !== 'schema-manifest'
             || !is_string($epoch)
             || !str_ends_with($epoch, '/')
             || !is_array($entries)
@@ -640,7 +642,8 @@ final class StudioDocumentSchemaRegistry
             $file = $entry instanceof \stdClass ? ($entry->file ?? null) : null;
             $digest = $entry instanceof \stdClass ? ($entry->digest ?? null) : null;
             $id = $entry instanceof \stdClass ? ($entry->id ?? null) : null;
-            if (!is_string($file)
+            if (
+                !is_string($file)
                 || preg_match('/^[a-z][a-z0-9-]*\.schema\.json$/', $file) !== 1
                 || !is_string($digest)
                 || !self::sha256Sri($digest)
@@ -656,7 +659,8 @@ final class StudioDocumentSchemaRegistry
 
             $path = $schemaDirectory . '/' . $file;
             $resolved = realpath($path);
-            if ($resolved === false
+            if (
+                $resolved === false
                 || !is_file($path)
                 || is_link($path)
                 || $resolved !== $path
@@ -715,7 +719,11 @@ final class StudioDocumentSchemaRegistry
     ): void {
         $seen = new \SplObjectStorage();
         $nodes = 0;
-        $walkSchema = function (mixed $value, string $pointer, int $depth) use (
+        $walkSchema = function (
+            mixed $value,
+            string $pointer,
+            int $depth
+        ) use (
             &$walkSchema,
             &$pointers,
             &$sites,
@@ -763,7 +771,8 @@ final class StudioDocumentSchemaRegistry
                         }
                         break;
                     case '$ref':
-                        if (!is_string($operand)
+                        if (
+                            !is_string($operand)
                             || !mb_check_encoding($operand, 'UTF-8')
                             || mb_strlen($operand, 'UTF-8') > self::MAX_REFERENCE_LENGTH
                         ) {
@@ -952,7 +961,8 @@ final class StudioDocumentSchemaRegistry
      */
     private static function compilePattern(mixed $operand, string $location): string
     {
-        if (!is_string($operand)
+        if (
+            !is_string($operand)
             || !mb_check_encoding($operand, 'UTF-8')
             || mb_strlen($operand, 'UTF-8') > self::MAX_PATTERN_LENGTH
         ) {
@@ -1016,7 +1026,8 @@ final class StudioDocumentSchemaRegistry
         } elseif (preg_match('/^[A-Za-z][A-Za-z0-9+.-]*:/', $uriPart) === 1) {
             $targetUri = $uriPart;
         } else {
-            if (str_starts_with($uriPart, '/')
+            if (
+                str_starts_with($uriPart, '/')
                 || str_contains($uriPart, '\\')
                 || preg_match('~(?:^|/)\.\.?(?:/|$)~', $uriPart) === 1
             ) {
@@ -1097,7 +1108,8 @@ final class StudioDocumentSchemaRegistry
         }
         try {
             $before = fstat($handle);
-            if (!is_array($before)
+            if (
+                !is_array($before)
                 || !self::regularFileStat($before)
                 || !self::sameFileIdentity($pathStat, $before)
                 || $before['size'] > self::MAX_DOCUMENT_BYTES
@@ -1106,7 +1118,8 @@ final class StudioDocumentSchemaRegistry
             }
             $bytes = stream_get_contents($handle, self::MAX_DOCUMENT_BYTES + 1);
             $after = fstat($handle);
-            if (!is_string($bytes)
+            if (
+                !is_string($bytes)
                 || strlen($bytes) > self::MAX_DOCUMENT_BYTES
                 || !is_array($after)
                 || !self::sameFileSnapshot($before, $after)
@@ -1259,7 +1272,11 @@ final class StudioDocumentSchemaRegistry
         \SplObjectStorage $active
     ): bool {
         $valid = true;
-        $fail = function (string $keyword, string $message, ?string $at = null) use (
+        $fail = function (
+            string $keyword,
+            string $message,
+            ?string $at = null
+        ) use (
             &$valid,
             &$errors,
             $path
@@ -1401,7 +1418,8 @@ final class StudioDocumentSchemaRegistry
         }
         if (property_exists($schema, 'if')) {
             $branch = $speculate($schema->if) ? ($schema->then ?? null) : ($schema->else ?? null);
-            if ($branch !== null
+            if (
+                $branch !== null
                 && !$this->subschema(self::asSubschema($branch), $instance, $path, $errors, $active)
             ) {
                 $fail('if', 'must match the conditional schema');
@@ -1474,7 +1492,8 @@ final class StudioDocumentSchemaRegistry
             $fail('exclusiveMaximum', 'must be < ' . self::encodeNumber($exclusiveMaximum));
         }
         $multipleOf = $schema->multipleOf ?? null;
-        if ((is_int($multipleOf) || is_float($multipleOf))
+        if (
+            (is_int($multipleOf) || is_float($multipleOf))
             && !self::isCanonicalDecimalMultiple($instance, $multipleOf)
         ) {
             $fail('multipleOf', 'must be multiple of ' . self::encodeNumber($multipleOf));
@@ -1502,13 +1521,15 @@ final class StudioDocumentSchemaRegistry
         $valid = true;
         $child = function (mixed $subschema, int $index) use (&$valid, $instance, $path, &$errors): void {
             $fresh = new \SplObjectStorage();
-            if (!$this->subschema(
-                self::asSubschema($subschema),
-                $instance[$index],
-                $path . '/' . $index,
-                $errors,
-                $fresh
-            )) {
+            if (
+                !$this->subschema(
+                    self::asSubschema($subschema),
+                    $instance[$index],
+                    $path . '/' . $index,
+                    $errors,
+                    $fresh
+                )
+            ) {
                 $valid = false;
             }
         };
@@ -1584,13 +1605,15 @@ final class StudioDocumentSchemaRegistry
                     continue;
                 }
                 $fresh = new \SplObjectStorage();
-                if (!$this->subschema(
-                    self::asSubschema($properties->{$name}),
-                    $instance->{$name},
-                    $path . '/' . self::escapeToken($name),
-                    $errors,
-                    $fresh
-                )) {
+                if (
+                    !$this->subschema(
+                        self::asSubschema($properties->{$name}),
+                        $instance->{$name},
+                        $path . '/' . self::escapeToken($name),
+                        $errors,
+                        $fresh
+                    )
+                ) {
                     $valid = false;
                 }
             }
@@ -1615,13 +1638,15 @@ final class StudioDocumentSchemaRegistry
                     $fail('additionalProperties', 'must NOT have additional properties');
                 } elseif ($additional !== true) {
                     $fresh = new \SplObjectStorage();
-                    if (!$this->subschema(
-                        self::asSubschema($additional),
-                        $instance->{$name},
-                        $path . '/' . self::escapeToken($name),
-                        $errors,
-                        $fresh
-                    )) {
+                    if (
+                        !$this->subschema(
+                            self::asSubschema($additional),
+                            $instance->{$name},
+                            $path . '/' . self::escapeToken($name),
+                            $errors,
+                            $fresh
+                        )
+                    ) {
                         $valid = false;
                     }
                 }
@@ -1632,13 +1657,15 @@ final class StudioDocumentSchemaRegistry
             foreach ($memberNames as $name) {
                 $scratch = [];
                 $fresh = new \SplObjectStorage();
-                if (!$this->subschema(
-                    self::asSubschema($schema->propertyNames),
-                    $name,
-                    $path,
-                    $scratch,
-                    $fresh
-                )) {
+                if (
+                    !$this->subschema(
+                        self::asSubschema($schema->propertyNames),
+                        $name,
+                        $path,
+                        $scratch,
+                        $fresh
+                    )
+                ) {
                     $fail('propertyNames', sprintf("property name '%s' is invalid", $name));
                 }
             }

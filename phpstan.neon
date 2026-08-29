@@ -3,7 +3,9 @@ parameters:
   phpVersion: 80100
   paths:
     - src
-    - tools/autoload-smoke.php
+    - smoke.php
+    - tools/check.php
+    - tools/verify-archive.php
     - tools/verify-api.php
     - tests/TestCase.php
     - tests/Case/PublicApiManifestTest.php

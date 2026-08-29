@@ -45,13 +45,15 @@ foreach ($files as $path) {
     $segments = explode('/', $pathPart);
     $fileName = array_pop($segments);
     $expectedNamespace = 'Kumwe\\Producer' . ($segments === [] ? '' : '\\' . implode('\\', $segments));
-    if (preg_match('/^namespace\s+([^;]+);/m', $code, $namespaceMatch) !== 1
+    if (
+        preg_match('/^namespace\s+([^;]+);/m', $code, $namespaceMatch) !== 1
         || trim($namespaceMatch[1]) !== $expectedNamespace
     ) {
         $errors[] = $relative . ' does not match the Producer PSR-4 namespace.';
         continue;
     }
-    if (preg_match('/^(?:final\s+|abstract\s+|readonly\s+)*(?:class|interface|enum)\s+(\w+)/m', $code, $typeMatch) !== 1
+    if (
+        preg_match('/^(?:final\s+|abstract\s+|readonly\s+)*(?:class|interface|enum)\s+(\w+)/m', $code, $typeMatch) !== 1
         || $typeMatch[1] !== $fileName
     ) {
         $errors[] = $relative . ' must declare the public type named by its file.';

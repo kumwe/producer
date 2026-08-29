@@ -6,7 +6,7 @@
  * Producer computes optional replay coordinates; the host owns the
  * transaction, trusted scope, mutation storage, audit, and protected
  * outcome persistence. All mutations cross this boundary so an unkeyed
- * request cannot accidentally bypass the App's existing transaction and
+ * request cannot accidentally bypass the host's existing transaction and
  * audit guarantees.
  *
  * @since 0.2.0

@@ -6,7 +6,7 @@
  * The release record is byte-identical at the package, protocol, and
  * testkit boundaries. Studio's signed-off schema and corpus manifests
  * define every admitted file and digest; PIN.json binds those manifests
- * and the release metadata to the coordinate Kumwe App consumes.
+ * and the release metadata to the host-neutral coordinate Producer consumes.
  *
  * @since 0.2.0
  */
@@ -126,13 +126,15 @@ foreach ([$protocolReleasePath, $testkitReleasePath] as $copy) {
 
 $releaseDigest = hash('sha256', $releaseBytes);
 $releasePin = is_array($pin['release_record'] ?? null) ? $pin['release_record'] : [];
-if (($pin['source']['repository'] ?? null) !== 'https://github.com/kumwe/studio'
+if (
+    ($pin['source']['repository'] ?? null) !== 'https://github.com/kumwe/studio'
     || ($pin['source']['kind'] ?? null) !== 'coordinated-release'
     || ($pin['source']['release'] ?? null) !== ($release['release'] ?? null)
 ) {
     $errors[] = 'PIN.json does not name the coordinated Studio release record.';
 }
-if (($releasePin['release'] ?? null) !== ($release['release'] ?? null)
+if (
+    ($releasePin['release'] ?? null) !== ($release['release'] ?? null)
     || ($releasePin['file'] ?? null) !== 'studio-release.json'
     || ($releasePin['sha256'] ?? null) !== $releaseDigest
 ) {
@@ -154,7 +156,8 @@ if (($pin['packages'] ?? null) !== ($release['packages'] ?? null)) {
 $directFiles = is_array($pin['files'] ?? null) ? $pin['files'] : [];
 $directSeen = [];
 foreach ($directFiles as $entry) {
-    if (!is_array($entry)
+    if (
+        !is_array($entry)
         || !is_string($entry['file'] ?? null)
         || !is_string($entry['sha256'] ?? null)
         || !safeRelative($entry['file'])
@@ -187,13 +190,15 @@ if ($actualDirect !== $requiredDirect) {
     $errors[] = 'PIN.json must bind exactly the release records and both released manifests.';
 }
 
-if (($schemaManifest['kind'] ?? null) !== 'schema-manifest'
+if (
+    ($schemaManifest['kind'] ?? null) !== 'schema-manifest'
     || !is_array($schemaManifest['schemas'] ?? null)
 ) {
     $errors[] = 'The protocol schema manifest is malformed.';
 } else {
     foreach ($schemaManifest['schemas'] as $entry) {
-        if (!is_array($entry)
+        if (
+            !is_array($entry)
             || !is_string($entry['file'] ?? null)
             || !is_string($entry['digest'] ?? null)
             || !safeRelative($entry['file'])
@@ -215,13 +220,15 @@ if (($schemaManifest['kind'] ?? null) !== 'schema-manifest'
     }
 }
 
-if (($corpusManifest['contractVersion'] ?? null) !== ($release['contractVersion'] ?? null)
+if (
+    ($corpusManifest['contractVersion'] ?? null) !== ($release['contractVersion'] ?? null)
     || !is_array($corpusManifest['groups'] ?? null)
 ) {
     $errors[] = 'The Studio testkit corpus manifest is malformed.';
 } else {
     foreach ($corpusManifest['groups'] as $group) {
-        if (!is_array($group)
+        if (
+            !is_array($group)
             || !is_string($group['path'] ?? null)
             || !safeRelative($group['path'])
             || !is_array($group['files'] ?? null)
@@ -230,7 +237,8 @@ if (($corpusManifest['contractVersion'] ?? null) !== ($release['contractVersion'
             continue;
         }
         foreach ($group['files'] as $entry) {
-            if (!is_array($entry)
+            if (
+                !is_array($entry)
                 || !is_string($entry['file'] ?? null)
                 || !is_string($entry['digest'] ?? null)
                 || !safeRelative($entry['file'])
