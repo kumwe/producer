@@ -394,6 +394,14 @@ final class BlockTypes
      */
     public static function all(): array
     {
-        return array_values((new \ReflectionClass(self::class))->getConstants());
+        $types = [];
+        foreach ((new \ReflectionClass(self::class))->getConstants() as $value) {
+            if (!is_string($value)) {
+                throw new \LogicException('The core block catalog may contain only string identifiers.');
+            }
+            $types[] = $value;
+        }
+
+        return $types;
     }
 }

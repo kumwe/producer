@@ -64,8 +64,12 @@ final class ProductionValues
      * magnitude at most 1e15) per label, and an optional bounded title.
      *
      * @param   mixed  $value  The decoded chart spec candidate.
-     * @return  \stdClass  {type, labels, datasets: list of {label, values},
-     *     title?}.
+     * @return  \stdClass&object{
+     *     type: string,
+     *     labels: list<string>,
+     *     datasets: list<object{label: string, values: list<int|float>}>,
+     *     title?: string
+     * }  Canonical chart spec.
      * @throws  RenderException  On an unknown member, a type outside the
      *     closed vocabulary, or any bound exceeded.
      * @since   0.1.0
@@ -123,7 +127,8 @@ final class ProductionValues
      * bounded caption. Cells are strings only — no markup, no nesting.
      *
      * @param   mixed  $value  The decoded table document candidate.
-     * @return  \stdClass  {caption?, columns, rows}.
+     * @return  \stdClass&object{caption?: string, columns: list<string>, rows: list<list<string>>}
+     *     Canonical table document.
      * @throws  RenderException  On an unknown member, a ragged row, or any
      *     bound exceeded.
      * @since   0.1.0
@@ -165,7 +170,7 @@ final class ProductionValues
      * currency must be an uppercase three-letter code.
      *
      * @param   mixed  $value  The decoded money value candidate.
-     * @return  \stdClass  {amount, currency}.
+     * @return  \stdClass&object{amount: string, currency: string}  Canonical money value.
      * @throws  RenderException  On an unknown member or a value outside
      *     either closed grammar.
      * @since   0.1.0
@@ -194,7 +199,16 @@ final class ProductionValues
      * declared dimensions.
      *
      * @param   mixed  $value  The decoded drawing document candidate.
-     * @return  \stdClass  {alt, height, strokes, width}.
+     * @return  \stdClass&object{
+     *     alt: string,
+     *     height: int,
+     *     strokes: list<object{
+     *         color: string,
+     *         points: list<object{x: int|float, y: int|float}>,
+     *         width: int|float
+     *     }>,
+     *     width: int
+     * }  Canonical drawing document.
      * @throws  RenderException  On an unknown member, an out-of-bounds
      *     coordinate, or any bound exceeded.
      * @since   0.1.0

@@ -15,6 +15,22 @@ namespace Kumwe\Producer\Render;
  * document that fails the grammar is refused, which makes the owning block
  * fall back to escaped plain text — stored markup is never evaluated.
  *
+ * @phpstan-type RichMark \stdClass&object{type: string, attrs?: \stdClass}
+ * @phpstan-type RichNode \stdClass&object{
+ *     type: string,
+ *     attrs?: \stdClass,
+ *     content?: list<\stdClass>,
+ *     marks?: list<\stdClass>,
+ *     text?: string
+ * }
+ * @phpstan-type RichDocument \stdClass&object{type: string, content: list<RichNode>}
+ * @phpstan-type ChecklistTree \stdClass&object{items: list<\stdClass>}
+ * @phpstan-type ChecklistEntry \stdClass&object{
+ *     children: ChecklistTree,
+ *     level: int,
+ *     node: RichNode|null
+ * }
+ *
  * @since   0.1.0
  */
 final class RichText
@@ -140,7 +156,7 @@ final class RichText
      * attributes all refuse rather than being dropped.
      *
      * @param   mixed  $value  The decoded document candidate.
-     * @return  \stdClass  The normalized document, safe for
+     * @return  RichDocument  The normalized document, safe for
      *     {@see self::render()} and {@see self::project()}.
      * @throws  RenderException  On any grammar violation or exceeded
      *     bound; the message carries the JSON-path of the refusal.
@@ -157,7 +173,10 @@ final class RichText
             $node->content = [];
         }
 
-        return $node;
+        return (object) [
+            'content' => self::nodeContent($node),
+            'type' => $node->type,
+        ];
     }
 
     /**
@@ -165,7 +184,7 @@ final class RichText
      * HTML: every text value escaped, tones and levels clamped to their
      * closed vocabularies, identical bytes for an identical document.
      *
-     * @param   \stdClass  $document  A document validated by
+     * @param   RichDocument  $document  A document validated by
      *     {@see self::parse()}; unvalidated input has no guarantees here.
      * @return  string  The document's escaped semantic markup.
      * @since   0.1.0
@@ -173,7 +192,7 @@ final class RichText
     public static function render(\stdClass $document): string
     {
         $out = '';
-        foreach ($document->content ?? [] as $node) {
+        foreach ($document->content as $node) {
             $out .= self::renderNode($node);
         }
 
@@ -185,7 +204,7 @@ final class RichText
      * order, each with code-point text offsets, maximal mark spans, and
      * inline embeds — the shape the rich-text conformance corpus fixes.
      *
-     * @param   \stdClass  $document  A document validated by
+     * @param   RichDocument  $document  A document validated by
      *     {@see self::parse()}.
      * @return  list<\stdClass>  One projection per leaf block, in document
      *     order.
@@ -196,7 +215,7 @@ final class RichText
     public static function project(\stdClass $document): array
     {
         $projections = [];
-        foreach ($document->content ?? [] as $block) {
+        foreach ($document->content as $block) {
             self::collectProjections($block, $projections);
         }
 
@@ -208,7 +227,7 @@ final class RichText
      * container recurses into its children, and code blocks and rules
      * project their fixed shapes.
      *
-     * @param   \stdClass        $node         The parsed block node.
+     * @param   RichNode          $node         The parsed block node.
      * @param   list<\stdClass>  $projections  The projection list being
      *     built, appended in document order.
      * @throws  RenderException  When the node type has no projection.
@@ -245,7 +264,7 @@ final class RichText
             case 'orderedList':
             case 'table':
             case 'tableRow':
-                foreach ($node->content ?? [] as $child) {
+                foreach (self::nodeContent($node) as $child) {
                     self::collectProjections($child, $projections);
                 }
 
@@ -261,7 +280,7 @@ final class RichText
      * same mark set merge), and non-text inlines as embeds at their
      * offset.
      *
-     * @param   \stdClass  $node  The parsed leaf block node.
+     * @param   RichNode  $node  The parsed leaf block node.
      * @return  \stdClass  {embeds, spans, text, type}.
      * @since   0.1.0
      */
@@ -271,12 +290,12 @@ final class RichText
         $spans = [];
         $text = '';
         $offset = 0;
-        foreach ($node->content ?? [] as $inline) {
-            if (($inline->type ?? '') === 'text') {
+        foreach (self::nodeContent($node) as $inline) {
+            if ($inline->type === 'text') {
                 $value = Properties::stringValue($inline->text ?? null);
                 $length = mb_strlen($value, 'UTF-8');
                 $marks = [];
-                foreach ($inline->marks ?? [] as $mark) {
+                foreach (self::nodeMarks($inline) as $mark) {
                     $marks[] = $mark->type;
                 }
                 sort($marks, SORT_STRING);
@@ -303,34 +322,35 @@ final class RichText
      * children first; a type without a shape here renders as the empty
      * string rather than failing the document.
      *
-     * @param   \stdClass  $node  The parsed node.
+     * @param   RichNode  $node  The parsed node.
      * @return  string  The node's escaped markup.
      * @since   0.1.0
      */
     private static function renderNode(\stdClass $node): string
     {
         $children = '';
-        foreach ($node->content ?? [] as $child) {
+        foreach (self::nodeContent($node) as $child) {
             $children .= self::renderNode($child);
         }
-        switch ($node->type ?? '') {
+        $attributes = self::nodeAttributes($node);
+        switch ($node->type) {
             case 'doc':
                 return $children;
             case 'paragraph':
                 return '<p>' . $children . '</p>';
             case 'heading':
-                $level = self::headingLevel($node->attrs->level ?? null);
+                $level = self::headingLevel($attributes->level ?? null);
 
                 return "<h{$level}>" . $children . "</h{$level}>";
             case 'blockquote':
                 return '<blockquote>' . $children . '</blockquote>';
             case 'callout':
                 return '<aside data-studio-rich-text-callout data-studio-tone="'
-                    . self::calloutTone($node->attrs->tone ?? null) . '">' . $children . '</aside>';
+                    . self::calloutTone($attributes->tone ?? null) . '">' . $children . '</aside>';
             case 'bulletList':
                 return '<ul>' . $children . '</ul>';
             case 'orderedList':
-                $start = $node->attrs->start ?? null;
+                $start = $attributes->start ?? null;
                 $attribute = is_int($start) || is_float($start)
                     ? ' start="' . SafeMarkup::number($start) . '"'
                     : '';
@@ -341,7 +361,7 @@ final class RichText
             case 'checklist':
                 return self::renderChecklist($node);
             case 'checklistItem':
-                return self::renderChecklistItem($node, self::checklistLevel($node->attrs->level ?? null), []);
+                return self::renderChecklistItem($node, self::checklistLevel($attributes->level ?? null), []);
             case 'table':
                 return self::renderTable($node);
             case 'tableRow':
@@ -350,7 +370,7 @@ final class RichText
                 return '<td>' . $children . '</td>';
             case 'codeBlock':
                 return '<pre><code data-language="'
-                    . SafeMarkup::escapeAttribute(Properties::stringProperty($node->attrs->language ?? null, 'text'))
+                    . SafeMarkup::escapeAttribute(Properties::stringProperty($attributes->language ?? null, 'text'))
                     . '">' . SafeMarkup::escapeHtml(Properties::stringValue($node->text ?? null)) . '</code></pre>';
             case 'horizontalRule':
                 return '<hr>';
@@ -359,7 +379,7 @@ final class RichText
             case 'text':
                 return self::applyMarks(
                     SafeMarkup::escapeHtml(Properties::stringValue($node->text ?? null)),
-                    is_array($node->marks ?? null) ? $node->marks : []
+                    self::nodeMarks($node)
                 );
             default:
                 return '';
@@ -372,7 +392,7 @@ final class RichText
      * outermost — so the same mark set always renders the same bytes.
      *
      * @param   string           $value  The escaped text to wrap.
-     * @param   list<\stdClass>  $marks  The node's parsed marks.
+     * @param   list<RichMark>  $marks  The node's parsed marks.
      * @return  string  The wrapped markup.
      * @since   0.1.0
      */
@@ -391,7 +411,8 @@ final class RichText
                 continue;
             }
             if ($type === 'highlight') {
-                $current = '<mark data-studio-tone="' . self::highlightTone($mark->attrs->tone ?? null) . '">'
+                $attributes = self::markAttributes($mark);
+                $current = '<mark data-studio-tone="' . self::highlightTone($attributes->tone ?? null) . '">'
                     . $current . '</mark>';
                 continue;
             }
@@ -412,18 +433,18 @@ final class RichText
      * becomes a thead of scoped column headers, everything else renders as
      * body rows.
      *
-     * @param   \stdClass  $node  The parsed table node.
+     * @param   RichNode  $node  The parsed table node.
      * @return  string  The table's escaped markup.
      * @since   0.1.0
      */
     private static function renderTable(\stdClass $node): string
     {
-        $rows = is_array($node->content ?? null) ? $node->content : [];
+        $rows = self::nodeContent($node);
         $renderRow = static function (\stdClass $row, bool $header): string {
             $cells = '';
-            foreach ($row->content ?? [] as $cell) {
+            foreach (self::nodeContent($row) as $cell) {
                 $content = '';
-                foreach ($cell->content ?? [] as $child) {
+                foreach (self::nodeContent($cell) as $child) {
                     $content .= self::renderNode($child);
                 }
                 $cells .= $header ? '<th scope="col">' . $content . '</th>' : '<td>' . $content . '</td>';
@@ -431,7 +452,7 @@ final class RichText
 
             return '<tr>' . $cells . '</tr>';
         };
-        if (($node->attrs->header ?? null) === true) {
+        if ((self::nodeAttributes($node)->header ?? null) === true) {
             $heading = $rows[0] ?? null;
             $body = array_slice($rows, 1);
             $bodyMarkup = '';
@@ -457,47 +478,40 @@ final class RichText
      * level-attributed items imply — a level skipped in the input gets a
      * non-semantic bridge item so the emitted list nesting stays valid.
      *
-     * @param   \stdClass  $node  The parsed checklist node.
+     * @param   RichNode  $node  The parsed checklist node.
      * @return  string  The checklist's escaped markup.
      * @since   0.1.0
      */
     private static function renderChecklist(\stdClass $node): string
     {
-        $root = (object) ['items' => []];
+        $root = self::newChecklistTree();
         $levels = [$root];
-        foreach ($node->content ?? [] as $item) {
-            $level = self::checklistLevel($item->attrs->level ?? null);
+        foreach (self::nodeContent($node) as $item) {
+            $level = self::checklistLevel(self::nodeAttributes($item)->level ?? null);
             $levels = array_slice($levels, 0, min($level + 1, count($levels)));
             while (count($levels) <= $level) {
                 $parentItems = $levels[count($levels) - 1];
-                $parent = $parentItems->items === [] ? null : $parentItems->items[count($parentItems->items) - 1];
+                $parent = self::lastChecklistEntry($parentItems);
                 if ($parent === null) {
-                    $parent = (object) [
-                        'children' => (object) ['items' => []],
-                        'level' => min(4, count($levels) - 1),
-                        'node' => null,
-                    ];
-                    $parentItems->items[] = $parent;
+                    $parent = self::newChecklistEntry(null, min(4, count($levels) - 1));
+                    self::appendChecklistEntry($parentItems, $parent);
                 }
                 $levels[] = $parent->children;
             }
             if (isset($levels[$level])) {
-                $levels[$level]->items[] = (object) [
-                    'children' => (object) ['items' => []],
-                    'level' => $level,
-                    'node' => $item,
-                ];
+                self::appendChecklistEntry($levels[$level], self::newChecklistEntry($item, $level));
             }
         }
 
-        return '<ul data-studio-rich-text-checklist>' . self::renderChecklistItems($root->items) . '</ul>';
+        return '<ul data-studio-rich-text-checklist>'
+            . self::renderChecklistItems(self::checklistEntries($root)) . '</ul>';
     }
 
     /**
      * Render one level of the rebuilt checklist tree, bridge items
      * included, each nesting its own children.
      *
-     * @param   list<\stdClass>  $items  Checklist tree items at one level.
+     * @param   list<ChecklistEntry>  $items  Checklist tree items at one level.
      * @return  string  The level's escaped markup.
      * @since   0.1.0
      */
@@ -505,13 +519,14 @@ final class RichText
     {
         $out = '';
         foreach ($items as $item) {
-            $children = $item->children->items === []
+            $childEntries = self::checklistEntries($item->children);
+            $children = $childEntries === []
                 ? ''
                 : '<ul data-studio-rich-text-checklist-level="' . ($item->level + 1) . '">'
-                    . self::renderChecklistItems($item->children->items) . '</ul>';
+                    . self::renderChecklistItems($childEntries) . '</ul>';
             $out .= $item->node === null
                 ? '<li role="none" data-studio-rich-text-checklist-bridge>' . $children . '</li>'
-                : self::renderChecklistItem($item->node, $item->level, $item->children->items);
+                : self::renderChecklistItem($item->node, $item->level, $childEntries);
         }
 
         return $out;
@@ -522,18 +537,18 @@ final class RichText
      * content and nested sub-list; an item with no text gets a fixed
      * aria-label so it never renders unnamed.
      *
-     * @param   \stdClass        $node      The parsed checklist item.
+     * @param   RichNode          $node      The parsed checklist item.
      * @param   int              $level     The item's nesting level, 0-4.
-     * @param   list<\stdClass>  $children  Checklist tree items nested
+     * @param   list<ChecklistEntry>  $children  Checklist tree items nested
      *     under this item.
      * @return  string  The item's escaped markup.
      * @since   0.1.0
      */
     private static function renderChecklistItem(\stdClass $node, int $level, array $children): string
     {
-        $checked = ($node->attrs->checked ?? null) === true;
+        $checked = (self::nodeAttributes($node)->checked ?? null) === true;
         $content = '';
-        foreach ($node->content ?? [] as $child) {
+        foreach (self::nodeContent($node) as $child) {
             $content .= self::renderNode($child);
         }
         $fallbackLabel = self::nodeHasText($node) ? '' : ' aria-label="Checklist item"';
@@ -552,14 +567,14 @@ final class RichText
      * True when the node or any descendant carries non-empty text — the
      * test deciding whether a checklist item needs its fallback label.
      *
-     * @param   \stdClass  $node  The parsed node.
+     * @param   RichNode  $node  The parsed node.
      * @return  bool  Whether any non-empty text exists beneath the node.
      * @since   0.1.0
      */
     private static function nodeHasText(\stdClass $node): bool
     {
-        foreach ($node->content ?? [] as $child) {
-            if (($child->type ?? null) === 'text' && Properties::stringValue($child->text ?? null) !== '') {
+        foreach (self::nodeContent($node) as $child) {
+            if ($child->type === 'text' && Properties::stringValue($child->text ?? null) !== '') {
                 return true;
             }
             if (self::nodeHasText($child)) {
@@ -647,6 +662,285 @@ final class RichText
     }
 
     /**
+     * Admit one normalized rich-text node for statically modelled traversal.
+     *
+     * @param   mixed  $value  Parsed node candidate.
+     * @return  RichNode  Node carrying its required string type.
+     * @throws  RenderException  When an internal caller supplies no node.
+     * @since   0.2.0
+     */
+    private static function richNode(mixed $value): \stdClass
+    {
+        self::assertRichNode($value);
+
+        return $value;
+    }
+
+    /**
+     * Prove the minimum normalized shape shared by every parsed node.
+     *
+     * @param   mixed  $value  Parsed node candidate.
+     * @throws  RenderException  When the internal node shape is malformed.
+     *
+     * @phpstan-assert RichNode $value
+     *
+     * @since   0.2.0
+     */
+    private static function assertRichNode(mixed $value): void
+    {
+        if (!$value instanceof \stdClass || !is_string($value->type ?? null)) {
+            throw new RenderException('Parsed rich-text content contains no typed node.');
+        }
+        if (property_exists($value, 'attrs') && !$value->attrs instanceof \stdClass) {
+            throw new RenderException('Parsed rich-text node attributes are malformed.');
+        }
+        if (property_exists($value, 'content')
+            && (!is_array($value->content) || !array_is_list($value->content))
+        ) {
+            throw new RenderException('Parsed rich-text node content is not a list.');
+        }
+        if (property_exists($value, 'marks')
+            && (!is_array($value->marks) || !array_is_list($value->marks))
+        ) {
+            throw new RenderException('Parsed rich-text marks are not a list.');
+        }
+        if (property_exists($value, 'text') && !is_string($value->text)) {
+            throw new RenderException('Parsed rich-text node text is malformed.');
+        }
+    }
+
+    /**
+     * Read and prove the parsed children of one node.
+     *
+     * @param   \stdClass  $node  Parsed parent node.
+     * @return  list<RichNode>  Typed children, or an empty list when absent.
+     * @throws  RenderException  When internal parsed content is malformed.
+     * @since   0.2.0
+     */
+    private static function nodeContent(\stdClass $node): array
+    {
+        $content = $node->content ?? null;
+        if ($content === null) {
+            return [];
+        }
+        if (!is_array($content) || !array_is_list($content)) {
+            throw new RenderException('Parsed rich-text node content is not a list.');
+        }
+        $nodes = [];
+        foreach ($content as $child) {
+            $nodes[] = self::richNode($child);
+        }
+
+        return $nodes;
+    }
+
+    /**
+     * Read and prove the parsed marks of one text node.
+     *
+     * @param   \stdClass  $node  Parsed text node.
+     * @return  list<RichMark>  Typed marks, or an empty list when absent.
+     * @throws  RenderException  When internal parsed marks are malformed.
+     * @since   0.2.0
+     */
+    private static function nodeMarks(\stdClass $node): array
+    {
+        $marks = $node->marks ?? null;
+        if ($marks === null) {
+            return [];
+        }
+        if (!is_array($marks) || !array_is_list($marks)) {
+            throw new RenderException('Parsed rich-text marks are not a list.');
+        }
+        $normalized = [];
+        foreach ($marks as $mark) {
+            self::assertRichMark($mark);
+            $normalized[] = $mark;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Prove the minimum normalized shape shared by every parsed mark.
+     *
+     * @param   mixed  $value  Parsed mark candidate.
+     * @throws  RenderException  When the internal mark shape is malformed.
+     *
+     * @phpstan-assert RichMark $value
+     *
+     * @since   0.2.0
+     */
+    private static function assertRichMark(mixed $value): void
+    {
+        if (!$value instanceof \stdClass || !is_string($value->type ?? null)) {
+            throw new RenderException('Parsed rich-text mark has no type.');
+        }
+        if (property_exists($value, 'attrs') && !$value->attrs instanceof \stdClass) {
+            throw new RenderException('Parsed rich-text mark attributes are malformed.');
+        }
+    }
+
+    /**
+     * Read a node's parsed attribute object without dynamic member chaining.
+     *
+     * @param   \stdClass  $node  Parsed node.
+     * @return  \stdClass  Attribute object, empty when absent.
+     * @throws  RenderException  When internal parsed attributes are malformed.
+     * @since   0.2.0
+     */
+    private static function nodeAttributes(\stdClass $node): \stdClass
+    {
+        $attributes = $node->attrs ?? null;
+        if ($attributes === null) {
+            return new \stdClass();
+        }
+        if (!$attributes instanceof \stdClass) {
+            throw new RenderException('Parsed rich-text node attributes are malformed.');
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Read a mark's parsed attribute object without dynamic member chaining.
+     *
+     * @param   RichMark  $mark  Parsed mark.
+     * @return  \stdClass  Attribute object, empty when absent.
+     * @throws  RenderException  When internal parsed attributes are malformed.
+     * @since   0.2.0
+     */
+    private static function markAttributes(\stdClass $mark): \stdClass
+    {
+        return self::nodeAttributes($mark);
+    }
+
+    /**
+     * Create one mutable checklist branch.
+     *
+     * @return  ChecklistTree  Empty checklist branch.
+     * @since   0.2.0
+     */
+    private static function newChecklistTree(): \stdClass
+    {
+        return (object) ['items' => []];
+    }
+
+    /**
+     * Create one mutable checklist tree entry.
+     *
+     * @param   RichNode|null  $node   Parsed checklist item, or bridge null.
+     * @param   int            $level  Normalized nesting level.
+     * @return  ChecklistEntry  New tree entry.
+     * @since   0.2.0
+     */
+    private static function newChecklistEntry(?\stdClass $node, int $level): \stdClass
+    {
+        return (object) [
+            'children' => self::newChecklistTree(),
+            'level' => $level,
+            'node' => $node,
+        ];
+    }
+
+    /**
+     * Append an entry to a mutable checklist branch.
+     *
+     * @param   ChecklistTree   $tree   Target branch.
+     * @param   ChecklistEntry  $entry  Entry to append.
+     * @since   0.2.0
+     */
+    private static function appendChecklistEntry(\stdClass $tree, \stdClass $entry): void
+    {
+        $tree->items[] = $entry;
+    }
+
+    /**
+     * Return the last checklist entry in a branch.
+     *
+     * @param   ChecklistTree  $tree  Branch to inspect.
+     * @return  ChecklistEntry|null  Last entry, or null for an empty branch.
+     * @throws  RenderException  When the internal tree is malformed.
+     * @since   0.2.0
+     */
+    private static function lastChecklistEntry(\stdClass $tree): ?\stdClass
+    {
+        $items = self::checklistEntries($tree);
+
+        return $items === [] ? null : $items[count($items) - 1];
+    }
+
+    /**
+     * Prove the entries held by one checklist branch.
+     *
+     * @param   ChecklistTree  $tree  Branch to inspect.
+     * @return  list<ChecklistEntry>  Typed entries.
+     * @throws  RenderException  When the internal tree is malformed.
+     * @since   0.2.0
+     */
+    private static function checklistEntries(\stdClass $tree): array
+    {
+        self::assertChecklistTree($tree);
+        $entries = [];
+        foreach ($tree->items as $entry) {
+            self::assertChecklistEntry($entry);
+            $entries[] = $entry;
+        }
+
+        return $entries;
+    }
+
+    /**
+     * Prove one internal checklist branch.
+     *
+     * @param   mixed  $value  Branch candidate.
+     * @throws  RenderException  When the internal tree is malformed.
+     *
+     * @phpstan-assert ChecklistTree $value
+     *
+     * @since   0.2.0
+     */
+    private static function assertChecklistTree(mixed $value): void
+    {
+        if (!$value instanceof \stdClass
+            || !is_array($value->items ?? null)
+            || !array_is_list($value->items)
+        ) {
+            throw new RenderException('Internal checklist tree is malformed.');
+        }
+        foreach ($value->items as $item) {
+            if (!$item instanceof \stdClass) {
+                throw new RenderException('Internal checklist tree is malformed.');
+            }
+        }
+    }
+
+    /**
+     * Prove one internal checklist entry.
+     *
+     * @param   mixed  $value  Entry candidate.
+     * @throws  RenderException  When the internal tree is malformed.
+     *
+     * @phpstan-assert ChecklistEntry $value
+     *
+     * @since   0.2.0
+     */
+    private static function assertChecklistEntry(mixed $value): void
+    {
+        if (!$value instanceof \stdClass
+            || !property_exists($value, 'children')
+            || !property_exists($value, 'level')
+            || !property_exists($value, 'node')
+            || !is_int($value->level)
+        ) {
+            throw new RenderException('Internal checklist tree is malformed.');
+        }
+        self::assertChecklistTree($value->children);
+        if ($value->node !== null) {
+            self::assertRichNode($value->node);
+        }
+    }
+
+    /**
      * Parse one node: known keys only, an allowed type, the depth and
      * aggregate bounds charged before children are walked, then the
      * per-type grammar asserted on the assembled node. Only recognized
@@ -655,9 +949,10 @@ final class RichText
      * @param   mixed      $value  The decoded node candidate.
      * @param   string     $path   The node's JSON-path, for refusals.
      * @param   int        $depth  The node's depth, the root at 1.
-     * @param   \stdClass  $state  The running document-wide counters
+     * @param   \stdClass&object{marks: int, nodes: int, text: int}  $state
+     *     The running document-wide counters
      *     {marks, nodes, text}.
-     * @return  \stdClass  The normalized node.
+     * @return  RichNode  The normalized node.
      * @throws  RenderException  On any grammar violation or exceeded
      *     bound.
      * @since   0.1.0
@@ -737,7 +1032,7 @@ final class RichText
      *
      * @param   mixed   $value  The decoded mark candidate.
      * @param   string  $path   The mark's JSON-path, for refusals.
-     * @return  \stdClass  The normalized mark.
+     * @return  RichMark  The normalized mark.
      * @throws  RenderException  On an unknown key or type, or attributes
      *     the mark may not carry.
      * @since   0.1.0
@@ -760,7 +1055,7 @@ final class RichText
             $mark->attrs = self::parseAttributes($value->attrs, "{$path}.attrs", "mark:{$type}");
         }
         if ($type === 'highlight') {
-            $tone = $mark->attrs->tone ?? null;
+            $tone = self::markAttributes($mark)->tone ?? null;
             if (!is_string($tone) || !in_array($tone, ['accent', 'danger', 'info', 'success', 'warning'], true)) {
                 throw new RenderException("{$path}.attrs.tone must be a configured highlight tone.");
             }
@@ -810,7 +1105,7 @@ final class RichText
      * Assert one node's mark set is portable: no duplicate mark types, and
      * code combined with nothing else.
      *
-     * @param   list<\stdClass>  $marks  The node's parsed marks.
+     * @param   list<RichMark>  $marks  The node's parsed marks.
      * @param   string           $path   The marks' JSON-path, for refusals.
      * @throws  RenderException  On a duplicate type or a code combination.
      * @since   0.1.0
@@ -834,20 +1129,22 @@ final class RichText
      * may not carry, the child types it may contain, whether content is
      * required, and each attribute's own closed value set.
      *
-     * @param   \stdClass  $node  The assembled node.
+     * @param   RichNode  $node  The assembled node.
      * @param   string     $path  The node's JSON-path, for refusals.
      * @throws  RenderException  On any violation of the type's grammar.
      * @since   0.1.0
      */
     private static function assertGrammar(\stdClass $node, string $path): void
     {
+        $attributes = self::nodeAttributes($node);
+        $content = self::nodeContent($node);
         switch ($node->type) {
             case 'doc':
                 self::assertNoFields($node, $path, ['attrs', 'marks', 'text']);
-                if (!property_exists($node, 'content') || $node->content === []) {
+                if (!property_exists($node, 'content') || $content === []) {
                     throw new RenderException("{$path}.content must contain at least one block node.");
                 }
-                self::assertChildTypes($node->content, $path, self::BLOCK_NODES);
+                self::assertChildTypes($content, $path, self::BLOCK_NODES);
 
                 return;
             case 'text':
@@ -862,13 +1159,13 @@ final class RichText
                 return;
             case 'paragraph':
                 self::assertNoFields($node, $path, ['attrs', 'marks', 'text']);
-                self::assertChildTypes($node->content ?? [], $path, self::INLINE_NODES);
+                self::assertChildTypes($content, $path, self::INLINE_NODES);
 
                 return;
             case 'heading':
                 self::assertNoFields($node, $path, ['marks', 'text']);
-                self::assertChildTypes($node->content ?? [], $path, self::INLINE_NODES);
-                $level = self::integerish($node->attrs->level ?? null);
+                self::assertChildTypes($content, $path, self::INLINE_NODES);
+                $level = self::integerish($attributes->level ?? null);
                 if ($level === null || !in_array($level, self::HEADING_LEVELS, true)) {
                     throw new RenderException("{$path}.attrs.level must be a configured heading level.");
                 }
@@ -877,8 +1174,8 @@ final class RichText
             case 'orderedList':
                 self::assertNoFields($node, $path, ['marks', 'text']);
                 self::assertNonEmptyChildTypes($node, $path, ['listItem']);
-                if (property_exists($node->attrs ?? new \stdClass(), 'start')) {
-                    $start = self::integerish($node->attrs->start);
+                if (property_exists($attributes, 'start')) {
+                    $start = self::integerish($attributes->start);
                     if ($start === null || $start < 1) {
                         throw new RenderException("{$path}.attrs.start must be a positive integer.");
                     }
@@ -893,7 +1190,7 @@ final class RichText
             case 'listItem':
                 self::assertNoFields($node, $path, ['attrs', 'marks', 'text']);
                 self::assertNonEmptyChildTypes($node, $path, self::BLOCK_NODES);
-                if (($node->content[0]->type ?? null) !== 'paragraph') {
+                if (($content[0]->type ?? null) !== 'paragraph') {
                     throw new RenderException("{$path}.content must begin with a paragraph node.");
                 }
 
@@ -906,7 +1203,7 @@ final class RichText
             case 'callout':
                 self::assertNoFields($node, $path, ['marks', 'text']);
                 self::assertNonEmptyChildTypes($node, $path, self::BLOCK_NODES);
-                $tone = $node->attrs->tone ?? null;
+                $tone = $attributes->tone ?? null;
                 if (!is_string($tone) || !in_array($tone, ['danger', 'info', 'success', 'warning'], true)) {
                     throw new RenderException("{$path}.attrs.tone must be a configured callout tone.");
                 }
@@ -919,11 +1216,11 @@ final class RichText
                 return;
             case 'checklistItem':
                 self::assertNoFields($node, $path, ['marks', 'text']);
-                self::assertChildTypes($node->content ?? [], $path, self::INLINE_NODES);
-                if (!is_bool($node->attrs->checked ?? null)) {
+                self::assertChildTypes($content, $path, self::INLINE_NODES);
+                if (!is_bool($attributes->checked ?? null)) {
                     throw new RenderException("{$path}.attrs.checked must be a boolean.");
                 }
-                $level = self::integerish($node->attrs->level ?? null);
+                $level = self::integerish($attributes->level ?? null);
                 if ($level === null || $level < 0 || $level > 4) {
                     throw new RenderException("{$path}.attrs.level must be an integer from zero through four.");
                 }
@@ -932,10 +1229,10 @@ final class RichText
             case 'table':
                 self::assertNoFields($node, $path, ['marks', 'text']);
                 self::assertNonEmptyChildTypes($node, $path, ['tableRow']);
-                if (!is_bool($node->attrs->header ?? null)) {
+                if (!is_bool($attributes->header ?? null)) {
                     throw new RenderException("{$path}.attrs.header must be a boolean.");
                 }
-                self::assertRectangularTable($node->content ?? [], $path);
+                self::assertRectangularTable($content, $path);
 
                 return;
             case 'tableRow':
@@ -945,7 +1242,7 @@ final class RichText
                 return;
             case 'tableCell':
                 self::assertNoFields($node, $path, ['attrs', 'marks', 'text']);
-                self::assertChildTypes($node->content ?? [], $path, self::INLINE_NODES);
+                self::assertChildTypes($content, $path, self::INLINE_NODES);
 
                 return;
             case 'codeBlock':
@@ -953,7 +1250,7 @@ final class RichText
                 if (!property_exists($node, 'text')) {
                     throw new RenderException("{$path}.text is required for a code block.");
                 }
-                $language = $node->attrs->language ?? null;
+                $language = $attributes->language ?? null;
                 if (!is_string($language) || preg_match('/^[A-Za-z0-9][A-Za-z0-9+_.#-]{0,63}$/u', $language) !== 1) {
                     throw new RenderException("{$path}.attrs.language must be a bounded language identifier.");
                 }
@@ -973,7 +1270,7 @@ final class RichText
      * Refuse the node when it carries any of the named fields — how each
      * type's grammar forbids the members it has no meaning for.
      *
-     * @param   \stdClass     $node    The assembled node.
+     * @param   RichNode       $node    The assembled node.
      * @param   string        $path    The node's JSON-path, for refusals.
      * @param   list<string>  $fields  The forbidden member names.
      * @throws  RenderException  When a forbidden member is present.
@@ -992,7 +1289,7 @@ final class RichText
      * Refuse any child whose type is outside the allowed set; an empty
      * list passes.
      *
-     * @param   list<\stdClass>  $content  The parsed child nodes.
+     * @param   list<RichNode>  $content  The parsed child nodes.
      * @param   string           $path     The parent's JSON-path, for
      *     refusals.
      * @param   list<string>     $allowed  The allowed child types.
@@ -1012,7 +1309,7 @@ final class RichText
      * Require at least one child and refuse any child of a disallowed
      * type — the grammar of every container that cannot be empty.
      *
-     * @param   \stdClass     $node     The assembled node.
+     * @param   RichNode       $node     The assembled node.
      * @param   string        $path     The node's JSON-path, for refusals.
      * @param   list<string>  $allowed  The allowed child types.
      * @throws  RenderException  On missing content or a disallowed child.
@@ -1020,8 +1317,8 @@ final class RichText
      */
     private static function assertNonEmptyChildTypes(\stdClass $node, string $path, array $allowed): void
     {
-        $content = $node->content ?? null;
-        if (!is_array($content) || $content === []) {
+        $content = self::nodeContent($node);
+        if ($content === []) {
             throw new RenderException("{$path}.content must contain at least one child node.");
         }
         self::assertChildTypes($content, $path, $allowed);
@@ -1031,19 +1328,20 @@ final class RichText
      * Require a rectangular table: at least one cell in the first row and
      * exactly that many cells in every row.
      *
-     * @param   list<\stdClass>  $rows  The parsed table rows.
+     * @param   list<RichNode>  $rows  The parsed table rows.
      * @param   string           $path  The table's JSON-path, for refusals.
      * @throws  RenderException  On an empty first row or a ragged row.
      * @since   0.1.0
      */
     private static function assertRectangularTable(array $rows, string $path): void
     {
-        $width = count($rows[0]->content ?? []);
+        $firstRow = $rows[0] ?? null;
+        $width = $firstRow === null ? 0 : count(self::nodeContent($firstRow));
         if ($width < 1) {
             throw new RenderException("{$path}.content must be a non-empty rectangular table.");
         }
         foreach ($rows as $row) {
-            if (count($row->content ?? []) !== $width) {
+            if (count(self::nodeContent($row)) !== $width) {
                 throw new RenderException("{$path}.content must be a non-empty rectangular table.");
             }
         }

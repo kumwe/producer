@@ -141,6 +141,9 @@ final class DataBlocks implements BlockRenderer
             $rows .= '<tr><th scope="row">' . SafeMarkup::escapeHtml($dataset->label) . '</th>' . $cells . '</tr>';
         }
         $title = $spec->title ?? null;
+        if (!is_string($title)) {
+            $title = null;
+        }
 
         return ($title === null
                 ? ''
@@ -187,6 +190,9 @@ final class DataBlocks implements BlockRenderer
             $rows .= '<tr>' . $cells . '</tr>';
         }
         $caption = $value->caption ?? null;
+        if (!is_string($caption)) {
+            $caption = null;
+        }
 
         return '<table data-studio-table>'
             . ($caption === null ? '' : '<caption>' . SafeMarkup::escapeHtml($caption) . '</caption>')

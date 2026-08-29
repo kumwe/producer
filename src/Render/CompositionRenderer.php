@@ -119,12 +119,19 @@ final class CompositionRenderer
     public function renderDocument(\stdClass $document, ?RenderContext $context = null): RenderResult
     {
         $roots = $document->roots ?? null;
-        if (!is_array($roots)) {
+        if (!is_array($roots) || !array_is_list($roots)) {
             throw new RenderException('A Blueprint document must carry a roots list.');
+        }
+        $rootNodes = [];
+        foreach ($roots as $root) {
+            if (!$root instanceof \stdClass) {
+                throw new RenderException('Blueprint nodes must be decoded objects.');
+            }
+            $rootNodes[] = $root;
         }
 
         return $this->renderWithCoordinates(
-            $roots,
+            $rootNodes,
             $context ?? new RenderContext(),
             self::blockCoordinates($document),
         );
@@ -307,38 +314,48 @@ final class CompositionRenderer
      */
     private function presentationAttributes(\stdClass $node, string $scope, RenderState $state): string
     {
-        if (!isset($node->properties->design)) {
+        $properties = $node->properties ?? null;
+        if (!$properties instanceof \stdClass || !property_exists($properties, 'design')) {
             return '';
         }
         try {
-            $intent = ProductionValues::parsePresentationIntent($node->properties->design);
+            $intent = ProductionValues::parsePresentationIntent($properties->design);
         } catch (\Throwable) {
             return '';
         }
-        $animation = $intent->animation ?? null;
+        $intentMembers = get_object_vars($intent);
+        $animation = $intentMembers['animation'] ?? null;
+        if ($animation !== null && !is_string($animation)) {
+            return '';
+        }
         if ($animation !== null && $animation !== 'none') {
             $state->enhance('motion', $node, $scope, ['animation' => $animation]);
         }
+        $visibility = $intentMembers['visibility'] ?? null;
+        $visibilityMembers = $visibility instanceof \stdClass ? get_object_vars($visibility) : [];
         $attributes = [
-            ['align', $intent->align ?? null],
+            ['align', $intentMembers['align'] ?? null],
             ['animation', $animation],
-            ['height', $intent->height ?? null],
-            ['inverse', $intent->inverse ?? null],
-            ['margin', $intent->margin ?? null],
-            ['marker', $intent->marker ?? null],
-            ['padding', $intent->padding ?? null],
-            ['position', $intent->position ?? null],
-            ['print', $intent->print ?? null],
-            ['scroll', $intent->scrolling ?? null],
-            ['visible-compact', $intent->visibility->compact ?? null],
-            ['visible-medium', $intent->visibility->medium ?? null],
-            ['visible-expanded', $intent->visibility->expanded ?? null],
-            ['width', $intent->width ?? null],
+            ['height', $intentMembers['height'] ?? null],
+            ['inverse', $intentMembers['inverse'] ?? null],
+            ['margin', $intentMembers['margin'] ?? null],
+            ['marker', $intentMembers['marker'] ?? null],
+            ['padding', $intentMembers['padding'] ?? null],
+            ['position', $intentMembers['position'] ?? null],
+            ['print', $intentMembers['print'] ?? null],
+            ['scroll', $intentMembers['scrolling'] ?? null],
+            ['visible-compact', $visibilityMembers['compact'] ?? null],
+            ['visible-medium', $visibilityMembers['medium'] ?? null],
+            ['visible-expanded', $visibilityMembers['expanded'] ?? null],
+            ['width', $intentMembers['width'] ?? null],
         ];
         $out = '';
         foreach ($attributes as [$name, $value]) {
             if ($value === null) {
                 continue;
+            }
+            if (!is_bool($value) && !is_string($value)) {
+                return '';
             }
             $text = is_bool($value) ? ($value ? 'true' : 'false') : (string) $value;
             $out .= ' data-studio-' . $name . '="' . SafeMarkup::escapeAttribute($text) . '"';

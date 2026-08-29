@@ -13,6 +13,9 @@
     "ext-json": "*",
     "ext-mbstring": "*"
   },
+  "require-dev": {
+    "phpstan/phpstan": "^2.1"
+  },
   "autoload": {
     "psr-4": {
       "Kumwe\\Producer\\": "src/"
@@ -24,7 +27,9 @@
     }
   },
   "scripts": {
+    "analyse": "phpstan analyse --no-progress --memory-limit=1G",
     "api": "php tools/verify-api.php",
+    "api:self-test": "php tools/verify-api.php --self-test",
     "architecture": "php tools/verify-architecture.php",
     "autoload-smoke": "php tools/autoload-smoke.php",
     "style": "php tools/check-style.php",
@@ -37,7 +42,9 @@
       "@docs",
       "@architecture",
       "@api",
+      "@api:self-test",
       "@contract",
+      "@analyse",
       "@autoload-smoke",
       "@test"
     ],

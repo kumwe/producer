@@ -308,28 +308,31 @@ final class RequestEnvelope
             self::refuseMember('invalid-member', 'sessionGeneration');
         }
 
-        $expectedRevision = $members['expectedRevision'] ?? null;
-        if (
-            array_key_exists('expectedRevision', $members)
-            && (!is_string($expectedRevision) || !ContractGrammar::isRevision($expectedRevision))
-        ) {
-            self::refuseMember('invalid-member', 'expectedRevision');
+        $expectedRevision = null;
+        if (array_key_exists('expectedRevision', $members)) {
+            $candidate = $members['expectedRevision'];
+            if (!is_string($candidate) || !ContractGrammar::isRevision($candidate)) {
+                self::refuseMember('invalid-member', 'expectedRevision');
+            }
+            $expectedRevision = $candidate;
         }
 
-        $idempotencyKey = $members['idempotencyKey'] ?? null;
-        if (
-            array_key_exists('idempotencyKey', $members)
-            && (!is_string($idempotencyKey) || !ContractGrammar::isStableId($idempotencyKey))
-        ) {
-            self::refuseMember('invalid-member', 'idempotencyKey');
+        $idempotencyKey = null;
+        if (array_key_exists('idempotencyKey', $members)) {
+            $candidate = $members['idempotencyKey'];
+            if (!is_string($candidate) || !ContractGrammar::isStableId($candidate)) {
+                self::refuseMember('invalid-member', 'idempotencyKey');
+            }
+            $idempotencyKey = $candidate;
         }
 
-        $locale = $members['locale'] ?? null;
-        if (
-            array_key_exists('locale', $members)
-            && (!is_string($locale) || !ContractGrammar::isLocale($locale))
-        ) {
-            self::refuseMember('invalid-member', 'locale');
+        $locale = null;
+        if (array_key_exists('locale', $members)) {
+            $candidate = $members['locale'];
+            if (!is_string($candidate) || !ContractGrammar::isLocale($candidate)) {
+                self::refuseMember('invalid-member', 'locale');
+            }
+            $locale = $candidate;
         }
 
         $traceContext = [];

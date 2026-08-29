@@ -161,8 +161,8 @@ final class ScopedStylesheet
      * Read one member from a record decoded as either an object or an
      * array, treating the two shapes identically.
      *
-     * @param   object|array  $record  The decoded sheet or rule record.
-     * @param   string        $name    The member name to read.
+     * @param   object|array<array-key, mixed>  $record  The decoded sheet or rule record.
+     * @param   string                          $name    The member name to read.
      * @return  mixed  The member value, or null when the member is absent.
      * @since   0.1.0
      */

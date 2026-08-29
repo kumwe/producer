@@ -213,8 +213,12 @@ final class SafeMarkup
         if (!is_string($policy) || preg_match('%^[a-z][a-z0-9.-]{0,126}/[a-z][a-z0-9.-]{0,126}$%u', $policy) !== 1) {
             throw new RenderException('Safe markup requires a qualified policy identifier.');
         }
+        $nodes = $fragment->nodes ?? null;
+        if (!is_array($nodes) || !array_is_list($nodes)) {
+            throw new RenderException('Safe markup requires a node list.');
+        }
         $out = '';
-        foreach ($fragment->nodes ?? [] as $node) {
+        foreach ($nodes as $node) {
             $out .= self::renderFragmentNode($node, 1);
         }
 
