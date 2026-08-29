@@ -10,9 +10,11 @@ namespace Kumwe\Producer\Canonical;
  * The portability contract fixes one canonical form for checksums: UTF-8
  * JSON with object members sorted by UTF-16 code unit, arrays in semantic
  * order, minimal ECMA-404 string escaping, deterministic numbers with
- * negative zero canonicalized, a bounded depth, and the prototype-polluting
- * member names refused. Studio's canonical conformance vectors prove this
- * implementation produces the same bytes as every other conforming runtime.
+ * negative zero canonicalized, integers restricted to the interoperable
+ * ECMAScript safe range, valid UTF-8 throughout, a bounded depth, and the
+ * prototype-polluting member names refused. Studio's canonical conformance
+ * vectors prove this implementation produces the same bytes as every other
+ * conforming runtime.
  *
  * Values follow PHP's decoded-JSON shape: objects are stdClass and arrays
  * are lists, which is what keeps {} and [] distinguishable. Decode inputs
@@ -29,6 +31,17 @@ final class CanonicalJson
      * @since   0.1.0
      */
     public const DEFAULT_MAXIMUM_DEPTH = 64;
+
+    /**
+     * Largest exactly interoperable integer in an ECMAScript number.
+     *
+     * PHP can hold larger platform integers, but JavaScript would round their
+     * value before serialization. Refusing outside ±(2^53−1) preserves the
+     * cross-language byte-identity this canonical form promises.
+     *
+     * @since   0.2.0
+     */
+    private const MAXIMUM_SAFE_INTEGER = 9007199254740991;
 
     /**
      * Object member names refused with the `forbidden-member` rejection:
@@ -139,6 +152,13 @@ final class CanonicalJson
             return $value ? 'true' : 'false';
         }
         if (is_int($value)) {
+            if ($value > self::MAXIMUM_SAFE_INTEGER || $value < -self::MAXIMUM_SAFE_INTEGER) {
+                throw new CanonicalEncodingException(
+                    'unrepresentable',
+                    'Canonical JSON integers must stay inside the interoperable safe range.'
+                );
+            }
+
             return (string) $value;
         }
         if (is_float($value)) {
@@ -214,6 +234,12 @@ final class CanonicalJson
                 'Canonical JSON cannot represent a non-finite number.'
             );
         }
+        if (abs($value) > self::MAXIMUM_SAFE_INTEGER) {
+            throw new CanonicalEncodingException(
+                'unrepresentable',
+                'Canonical JSON numbers must stay inside the interoperable safe range.'
+            );
+        }
         if ($value === 0.0) {
             return '0';
         }
@@ -236,6 +262,12 @@ final class CanonicalJson
      */
     private static function quote(string $value): string
     {
+        if (!mb_check_encoding($value, 'UTF-8')) {
+            throw new CanonicalEncodingException(
+                'unrepresentable',
+                'Canonical JSON strings and member names must be valid UTF-8.'
+            );
+        }
         $out = '"';
         $length = strlen($value);
         for ($index = 0; $index < $length; $index++) {

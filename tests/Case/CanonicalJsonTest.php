@@ -83,4 +83,36 @@ final class CanonicalJsonTest extends TestCase
         $second = CanonicalJson::stringify(CanonicalJson::decode($first));
         $this->assertSame($first, $second, 'Canonical output must be a fixed point of decode.');
     }
+
+    public function testInvalidUtf8AndNumbersOutsideTheSafeRangeAreRefused(): void
+    {
+        $invalidMember = new \stdClass();
+        $invalidMember->{"member\xff"} = 1;
+        $values = [
+            'invalid string bytes' => "value\xff",
+            'invalid member bytes' => $invalidMember,
+            'integer above safe maximum' => 9007199254740992,
+            'integer below safe minimum' => -9007199254740992,
+            'float above safe maximum' => 9007199254740992.0,
+        ];
+        foreach ($values as $label => $value) {
+            $error = $this->assertThrows(
+                static fn () => CanonicalJson::stringify($value),
+                CanonicalEncodingException::class,
+                'The ' . $label . ' must be refused.'
+            );
+            $this->assertSame('unrepresentable', $error->rejection(), 'The ' . $label . ' code must be stable.');
+        }
+
+        $this->assertSame(
+            '9007199254740991',
+            CanonicalJson::stringify(9007199254740991),
+            'The exact positive safe-integer boundary must remain portable.'
+        );
+        $this->assertSame(
+            '-9007199254740991',
+            CanonicalJson::stringify(-9007199254740991),
+            'The exact negative safe-integer boundary must remain portable.'
+        );
+    }
 }

@@ -4195,6 +4195,324 @@
                 }
             }
         },
+        "Kumwe\\Producer\\Schema\\StudioContractRelease": {
+            "file": "src/Schema/StudioContractRelease.php",
+            "kind": "class",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [
+                        {
+                            "name": "contractVersion",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "release",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "protocolVersion",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "corpusManifestDigest",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "claimedProfiles",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "packages",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "recordSha256",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return_type": null
+                },
+                "claimedProfiles": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "array"
+                },
+                "contractVersion": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "string"
+                },
+                "corpusManifestDigest": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "string"
+                },
+                "packages": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "array"
+                },
+                "protocolVersion": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "string"
+                },
+                "recordSha256": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "string"
+                },
+                "release": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "string"
+                }
+            }
+        },
+        "Kumwe\\Producer\\Schema\\StudioContractResources": {
+            "file": "src/Schema/StudioContractResources.php",
+            "kind": "class",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "releaseRecord": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "Kumwe\\Producer\\Schema\\StudioContractRelease"
+                },
+                "testkitBytes": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [
+                        {
+                            "name": "relative",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return_type": "string"
+                },
+                "testkitManifestBytes": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "string"
+                }
+            }
+        },
+        "Kumwe\\Producer\\Schema\\StudioDocumentSchemaRegistry": {
+            "file": "src/Schema/StudioDocumentSchemaRegistry.php",
+            "kind": "class",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": {
+                "CONTRIBUTION_KINDS": {
+                    "visibility": "public",
+                    "final": false,
+                    "type": null,
+                    "value": [
+                        "block-definition",
+                        "pattern",
+                        "field-adapter",
+                        "inspector",
+                        "design-vocabulary",
+                        "migration"
+                    ]
+                },
+                "DOCUMENT_KINDS": {
+                    "visibility": "public",
+                    "final": false,
+                    "type": null,
+                    "value": [
+                        "block-definition",
+                        "pattern",
+                        "field-adapter",
+                        "inspector",
+                        "design-vocabulary",
+                        "migration",
+                        "blueprint",
+                        "content-model",
+                        "entry",
+                        "host-error",
+                        "host-request",
+                        "host-result",
+                        "preview-message"
+                    ]
+                }
+            },
+            "properties": [],
+            "methods": {
+                "fromVendoredCorpus": {
+                    "visibility": "public",
+                    "static": true,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "Kumwe\\Producer\\Schema\\StudioDocumentSchemaRegistry"
+                },
+                "validate": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [
+                        {
+                            "name": "kind",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "document",
+                            "type": "mixed",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return_type": "Kumwe\\Producer\\Schema\\StudioDocumentValidation"
+                }
+            }
+        },
+        "Kumwe\\Producer\\Schema\\StudioDocumentValidation": {
+            "file": "src/Schema/StudioDocumentValidation.php",
+            "kind": "class",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": [],
+            "properties": [],
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [
+                        {
+                            "name": "valid",
+                            "type": "bool",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "diagnostics",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return_type": null
+                },
+                "diagnostics": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "array"
+                },
+                "valid": {
+                    "visibility": "public",
+                    "static": false,
+                    "final": false,
+                    "abstract": false,
+                    "returns_reference": false,
+                    "parameters": [],
+                    "return_type": "bool"
+                }
+            }
+        },
         "Kumwe\\Producer\\Wire\\Dispatcher": {
             "file": "src/Wire/Dispatcher.php",
             "kind": "class",

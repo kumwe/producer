@@ -12,7 +12,7 @@ in this table and never the ones below:
 | Layer | Namespace | Owns | Must never know about |
 | --- | --- | --- | --- |
 | Canonical | `Kumwe\Producer\Canonical` | Canonical JSON bytes, digests | HTTP, rendering, hosts |
-| Schema | `Kumwe\Producer\Schema` | The schema-property profile: admission and instance validation | HTTP, rendering, hosts |
+| Schema | `Kumwe\Producer\Schema` | Exact pinned document admission plus contributed schema-property admission and instance validation | HTTP, rendering, hosts |
 | Error | `Kumwe\Producer\Error` | The closed host-error taxonomy | rendering, hosts |
 | Wire | `Kumwe\Producer\Wire` | Envelopes, the operation registry, dispatch, port interfaces | rendering internals, any concrete host |
 | Render | `Kumwe\Producer\Render` | Composition to semantic HTML, escaping, fallbacks; reuses the Error layer's contract string grammar | HTTP, storage, any concrete host |

@@ -6,8 +6,9 @@ completes it. A step is claimed only when `composer check` proves it on a clean 
 ## Position
 
 Runtime realization. Delivered and proven on a clean clone: the pinned contract lane (P-1), the
-canonical serializer (P-2), the wire layer with the closed twenty-four-operation registry and the
-port interfaces (P-3 and the interface half of P-9), the schema-property profile, the complete
+canonical serializer (P-2), the sealed exact document-schema registry, the wire layer with the
+closed twenty-four-operation registry and the port interfaces (P-3 and the interface half of
+P-9), the schema-property profile, the complete
 forty-five-type renderer with its escaping discipline and fallbacks (P-4, P-5), the stylesheet
 generator (P-6), rich-text projection rendering (P-7), and the enhancement need signal on the
 render result (the producer half of P-8). Producer is pinned to Studio's exact coordinated
