@@ -90,7 +90,31 @@
   ],
   "browserArchive": {
     "archiveStem": "studio-browser-0.1.0-beta.2",
-    "status": "unavailable",
-    "reason": "The governed beta publication exposes provenance-backed npm packages but no approved outer Studio browser archive or detached archive checksum."
+    "status": "verified-local-candidate",
+    "candidate": {
+      "archive": {
+        "file": "studio-browser-0.1.0-beta.2-e1bd88fa0bf6170e.tar",
+        "bytes": 1401344,
+        "budgetBytes": 2097152,
+        "sha256": "e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01",
+        "sha512": "630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501d09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764",
+        "integrity": "sha512-Ywoz6/bqAyFVn9x4ZERZIlVE8WIckeRCztijV6HWhQHQlxX1xmBSa+gZUySI/ID6XFNTarkGDmi6yA/b2Q7XZA==",
+        "manifestSha256": "89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68",
+        "members": 74
+      },
+      "checksum": {
+        "file": "studio-browser-0.1.0-beta.2-e1bd88fa0bf6170e.tar.sha256",
+        "bytes": 115,
+        "sha256": "25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0"
+      }
+    },
+    "publication": {
+      "status": "unavailable",
+      "expectedTag": "studio-v0.1.0-beta.2",
+      "expectedReleaseUrl": "https://github.com/kumwe/studio/releases/tag/studio-v0.1.0-beta.2",
+      "expectedArchiveUrl": "https://github.com/kumwe/studio/releases/download/studio-v0.1.0-beta.2/studio-browser-0.1.0-beta.2-e1bd88fa0bf6170e.tar",
+      "expectedChecksumUrl": "https://github.com/kumwe/studio/releases/download/studio-v0.1.0-beta.2/studio-browser-0.1.0-beta.2-e1bd88fa0bf6170e.tar.sha256"
+    },
+    "reason": "The exact Studio beta.2 browser archive and detached checksum are locally reproduced and fully verified, but the governed GitHub prerelease does not publish both assets yet."
   }
 }

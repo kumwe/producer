@@ -76,7 +76,10 @@ if (!$validation->valid()) {
 readiness. Its browser-artifact surface binds the manifest, browser module, and enhancement runtime
 to exact package paths, byte counts, SHA-256 content hashes, and SRI values. The Composer package
 also carries the manifest's complete fourteen-file redistribution notice/license closure, with
-every member package-path and digest bound by the same proof. `testkitBytes()` reads only
+every member package-path and digest bound by the same proof. Its private import gate additionally
+proves the deterministic 74-member outer ustar archive, detached checksum, and byte equality with
+the npm browser distribution. The 1.4 MB archive and checksum are provenance inputs, not Composer
+payload. `testkitBytes()` reads only
 digest-verified corpus-manifest members for consumer conformance tests. None of these APIs exposes
 the package root or a generalized filesystem reader. Decoded inputs must use the canonical JSON
 shape (`stdClass` objects and list arrays) and the interoperable ECMAScript safe-integer range.
@@ -93,11 +96,12 @@ corpus-proven. The Studio asset manifest also proves the exact browser module an
 runtime bytes carried by the npm packages and all fourteen redistribution notice/license members
 that accompany those bytes.
 
-This work is **not release-ready**: the governed Studio beta publication has no approved outer
-Studio browser archive or detached archive checksum. The npm provenance and manifest-verified inner
-assets do not replace that release artifact, so Producer 0.2 remains unreleased until the blocker is
-resolved and re-pinned. Deployment emitters and optional template bridges also remain roadmap work
-and are not claimed. See
+This work is **not release-ready**: the exact outer Studio browser archive and detached checksum
+have been reproduced locally and fully verified, but the governed GitHub prerelease does not yet
+publish both assets. The PIN records the candidate's complete immutable envelope without claiming
+that its expected download URLs are live, so Producer 0.2 remains unreleased until those exact
+public assets exist and are re-pinned. Deployment emitters and optional template bridges also
+remain roadmap work and are not claimed. See
 [the roadmap](https://github.com/kumwe/producer/blob/main/docs/roadmap.md) for the precise boundary.
 
 ## Requirements

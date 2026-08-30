@@ -42,11 +42,11 @@ final class StudioContractResourcesTest extends TestCase
             $release->recordSha256(),
             'The exact release-record bytes must stay pinned.'
         );
-        $this->assertSame(false, $release->releaseReady(), 'The missing governed archive must block release.');
+        $this->assertSame(false, $release->releaseReady(), 'The unpublished governed assets must block release.');
         $this->assertSame(
             [
-                'The governed beta publication exposes provenance-backed npm packages but no approved outer '
-                    . 'Studio browser archive or detached archive checksum.',
+                'The exact Studio beta.2 browser archive and detached checksum are locally reproduced and '
+                    . 'fully verified, but the governed GitHub prerelease does not publish both assets yet.',
             ],
             $release->releaseBlockers(),
             'The exact unresolved publication proof must stay visible.'
@@ -68,7 +68,7 @@ final class StudioContractResourcesTest extends TestCase
         $this->assertSame(
             'studio-browser-0.1.0-beta.2',
             $locators->authoringArchiveStem(),
-            'The unavailable archive must still have its release-derived identity.'
+            'The verified local candidate must retain its release-derived archive identity.'
         );
         $this->assertSame(
             '@kumwe/studio-renderer-web',
@@ -89,6 +89,29 @@ final class StudioContractResourcesTest extends TestCase
         $manifestAssets = is_array($manifestDocument['assets'] ?? null)
             ? $manifestDocument['assets']
             : [];
+        $this->assertSame(73, count($manifestAssets), 'The exact outer-archive asset closure must remain fixed.');
+        $roleCounts = [];
+        foreach ($manifestAssets as $asset) {
+            $role = is_array($asset) ? ($asset['role'] ?? null) : null;
+            if (!is_string($role)) {
+                throw new \RuntimeException('The browser manifest carries a malformed asset role.');
+            }
+            $roleCounts[$role] = ($roleCounts[$role] ?? 0) + 1;
+        }
+        ksort($roleCounts, SORT_STRING);
+        $this->assertSame(
+            [
+                'browser-module' => 1,
+                'documentation' => 32,
+                'enhancement-runtime' => 1,
+                'license' => 13,
+                'notice' => 1,
+                'release-record' => 1,
+                'schema' => 24,
+            ],
+            $roleCounts,
+            'The 74-member ustar proof must remain manifest plus the exact 73-role closure.'
+        );
         $redistribution = array_values(array_filter(
             $manifestAssets,
             static fn (mixed $asset): bool => is_array($asset)

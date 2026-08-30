@@ -191,6 +191,9 @@ $resolvedAssets = is_array($browserPin['resolved_assets'] ?? null)
 $redistributionFiles = is_array($browserPin['redistribution_files'] ?? null)
     ? $browserPin['redistribution_files']
     : [];
+$archivePin = is_array($browserPin['authoring_archive'] ?? null)
+    ? $browserPin['authoring_archive']
+    : [];
 $browserPinMembers = array_keys($browserPin);
 sort($browserPinMembers, SORT_STRING);
 if (
@@ -203,6 +206,45 @@ if (
     || count($redistributionFiles) !== 14
 ) {
     $errors[] = 'The Studio PIN does not carry the exact browser proof members.';
+}
+$archiveReason = 'The exact Studio beta.2 browser archive and detached checksum are locally reproduced '
+    . 'and fully verified, but the governed GitHub prerelease does not publish both assets yet.';
+$archiveSha256 = 'e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01';
+$archiveFile = 'studio-browser-0.1.0-beta.2-' . substr($archiveSha256, 0, 16) . '.tar';
+$archiveTag = 'studio-v0.1.0-beta.2';
+$downloadRoot = 'https://github.com/kumwe/studio/releases/download/' . $archiveTag . '/';
+$expectedArchivePin = [
+    'archive_stem' => 'studio-browser-0.1.0-beta.2',
+    'status' => 'verified-local-candidate',
+    'archive_file' => $archiveFile,
+    'archive_bytes' => 1401344,
+    'archive_budget_bytes' => 2097152,
+    'archive_sha256' => $archiveSha256,
+    'archive_sha512' => '630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501'
+        . 'd09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764',
+    'archive_integrity' => 'sha512-Ywoz6/bqAyFVn9x4ZERZIlVE8WIckeRCztijV6HWhQHQlxX1xmBSa+'
+        . 'gZUySI/ID6XFNTarkGDmi6yA/b2Q7XZA==',
+    'manifest_sha256' => '89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68',
+    'member_count' => 74,
+    'checksum_file' => $archiveFile . '.sha256',
+    'checksum_bytes' => 115,
+    'checksum_sha256' => '25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0',
+    'publication_status' => 'unavailable',
+    'expected_tag' => $archiveTag,
+    'expected_release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,
+    'expected_archive_url' => $downloadRoot . $archiveFile,
+    'expected_checksum_url' => $downloadRoot . $archiveFile . '.sha256',
+    'reason' => $archiveReason,
+];
+$readiness = is_array($pin['release_readiness'] ?? null) ? $pin['release_readiness'] : [];
+if (
+    $archivePin !== $expectedArchivePin
+    || ($readiness['status'] ?? null) !== 'blocked'
+    || ($readiness['blockers'] ?? null) !== [$archiveReason]
+    || !is_file($contract . '/browser/studio-assets.json')
+    || $archivePin['manifest_sha256'] !== hash_file('sha256', $contract . '/browser/studio-assets.json')
+) {
+    $errors[] = 'The archive must retain the exact blocked, non-vendored Studio browser candidate proof.';
 }
 $assetRoles = [];
 $contractDirectFiles = [
@@ -383,4 +425,4 @@ if ($errors !== []) {
 }
 
 echo "Composer archive verified: 454 files, 70 public types, 55 Studio schemas, 301 corpus files, "
-    . "14 redistribution files.\n";
+    . "14 redistribution files, and a non-vendored 74-member outer-archive proof.\n";

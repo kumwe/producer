@@ -27,6 +27,7 @@ $commands = [
     [$php, $root . '/tools/verify-architecture.php'],
     [$php, $root . '/tools/verify-api.php'],
     [$php, $root . '/tools/verify-api.php', '--self-test'],
+    [$php, $root . '/tools/verify-import-safety.php'],
     [$php, $root . '/tools/verify-contract.php'],
     [$php, $phpcs, '-q', '-n'],
     [$php, $phpstan, 'analyse', '--no-progress', '--memory-limit=1G', '--debug'],
