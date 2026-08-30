@@ -24,6 +24,7 @@ use Kumwe\Producer\Wire\HostResult;
 use Kumwe\Producer\Wire\MutationOutcome;
 use Kumwe\Producer\Wire\Operation;
 use Kumwe\Producer\Wire\Port\ArtifactPortInterface;
+use Kumwe\Producer\Wire\Port\AuthoringPortInterface;
 use Kumwe\Producer\Wire\Port\AuthorizationInterface;
 use Kumwe\Producer\Wire\Port\HostAdapterInterface;
 use Kumwe\Producer\Wire\Port\LocalizationPortInterface;
@@ -191,6 +192,11 @@ final class FakeHost implements HostAdapterInterface
     public function artifact(): ArtifactPortInterface
     {
         return $this->artifactFake;
+    }
+
+    public function authoring(): ?AuthoringPortInterface
+    {
+        return null;
     }
 
     public function localization(): ?LocalizationPortInterface

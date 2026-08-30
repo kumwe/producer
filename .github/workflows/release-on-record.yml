@@ -45,7 +45,7 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: json, mbstring, simplexml, tokenizer, xmlwriter
           coverage: none
-          tools: composer:v2
+          tools: composer:2.10.3
 
       - name: Install the validated package toolchain
         run: |
@@ -93,6 +93,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Set up PHP for the release gate
+        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2.35.5
+        with:
+          php-version: '8.1'
+          extensions: json
+          coverage: none
+
       # The newest release record is the FIRST second-level heading, so a
       # malformed record fails this run loudly instead of silently
       # releasing nothing or re-reading an older heading.
@@ -103,7 +110,9 @@ jobs:
           set -euo pipefail
           first="$(grep -m 1 -E '^## ' CHANGELOG.md || true)"
           if [ "$first" = "## Unreleased" ] || [ "$first" = "## [Unreleased]" ]; then
-            first="$(grep -E '^## ' CHANGELOG.md | sed -n 2p)"
+            echo "::notice::The newest changelog section is unreleased; nothing to publish."
+            echo "version=" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
           if [ -z "$first" ]; then
             echo "::notice::CHANGELOG.md records no released version yet; nothing to release."
@@ -116,6 +125,10 @@ jobs:
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Require complete Studio publication evidence
+        if: steps.record.outputs.version != ''
+        run: php tools/verify-release-ready.php
 
       # Probe the release before the tag so recovery cannot publish a
       # pre-positioned, untested tag. A version already published may be an

@@ -19,12 +19,15 @@
 /tools export-ignore
 /vendor export-ignore
 
-# Studio 0.1.0-rc.1 owns only the manifest-bound protocol/ and testkit/
-# layout. Never resurrect the pre-release mirror paths in a package archive.
+# Studio 0.1.0-beta.2 owns only the manifest-bound protocol/, testkit/,
+# and browser/ layout. Never resurrect legacy mirror paths in an archive.
 /resources/studio-contract/conformance export-ignore
 /resources/studio-contract/schemas export-ignore
 
-# These pre-release wire seams were removed at the coordinated Studio pin.
+# Published third-party license bytes are digest-bound and must retain any
+# upstream trailing space exactly rather than being normalized during review.
+/resources/studio-contract/browser/third-party-licenses/*.txt whitespace=-trailing-space
+
+# These obsolete idempotency seams stay outside package archives.
 /src/Wire/IdempotencyRecord.php export-ignore
-/src/Wire/Port/AuthoringPortInterface.php export-ignore
 /src/Wire/Port/IdempotencyLedgerInterface.php export-ignore

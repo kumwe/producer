@@ -114,7 +114,7 @@ final class ScopedStylesheet
         if (count($rules) > 100) {
             throw new CssException('Scoped stylesheet exceeds 100 rules.');
         }
-        $base = '[data-studio-scope="' . $scope . '"]';
+        $base = '[data-studio-scope=' . $scope . ']';
         $compiled = '';
         foreach ($rules as $rule) {
             if (!is_object($rule) && !is_array($rule)) {

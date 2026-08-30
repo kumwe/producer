@@ -17,6 +17,24 @@ namespace Kumwe\Producer\Schema;
 final class StudioContractRelease
 {
     /**
+     * Exact public npm package family of the coordinated Studio release.
+     *
+     * @var list<string>
+     *
+     * @since 0.2.0
+     */
+    private const PACKAGE_NAMES = [
+        '@kumwe/studio',
+        '@kumwe/studio-core',
+        '@kumwe/studio-media',
+        '@kumwe/studio-preview',
+        '@kumwe/studio-protocol',
+        '@kumwe/studio-renderer-web',
+        '@kumwe/studio-rich-text',
+        '@kumwe/studio-testkit',
+    ];
+
+    /**
      * Hold one completely validated release coordinate.
      *
      * @param string                $contractVersion      Release-record contract version.
@@ -25,6 +43,11 @@ final class StudioContractRelease
      * @param string                $corpusManifestDigest Canonical SHA-256 SRI of the testkit manifest.
      * @param list<string>          $claimedProfiles      Ordered unique qualified profile names.
      * @param array<string, string> $packages             Exact package name to Semantic Version map.
+     * @param string                $sourceCommit         Provenance-authenticated source commit.
+     * @param array<string, string> $packageIntegrities   Exact package name to npm SHA-512 integrity map.
+     * @param StudioBrowserArtifacts $browserArtifacts    Closed browser artifact locators.
+     * @param bool                  $releaseReady         Whether publication evidence is complete.
+     * @param list<string>          $releaseBlockers      Reasons this generation cannot be released.
      * @param string                $recordSha256         Lowercase SHA-256 hex of the release bytes.
      *
      * @throws \InvalidArgumentException When any coordinate is malformed or repeated.
@@ -38,6 +61,11 @@ final class StudioContractRelease
         private readonly string $corpusManifestDigest,
         private readonly array $claimedProfiles,
         private readonly array $packages,
+        private readonly string $sourceCommit,
+        private readonly array $packageIntegrities,
+        private readonly StudioBrowserArtifacts $browserArtifacts,
+        private readonly bool $releaseReady,
+        private readonly array $releaseBlockers,
         private readonly string $recordSha256
     ) {
         if ($contractVersion === '' || strlen($contractVersion) > 100 || !mb_check_encoding($contractVersion, 'UTF-8')) {
@@ -52,7 +80,7 @@ final class StudioContractRelease
         if (preg_match('/^sha256-[A-Za-z0-9+\/]{42}[AEIMQUYcgkosw048]=$/', $corpusManifestDigest) !== 1) {
             throw new \InvalidArgumentException('The Studio corpus-manifest digest is not canonical SHA-256 SRI.');
         }
-        if (!array_is_list($claimedProfiles) || $claimedProfiles === []) {
+        if (!array_is_list($claimedProfiles)) {
             throw new \InvalidArgumentException('The Studio release must claim an ordered profile list.');
         }
         $seenProfiles = [];
@@ -62,8 +90,8 @@ final class StudioContractRelease
             }
             $seenProfiles[$profile] = true;
         }
-        if ($packages === [] || array_is_list($packages)) {
-            throw new \InvalidArgumentException('The Studio release must carry a named package map.');
+        if ($packages === [] || array_is_list($packages) || array_is_list($packageIntegrities)) {
+            throw new \InvalidArgumentException('The Studio release must carry named package coordinates.');
         }
         foreach ($packages as $package => $version) {
             if (
@@ -71,9 +99,42 @@ final class StudioContractRelease
                 || preg_match('/^@kumwe\/[a-z][a-z0-9-]*$/', $package) !== 1
                 || !is_string($version)
                 || !self::semanticVersion($version)
+                || $version !== $release
             ) {
                 throw new \InvalidArgumentException('The Studio release carries a malformed package coordinate.');
             }
+        }
+        $names = array_keys($packages);
+        sort($names, SORT_STRING);
+        if ($names !== self::PACKAGE_NAMES) {
+            throw new \InvalidArgumentException('The Studio release must carry the exact eight-package family.');
+        }
+        $integrityNames = array_keys($packageIntegrities);
+        sort($integrityNames, SORT_STRING);
+        if ($integrityNames !== self::PACKAGE_NAMES) {
+            throw new \InvalidArgumentException('The Studio release must bind every package integrity.');
+        }
+        foreach ($packageIntegrities as $integrity) {
+            if (
+                !is_string($integrity)
+                || preg_match('/^sha512-[A-Za-z0-9+\/]+={0,2}$/', $integrity) !== 1
+            ) {
+                throw new \InvalidArgumentException('The Studio release carries a malformed package integrity.');
+            }
+        }
+        if (preg_match('/^[a-f0-9]{40}$/', $sourceCommit) !== 1) {
+            throw new \InvalidArgumentException('The Studio release source commit is malformed.');
+        }
+        if (!array_is_list($releaseBlockers)) {
+            throw new \InvalidArgumentException('The Studio release blockers must be an ordered list.');
+        }
+        foreach ($releaseBlockers as $blocker) {
+            if (!is_string($blocker) || $blocker === '' || !mb_check_encoding($blocker, 'UTF-8')) {
+                throw new \InvalidArgumentException('The Studio release carries a malformed blocker.');
+            }
+        }
+        if ($releaseReady === ($releaseBlockers !== [])) {
+            throw new \InvalidArgumentException('Studio release readiness and blockers disagree.');
         }
         if (preg_match('/^[a-f0-9]{64}$/', $recordSha256) !== 1) {
             throw new \InvalidArgumentException('The Studio release-record SHA-256 is malformed.');
@@ -142,6 +203,52 @@ final class StudioContractRelease
     public function packages(): array
     {
         return $this->packages;
+    }
+
+    /**
+     * Exact Git commit authenticated by the npm provenance attestations.
+     *
+     * @since 0.2.0
+     */
+    public function sourceCommit(): string
+    {
+        return $this->sourceCommit;
+    }
+
+    /**
+     * Exact registry SHA-512 integrity for every coordinated npm package.
+     *
+     * @return array<string, string>
+     *
+     * @since 0.2.0
+     */
+    public function packageIntegrities(): array
+    {
+        return $this->packageIntegrities;
+    }
+
+    /** @since 0.2.0 */
+    public function browserArtifacts(): StudioBrowserArtifacts
+    {
+        return $this->browserArtifacts;
+    }
+
+    /** @since 0.2.0 */
+    public function releaseReady(): bool
+    {
+        return $this->releaseReady;
+    }
+
+    /**
+     * Exact blockers preventing a Producer release for this generation.
+     *
+     * @return list<string>
+     *
+     * @since 0.2.0
+     */
+    public function releaseBlockers(): array
+    {
+        return $this->releaseBlockers;
     }
 
     /**

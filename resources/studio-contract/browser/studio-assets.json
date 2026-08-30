@@ -1,0 +1,611 @@
+{
+  "assets": [
+    {
+      "bytes": 940524,
+      "contentHash": "93e7abeb4a64b850e0493b5e908a31c5660b76489913b38729a952fcac6067a6",
+      "integrity": "sha256-k+er60pkuFDgSTtekIoxxWYLdkiZE7OHKalS/KxgZ6Y=",
+      "budgetBytes": 1048576,
+      "mediaType": "text/javascript",
+      "minified": true,
+      "path": "assets/studio-browser-93e7abeb4a64b850.min.js",
+      "role": "browser-module"
+    },
+    {
+      "bytes": 10874,
+      "contentHash": "828c6d329278457c54eecfa422cba63272ff5ee1a8be565420e1c5060b743155",
+      "integrity": "sha256-goxtMpJ4RXxU7s+kIsumMnL/XuGovlZUIOHFBgt0MVU=",
+      "budgetBytes": 65536,
+      "mediaType": "text/javascript",
+      "minified": true,
+      "path": "assets/studio-enhancements-828c6d329278457c.min.js",
+      "role": "enhancement-runtime"
+    },
+    {
+      "bytes": 20611,
+      "integrity": "sha256-Z28RDrZn7/DDe0aa6eRdI44yH/Knu9nmpNbynJBmMGU=",
+      "mediaType": "text/markdown",
+      "path": "docs/contracts/studio-deployment.md",
+      "role": "documentation"
+    },
+    {
+      "bytes": 14878,
+      "integrity": "sha256-ySKcplumabz7hpFnVGZkIVsp4OPNZplpngJt7W5jaxI=",
+      "mediaType": "text/markdown",
+      "path": "docs/integration/prebuilt-browser-assets.md",
+      "role": "documentation"
+    },
+    {
+      "bytes": 433,
+      "integrity": "sha256-FuZfgyoo/WN0bxvnmt47BNwAn1Kg2j3BaXdvc/Jf5f4=",
+      "mediaType": "application/json",
+      "path": "examples/php-authoring-host/composer.json",
+      "role": "documentation"
+    },
+    {
+      "bytes": 856,
+      "integrity": "sha256-FYrROWWO9A1tHcGciH+5UMRr+hbyywAkgfuZnQAWY7A=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/public/index.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 22007,
+      "integrity": "sha256-SFtrvrzRoPnOe+B+sI78FtRJRwzpxfmKhj57E9Mq6DI=",
+      "mediaType": "text/markdown",
+      "path": "examples/php-authoring-host/README.md",
+      "role": "documentation"
+    },
+    {
+      "bytes": 1754,
+      "integrity": "sha256-HGr6IHn6Z75ARn/w868dZy6+ssGWxmD7VEIvbbjIy7U=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/AuthenticationHeaderPolicy.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 1499,
+      "integrity": "sha256-dweSgi4R+OSlOupq4S6Fd4z7Y+JjOr/Com4RkpEsdQ8=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/AuthoringApplicationService.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 1675,
+      "integrity": "sha256-gFHPR30W8xczzOUB7YvQdOxMSHcN2TZnR6E5Gl9fak0=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/AuthoringCallContext.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 2144,
+      "integrity": "sha256-79B/pig/s1WBSV6PHhbVLfwMd42aDDjcZ1HIczkQ4To=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/AuthoringEndpointConfiguration.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 836,
+      "integrity": "sha256-g8ykC1QBNbsVrojQWNjw+vFtrpmVRFdKufbwr1ZRkkQ=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/AuthoringOperation.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 2863,
+      "integrity": "sha256-2Z7/7kQqz0qLMfahx7KrH5nJEpgS+okOmv+hXaidFKM=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/AuthoringOperationRegistry.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 14006,
+      "integrity": "sha256-RLp4O6f2kHce4HvwQzQAFIWynfMLxrdd3Um2p/IlAJc=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/AuthoringResponder.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 394,
+      "integrity": "sha256-h3nnWu/osiKW4JP8rF25JJtP8rzbTl9vKrcUGbPMt94=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/autoload.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 236,
+      "integrity": "sha256-m+Yy4MGvJfqP/EhCTWgu2tXgQLB5xyLl4rRdNfFJT9w=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/CorrelationIdFactory.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 307,
+      "integrity": "sha256-ygR4lAo22db5y9d013qURqcsW7vvE+7nkhy+X2EC3is=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/DefaultFailureMapper.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 261,
+      "integrity": "sha256-VuVpaChCWC2fZs3UaAZUpwZiKNR+EUmNJBb858NdXwo=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/FailureMapper.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 4181,
+      "integrity": "sha256-pW2eQpETsYExNk+aTQmf4P/dToWFoOfk1K90wj6vwiw=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/HostFailure.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 3198,
+      "integrity": "sha256-odWYL6mOCtQnL/WYkwM5Dkjr7/UfxZS5sD+tHkA0T2U=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/HttpRequest.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 2109,
+      "integrity": "sha256-izL6RIPMaYL+IcoCTiX6VVV6sid7t+XAI8eBug6y7dM=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/HttpResponse.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 8530,
+      "integrity": "sha256-E08gX6IvT3dkctf4I29CiAafj+MHfNvieNbymF6gcC4=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/JsonDuplicateMemberDetector.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 258,
+      "integrity": "sha256-PacXgwMSawQYmNY3md0+ceFrWNaxP8jNNnnDim9PaM4=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/RandomCorrelationIdFactory.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 5405,
+      "integrity": "sha256-TO+3GQ29U/4+2E/qZW9ERY4mgkcnl+dKRm04jXcHoew=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/SameOriginSessionCsrfVerifier.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 460,
+      "integrity": "sha256-uJIwmn6rjwraZBUoy1iQsFhlGxFnxS/NDBWv3CaLFDw=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/SchemaValidator.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 3526,
+      "integrity": "sha256-SWs08pB9fBDWWHiWJvo5+CD833akigJj6InuC6V3ytg=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/ShortLivedTokenVerifier.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 3911,
+      "integrity": "sha256-X4KM/kATT1SzguakRTNKO69Y43M7NMNiq6ZkXcv+CSw=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/StudioContentSecurityPolicy.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 14484,
+      "integrity": "sha256-Lin5d/4XDWdrtmHtWeDbynqTrf7UcmZUJ3yumKHbz3Y=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/StudioDeploymentEmitter.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 1304,
+      "integrity": "sha256-x0dDgAwpVG34enQ9fbYYZVkUt8Vsz3LwY4HKkOPIhxA=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/TransportSecurityDecision.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 618,
+      "integrity": "sha256-YLfXqqK2bi0xSyuDgEWVOOzac1rIu8wmbvX1ODG1TBw=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/TransportSecurityInput.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 426,
+      "integrity": "sha256-470A+oRUb55wzIfVN5gXlPjeyZI9QC+RFfJAOxeqQK8=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/src/TransportSecurityVerifier.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 52676,
+      "integrity": "sha256-elFGzdBQ17Map80nf6LnMXY6nI6p5Kj97Syd0CRiceo=",
+      "mediaType": "text/plain",
+      "path": "examples/php-authoring-host/tests/run.php",
+      "role": "documentation"
+    },
+    {
+      "bytes": 1082,
+      "integrity": "sha256-VQSyN6p+ZmPqfboJXJnmEY51SnQ7PcDRWxiPTzWYUyo=",
+      "mediaType": "text/plain",
+      "path": "LICENSE",
+      "role": "license"
+    },
+    {
+      "bytes": 1664,
+      "integrity": "sha256-vkUjUH5Y884JV4vdEjhD+jo7DsaX7U5vpExo2c2TrY0=",
+      "mediaType": "text/markdown",
+      "path": "README.md",
+      "role": "documentation"
+    },
+    {
+      "bytes": 17843,
+      "integrity": "sha256-1G8TtRsEvzqO9ixuoaMRAOBJZ2FdSM82xLA6zziA5Rk=",
+      "mediaType": "application/json",
+      "path": "schemas/authoring-http.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 7493,
+      "integrity": "sha256-/rKcDdqp9AomUUzMlcpUbEVUTTydH9rduu5BumhfN9s=",
+      "mediaType": "application/json",
+      "path": "schemas/authoring-save.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 5419,
+      "integrity": "sha256-YOuMdnT6L/BkfGv9D9gqQjXP1yvriLufPLVKWeKmQh0=",
+      "mediaType": "application/json",
+      "path": "schemas/authoring-session.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 5356,
+      "integrity": "sha256-N3sgQ/9iEAOvKwpkoRPbTeJF/KwK1kLWheMKuGRU+PY=",
+      "mediaType": "application/json",
+      "path": "schemas/authoring-target.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 7453,
+      "integrity": "sha256-S3sx0m9PQs2vMFNvYIapBXc8W184cEng5MFF54C6RwQ=",
+      "mediaType": "application/json",
+      "path": "schemas/block-definition.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 9714,
+      "integrity": "sha256-MsFQU2lUG7oNfV9WyzVraH3uwd/+AHpdlsh9inHgBu0=",
+      "mediaType": "application/json",
+      "path": "schemas/blueprint.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 8450,
+      "integrity": "sha256-O2nKQ4qeVaHzqM6pseB6R1NXflQyPd2TWzucR5Lf/Ss=",
+      "mediaType": "application/json",
+      "path": "schemas/common.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 7637,
+      "integrity": "sha256-M4vvgiYXf1WbIryDzJNdde91fJd5npzfaM8E495eQRw=",
+      "mediaType": "application/json",
+      "path": "schemas/content-model.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 3104,
+      "integrity": "sha256-KoGp/qlqlsqabqtELbd/bdRHyM1wU8sRxyyLvOg/OFg=",
+      "mediaType": "application/json",
+      "path": "schemas/design-vocabulary.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 1476,
+      "integrity": "sha256-BQFVJmT3bwZOfCmXuQrZnYYxjB0FAUV7j1XrdZdIkdw=",
+      "mediaType": "application/json",
+      "path": "schemas/entry.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 2456,
+      "integrity": "sha256-pmSxOOQO2G0OAxej15ISDEd9tS16w3XwZXyBxXyalzk=",
+      "mediaType": "application/json",
+      "path": "schemas/field-adapter.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 2427,
+      "integrity": "sha256-dcyPPmPmKLyU3jwajgfQd17xBtrI8sL9nhweAF3LsnY=",
+      "mediaType": "application/json",
+      "path": "schemas/host-capabilities.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 1782,
+      "integrity": "sha256-7tYC8PpuMQd3DHt4zrB3A+w5bZVMOman4gYvfugXdc8=",
+      "mediaType": "application/json",
+      "path": "schemas/host-error.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 6108,
+      "integrity": "sha256-Sd/PcwJSh/qPuxVz7L1durLmavdALdCbya/BMMxzZvs=",
+      "mediaType": "application/json",
+      "path": "schemas/host-operations.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 3769,
+      "integrity": "sha256-pOVrjkIA0RiBKF2aKfmOnmE1DlAFYgg+QBuiH+L5hIk=",
+      "mediaType": "application/json",
+      "path": "schemas/host-request.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 1039,
+      "integrity": "sha256-yNKi6fS95rlh9UubTz2FA+neXY0KDNYKs3NX0vGY+c0=",
+      "mediaType": "application/json",
+      "path": "schemas/host-result.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 2026,
+      "integrity": "sha256-gCIQyhwXC4DwTYwg2g+L05rrw2HIu0Ckni22Y7CDbEQ=",
+      "mediaType": "application/json",
+      "path": "schemas/inspector.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 1437,
+      "integrity": "sha256-hlwTWpwFCpBpyHSkB+UhCPV2ks1Pu3UutuuT34frYMI=",
+      "mediaType": "application/json",
+      "path": "schemas/migration.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 1714,
+      "integrity": "sha256-ys69OuX6KO1efqLjTmOV3K0gQC2GZiAXDXkH06Ddh88=",
+      "mediaType": "application/json",
+      "path": "schemas/pattern.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 3747,
+      "integrity": "sha256-/DKHbScEb8525pjXQIhQipCSnS90y21f+2L8JMnRqJc=",
+      "mediaType": "application/json",
+      "path": "schemas/reusable-content-type.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 13038,
+      "integrity": "sha256-JyV/s49f+XgMI+zBVAmx9UgCXwK1qpMBWR7flnu9NW4=",
+      "mediaType": "application/json",
+      "path": "schemas/studio-browser-assets.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 7518,
+      "integrity": "sha256-LK81tgJb05u/pwRymTrccKbZiQHD7QXMYv14myilfGs=",
+      "mediaType": "application/json",
+      "path": "schemas/studio-config.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 12687,
+      "integrity": "sha256-T37m573XBWGK0mV7UAN/r+juuJ1Q5/cVen2B6iwPzw4=",
+      "mediaType": "application/json",
+      "path": "schemas/studio-deployment.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 8197,
+      "integrity": "sha256-UjioXieC+7goKt+iLia/4IXh7wxx9KZc/vxPD4ewyfM=",
+      "mediaType": "application/json",
+      "path": "schemas/vectors/authoring-http/transport-matrix.json",
+      "role": "documentation"
+    },
+    {
+      "bytes": 13038,
+      "integrity": "sha256-JyV/s49f+XgMI+zBVAmx9UgCXwK1qpMBWR7flnu9NW4=",
+      "mediaType": "application/json",
+      "path": "studio-browser-assets.schema.json",
+      "role": "schema"
+    },
+    {
+      "bytes": 1129,
+      "integrity": "sha256-GfjWT/TYz3uPY3qbi//3OVldU+TmPNv0X2+VoBut6WY=",
+      "mediaType": "application/json",
+      "path": "studio-release.json",
+      "role": "release-record"
+    },
+    {
+      "bytes": 3313,
+      "integrity": "sha256-r3xeI4PIxFh8AAyscgjvD7pRWlWaJBg1y5rJJKnwJ6M=",
+      "mediaType": "text/markdown",
+      "path": "THIRD_PARTY_NOTICES.md",
+      "role": "notice"
+    },
+    {
+      "bytes": 1063,
+      "integrity": "sha256-aYAi0oKuUe8FRR4YzagDgap0xqi7GbTuRWWxkm024Io=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/codex-notifier-1.1.2.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1062,
+      "integrity": "sha256-Q1C613I+t5jhth2LsAbb26YR1kJXtxH4G8ncc36Ctp8=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/codex-tooltip-1.0.6.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1063,
+      "integrity": "sha256-WVXG6dHeSQYI16QbTP/wDnaYZ921+sKZm478h0UA46E=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/editorjs__caret-1.1.0.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1063,
+      "integrity": "sha256-WVXG6dHeSQYI16QbTP/wDnaYZ921+sKZm478h0UA46E=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/editorjs__dom-1.1.0.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 10761,
+      "integrity": "sha256-uUbzh7u33mhDwNs0+HqJVvIp0iCzv4Gxa4QleIys8+0=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/editorjs__editorjs-2.31.6.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1063,
+      "integrity": "sha256-WVXG6dHeSQYI16QbTP/wDnaYZ921+sKZm478h0UA46E=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/editorjs__helpers-1.2.2.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1518,
+      "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/lit__reactive-element-2.1.2.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1518,
+      "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/lit-3.3.3.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1518,
+      "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/lit-element-4.2.2.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1518,
+      "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/lit-html-3.3.3.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1518,
+      "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/lit-labs__ssr-dom-shim-1.6.0.txt",
+      "role": "license"
+    },
+    {
+      "bytes": 1141,
+      "integrity": "sha256-ws/MuBL+SCEBqPBFl9/FqZkaaydIJmxHrJG2parhU4M=",
+      "mediaType": "text/plain",
+      "path": "third-party-licenses/types__trusted-types-2.0.7.txt",
+      "role": "license"
+    }
+  ],
+  "contentSecurityPolicy": {
+    "headerTemplate": "default-src 'none'; script-src 'self'; require-trusted-types-for 'script'; trusted-types lit-html; style-src 'self' 'nonce-{{STYLE_NONCE}}'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; worker-src 'none'; frame-src 'none'; manifest-src 'none'; object-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'",
+    "inertConfigurationScript": {
+      "element": "script",
+      "mediaType": "application/json",
+      "requiresHash": false,
+      "requiresNonce": false
+    },
+    "profile": "same-origin-http",
+    "styleNonce": {
+      "minimumEntropyBits": 128,
+      "placeholder": "{{STYLE_NONCE}}",
+      "scope": "response"
+    }
+  },
+  "enhancementRuntime": {
+    "activation": "renderer-data-attributes",
+    "contentSecurityPolicy": "default-src 'none'; script-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'",
+    "enhancements": [
+      "countdown",
+      "dialog",
+      "lightbox",
+      "navigation",
+      "notice",
+      "popover",
+      "slideshow",
+      "tabs"
+    ],
+    "entryPoint": "assets/studio-enhancements-828c6d329278457c.min.js",
+    "format": "iife",
+    "loading": "defer",
+    "needSignal": {
+      "rule": "closed-family-intersection-non-empty",
+      "source": "renderer-web.enhancements"
+    },
+    "noJavaScriptFallback": "semantic-renderer-output",
+    "safeToIncludeUnconditionally": true
+  },
+  "kind": "studio-browser-assets",
+  "module": {
+    "entryPoint": "assets/studio-browser-93e7abeb4a64b850.min.js",
+    "exports": [
+      "mountStudio",
+      "mountStudioFromConfigElement",
+      "autoMountStudio",
+      "parseStudioDeploymentConfiguration",
+      "resolveStudioDeploymentRuntime",
+      "createBrowserHttpHostAdapter",
+      "createCoreProductionBlockDefinitions",
+      "createCoreProductionPatterns",
+      "createStudioStandaloneRuntime",
+      "defineKumweStudio",
+      "defineKumweStudioContextual",
+      "defineKumweStudioStandalone",
+      "defineStudioBrowserElements",
+      "mountStudioHosted",
+      "mountStudioStandalone",
+      "openContextualStudioSession"
+    ],
+    "format": "esm"
+  },
+  "productionRuntime": {
+    "forbidden": [
+      "node",
+      "npm",
+      "npx",
+      "vite",
+      "server-side-javascript"
+    ],
+    "requires": [],
+    "servingModel": "static-files"
+  },
+  "publicRenderer": {
+    "style": {
+      "budgetBytes": 262144,
+      "contentHashAlgorithm": "sha256",
+      "fileNameTemplate": "studio-public-{{CONTENT_HASH_16}}.min.css",
+      "integrityAlgorithm": "sha256",
+      "materialization": "exact-utf8-bytes",
+      "mediaType": "text/css",
+      "minified": true,
+      "outputSchema": "https://schemas.kumwe.org/studio/v1/studio-browser-assets.schema.json#/$defs/publicStyleAsset",
+      "source": "renderer-web.css"
+    }
+  },
+  "release": {
+    "corpusManifestDigest": "sha256-PupdZVv+htI0wd7bnFtwVdFzhYVB7DxTXh+viiBClNM=",
+    "version": "0.1.0-beta.2"
+  },
+  "schemaVersion": 1
+}

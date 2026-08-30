@@ -26,11 +26,11 @@ final class CssStylesheetTest extends TestCase
             [
                 'prefers-reduced-motion',
                 '[data-studio-block]',
-                'data-studio-layout="stack"',
-                'data-studio-position="sticky"',
+                'data-studio-layout=stack',
+                'data-studio-position=sticky',
                 '@media print',
-                'min-width:48rem',
-                'min-width:75rem',
+                'width>=48rem',
+                'width>=75rem',
                 'data-studio-cover',
                 'data-studio-chart-table',
                 'data-studio-lightbox-dialog',
@@ -91,8 +91,8 @@ final class CssStylesheetTest extends TestCase
             ],
         ];
         $this->assertSame(
-            '[data-studio-scope="s1"][data-studio-part="heading"]{background-color:#101010;color:#fff}'
-            . '[data-studio-scope="s1"]{padding-block:1rem}',
+            '[data-studio-scope=s1][data-studio-part="heading"]{background-color:#101010;color:#fff}'
+            . '[data-studio-scope=s1]{padding-block:1rem}',
             ScopedStylesheet::compile('s1', $sheet),
             'Scoped rules compile with sorted declarations under the scope attribute.'
         );

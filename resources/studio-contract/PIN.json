@@ -1,58 +1,385 @@
 {
-  "pin": "kumwe-producer-studio-contract",
-  "source": {
-    "repository": "https://github.com/kumwe/studio",
-    "kind": "coordinated-release",
-    "release": "0.1.0-rc.1"
-  },
-  "release_record": {
-    "release": "0.1.0-rc.1",
-    "file": "studio-release.json",
-    "sha256": "b891bf573cfac52c751c1f13fa372a4f63ea76795316cce6f881b577f08bce56"
-  },
-  "protocol_version": "0.1.0-draft.2",
-  "corpus_manifest_digest": "sha256-4/ChS3pCA32CoZ+BjvL2tj2RGOFJNdqXwuqO8gWDxTs=",
-  "claimed_profiles": [
-    "studio.profile/authoring-web",
-    "studio.profile/binding-projection-v1",
-    "studio.profile/engine-core",
-    "studio.profile/host-baseline",
-    "studio.profile/host-baseline-v2",
-    "studio.profile/media-policy",
-    "studio.profile/preview-identity-v1",
-    "studio.profile/renderer-web",
-    "studio.profile/schema-property"
-  ],
-  "packages": {
-    "@kumwe/studio-core": "0.1.0-rc.1",
-    "@kumwe/studio-media": "0.1.0-rc.1",
-    "@kumwe/studio-preview": "0.1.0-rc.1",
-    "@kumwe/studio-protocol": "0.1.0-rc.1",
-    "@kumwe/studio-renderer-web": "0.1.0-rc.1",
-    "@kumwe/studio-rich-text": "0.1.0-rc.1",
-    "@kumwe/studio": "0.1.0-rc.1",
-    "@kumwe/studio-testkit": "0.1.0-rc.1"
-  },
-  "files": [
-    {
-      "file": "studio-release.json",
-      "sha256": "b891bf573cfac52c751c1f13fa372a4f63ea76795316cce6f881b577f08bce56"
+    "pin": "kumwe-producer-studio-contract",
+    "source": {
+        "repository": "https://github.com/kumwe/studio",
+        "kind": "provenance-backed-npm-release",
+        "release": "0.1.0-beta.2",
+        "commit": "38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48",
+        "workflow": "https://github.com/kumwe/studio/actions/runs/33181863797/attempts/1"
     },
-    {
-      "file": "protocol/studio-release.json",
-      "sha256": "b891bf573cfac52c751c1f13fa372a4f63ea76795316cce6f881b577f08bce56"
+    "release_record": {
+        "release": "0.1.0-beta.2",
+        "file": "studio-release.json",
+        "sha256": "19f8d64ff4d8cf7b8f637a9b8bfff739595d53e4e63cdbf45f6f95a01bade966"
     },
-    {
-      "file": "protocol/schemas/manifest.json",
-      "sha256": "644de67fdfec17101dd59f23d369baa4485ffe895596771cbb8885d4cf3e0cfc"
+    "protocol_version": "0.1.0-draft.2",
+    "corpus_manifest_digest": "sha256-PupdZVv+htI0wd7bnFtwVdFzhYVB7DxTXh+viiBClNM=",
+    "claimed_profiles": [],
+    "packages": {
+        "@kumwe/studio-core": "0.1.0-beta.2",
+        "@kumwe/studio-media": "0.1.0-beta.2",
+        "@kumwe/studio-preview": "0.1.0-beta.2",
+        "@kumwe/studio-protocol": "0.1.0-beta.2",
+        "@kumwe/studio-renderer-web": "0.1.0-beta.2",
+        "@kumwe/studio-rich-text": "0.1.0-beta.2",
+        "@kumwe/studio": "0.1.0-beta.2",
+        "@kumwe/studio-testkit": "0.1.0-beta.2"
     },
-    {
-      "file": "testkit/studio-release.json",
-      "sha256": "b891bf573cfac52c751c1f13fa372a4f63ea76795316cce6f881b577f08bce56"
+    "package_provenance": [
+        {
+            "name": "@kumwe/studio",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio/-/studio-0.1.0-beta.2.tgz",
+            "bytes": 411274,
+            "sha256": "21f8417dce37e72985a28b99d0af3f5349ab26cf61fcb31c7e716fa03ab6580d",
+            "shasum": "370011b8b8ba2f42f8803c33bd820a03b575e344",
+            "integrity": "sha512-Ms9GNRFeu6VnwWMKzcvobzdotfmu2g0ZSFzf0GLvUUJvAtvacU6i83L8PKhIWlR72zFcVlymwfAbKQEJjlx8vQ==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio@0.1.0-beta.2"
+        },
+        {
+            "name": "@kumwe/studio-core",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio-core/-/studio-core-0.1.0-beta.2.tgz",
+            "bytes": 91684,
+            "sha256": "bb3bf206092a6d68a4009c9e4cb8a44876b1c3f808c2f04694f6da9e6a61a402",
+            "shasum": "853d0d01fd583f5c6e16b7eb13c4297e004d7c60",
+            "integrity": "sha512-KbD2XQHMtmuO8TP1nzJSEdL0qb4b9MRwlul2ivE9hn4ttb3bqCu5N9qcX5ngl8l3dp9I5wlozLPgjMGtxIsWgg==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-core@0.1.0-beta.2"
+        },
+        {
+            "name": "@kumwe/studio-media",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio-media/-/studio-media-0.1.0-beta.2.tgz",
+            "bytes": 10242,
+            "sha256": "687226adc3115332fc62134eb53e2fbd567baca3a8947a911862be2b54e36cb1",
+            "shasum": "84ed9cfd4f7cf71112a850da4cecb45427585eb2",
+            "integrity": "sha512-TINoVY5+DFMPY+tdX2Fb3PY9LgeK2m+oO6Ejq6+w17R4GS42w292wlTaaqiMKNSiiiaedrIr8PQ/HZFNl42zAQ==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-media@0.1.0-beta.2"
+        },
+        {
+            "name": "@kumwe/studio-preview",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio-preview/-/studio-preview-0.1.0-beta.2.tgz",
+            "bytes": 13326,
+            "sha256": "4e4b3ff0fa451efeaada357d738f78cec54372fc8061d51244ec435d27c7273c",
+            "shasum": "60054a4b5e0b3f25132efbb2757a11861e34aefd",
+            "integrity": "sha512-ci1viXhEDNRGAN4OSKVuOVREFzroCfGXpRgQZQ6cHM9mPiNSjzwUTfgT0lDCvLVIJVkAB9/dEZUilJoBTgJVSQ==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-preview@0.1.0-beta.2"
+        },
+        {
+            "name": "@kumwe/studio-protocol",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio-protocol/-/studio-protocol-0.1.0-beta.2.tgz",
+            "bytes": 106301,
+            "sha256": "e7363eae94c0cdf23d42d666a2a4ad7f42b66e4a881547b7d3292195ae5cb8e7",
+            "shasum": "69e7b1a43b4fdbb291bdda03a53c60af41610598",
+            "integrity": "sha512-pxG9ycDEoTeEPFTLAcxGrZEu1kScaXTqc6WIfJrnlkJ2eeSZcbaS4jSbWsMIyACWsdYKb+J/bDz5Uldfo1WMkQ==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-protocol@0.1.0-beta.2"
+        },
+        {
+            "name": "@kumwe/studio-renderer-web",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio-renderer-web/-/studio-renderer-web-0.1.0-beta.2.tgz",
+            "bytes": 34448,
+            "sha256": "d8565e6541a70afbddc2f62ef72e3f15c45bd03feb22ccb92af22d8c2a42ed46",
+            "shasum": "841d8c0d4c5f9635bca36755f07117174ea8e056",
+            "integrity": "sha512-7TW0wQoeUumyVccvLvbMs59xg2QG26lKhcDfPEVsBp56hI456QLM4lRnD0UjAZ/xcpgdNti3vLgBbqs+BqnneQ==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-renderer-web@0.1.0-beta.2"
+        },
+        {
+            "name": "@kumwe/studio-rich-text",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio-rich-text/-/studio-rich-text-0.1.0-beta.2.tgz",
+            "bytes": 27199,
+            "sha256": "da9889b5dbd90ee840fe45a327e546e19dffe7af7fa0ee6b5e3c86df8919fbb2",
+            "shasum": "08a733899ee5616641bf11f6e9546054d63921d9",
+            "integrity": "sha512-NfsnsLzVA4xsPqS5XvnsQQ1qvtf+s5l+4wIDEP3f+R48HPgf6CRudUsDm7clgW6Tqc8KChlKpGilyDPgWXCfyg==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-rich-text@0.1.0-beta.2"
+        },
+        {
+            "name": "@kumwe/studio-testkit",
+            "version": "0.1.0-beta.2",
+            "tarball": "https://registry.npmjs.org/@kumwe/studio-testkit/-/studio-testkit-0.1.0-beta.2.tgz",
+            "bytes": 190643,
+            "sha256": "ff223005e3582f2c68884749cbc3ab6b23c6a5be93be2d980187c3b6b9d3c5df",
+            "shasum": "59befc4cce955e94a5b2022c4f95e8b32339dfee",
+            "integrity": "sha512-KxD2nPT5GAOePn7e7nflQWnnKCQJbUXw1h+rDVkBO9Ue/TKOMN/vDV3Ue4Q3j9Hd09KbMx5Bxq12kyhY7KCu5g==",
+            "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-testkit@0.1.0-beta.2"
+        }
+    ],
+    "browser_artifacts": {
+        "manifest": {
+            "file": "browser/studio-assets.json",
+            "package": "@kumwe/studio",
+            "package_path": "dist/browser/studio-assets.json",
+            "sha256": "89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68"
+        },
+        "authoring_archive": {
+            "archive_stem": "studio-browser-0.1.0-beta.2",
+            "status": "unavailable",
+            "reason": "The governed beta publication exposes provenance-backed npm packages but no approved outer Studio browser archive or detached archive checksum."
+        },
+        "resolved_assets": [
+            {
+                "role": "browser-module",
+                "file": "browser/assets/studio-browser-93e7abeb4a64b850.min.js",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/assets/studio-browser-93e7abeb4a64b850.min.js",
+                "bytes": 940524,
+                "budget_bytes": 1048576,
+                "content_hash": "93e7abeb4a64b850e0493b5e908a31c5660b76489913b38729a952fcac6067a6",
+                "integrity": "sha256-k+er60pkuFDgSTtekIoxxWYLdkiZE7OHKalS/KxgZ6Y=",
+                "minified": true
+            },
+            {
+                "role": "enhancement-runtime",
+                "file": "browser/assets/studio-enhancements-828c6d329278457c.min.js",
+                "package": "@kumwe/studio-renderer-web",
+                "package_path": "dist/browser/assets/studio-enhancements-828c6d329278457c.min.js",
+                "bytes": 10874,
+                "budget_bytes": 65536,
+                "content_hash": "828c6d329278457c54eecfa422cba63272ff5ee1a8be565420e1c5060b743155",
+                "integrity": "sha256-goxtMpJ4RXxU7s+kIsumMnL/XuGovlZUIOHFBgt0MVU=",
+                "minified": true
+            }
+        ],
+        "redistribution_files": [
+            {
+                "role": "license",
+                "file": "browser/LICENSE",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/LICENSE",
+                "bytes": 1082,
+                "media_type": "text/plain",
+                "integrity": "sha256-VQSyN6p+ZmPqfboJXJnmEY51SnQ7PcDRWxiPTzWYUyo=",
+                "sha256": "5504b237aa7e6663ea7dba095c99e6118e754a743b3dc0d15b188f4f3598532a"
+            },
+            {
+                "role": "notice",
+                "file": "browser/THIRD_PARTY_NOTICES.md",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/THIRD_PARTY_NOTICES.md",
+                "bytes": 3313,
+                "media_type": "text/markdown",
+                "integrity": "sha256-r3xeI4PIxFh8AAyscgjvD7pRWlWaJBg1y5rJJKnwJ6M=",
+                "sha256": "af7c5e2383c8c4587c000cac7208ef0fba515a559a241835cb9ac924a9f027a3"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/codex-notifier-1.1.2.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/codex-notifier-1.1.2.txt",
+                "bytes": 1063,
+                "media_type": "text/plain",
+                "integrity": "sha256-aYAi0oKuUe8FRR4YzagDgap0xqi7GbTuRWWxkm024Io=",
+                "sha256": "698022d282ae51ef05451e18cda80381aa74c6a8bb19b4ee4565b1926d36e08a"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/codex-tooltip-1.0.6.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/codex-tooltip-1.0.6.txt",
+                "bytes": 1062,
+                "media_type": "text/plain",
+                "integrity": "sha256-Q1C613I+t5jhth2LsAbb26YR1kJXtxH4G8ncc36Ctp8=",
+                "sha256": "4350bad7723eb798e1b61d8bb006dbdba611d64257b711f81bc9dc737e82b69f"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/editorjs__caret-1.1.0.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/editorjs__caret-1.1.0.txt",
+                "bytes": 1063,
+                "media_type": "text/plain",
+                "integrity": "sha256-WVXG6dHeSQYI16QbTP/wDnaYZ921+sKZm478h0UA46E=",
+                "sha256": "5955c6e9d1de490608d7a41b4cfff00e769867ddb5fac2999b8efc874500e3a1"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/editorjs__dom-1.1.0.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/editorjs__dom-1.1.0.txt",
+                "bytes": 1063,
+                "media_type": "text/plain",
+                "integrity": "sha256-WVXG6dHeSQYI16QbTP/wDnaYZ921+sKZm478h0UA46E=",
+                "sha256": "5955c6e9d1de490608d7a41b4cfff00e769867ddb5fac2999b8efc874500e3a1"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/editorjs__editorjs-2.31.6.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/editorjs__editorjs-2.31.6.txt",
+                "bytes": 10761,
+                "media_type": "text/plain",
+                "integrity": "sha256-uUbzh7u33mhDwNs0+HqJVvIp0iCzv4Gxa4QleIys8+0=",
+                "sha256": "b946f387bbb7de6843c0db34f87a8956f229d220b3bf81b16b8425788cacf3ed"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/editorjs__helpers-1.2.2.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/editorjs__helpers-1.2.2.txt",
+                "bytes": 1063,
+                "media_type": "text/plain",
+                "integrity": "sha256-WVXG6dHeSQYI16QbTP/wDnaYZ921+sKZm478h0UA46E=",
+                "sha256": "5955c6e9d1de490608d7a41b4cfff00e769867ddb5fac2999b8efc874500e3a1"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/lit__reactive-element-2.1.2.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/lit__reactive-element-2.1.2.txt",
+                "bytes": 1518,
+                "media_type": "text/plain",
+                "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+                "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/lit-3.3.3.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/lit-3.3.3.txt",
+                "bytes": 1518,
+                "media_type": "text/plain",
+                "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+                "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/lit-element-4.2.2.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/lit-element-4.2.2.txt",
+                "bytes": 1518,
+                "media_type": "text/plain",
+                "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+                "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/lit-html-3.3.3.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/lit-html-3.3.3.txt",
+                "bytes": 1518,
+                "media_type": "text/plain",
+                "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+                "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/lit-labs__ssr-dom-shim-1.6.0.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/lit-labs__ssr-dom-shim-1.6.0.txt",
+                "bytes": 1518,
+                "media_type": "text/plain",
+                "integrity": "sha256-K2b5OQr94p7f5DFNr/k/AfsYLhF4BT4igSAXiYfl23U=",
+                "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+            },
+            {
+                "role": "license",
+                "file": "browser/third-party-licenses/types__trusted-types-2.0.7.txt",
+                "package": "@kumwe/studio",
+                "package_path": "dist/browser/third-party-licenses/types__trusted-types-2.0.7.txt",
+                "bytes": 1141,
+                "media_type": "text/plain",
+                "integrity": "sha256-ws/MuBL+SCEBqPBFl9/FqZkaaydIJmxHrJG2parhU4M=",
+                "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+            }
+        ]
     },
-    {
-      "file": "testkit/corpus-manifest.json",
-      "sha256": "e3f0a14b7a42037d82a19f818ef2f6b63d9118e14935da97c2ea8ef20583c53b"
-    }
-  ]
+    "release_readiness": {
+        "status": "blocked",
+        "blockers": [
+            "The governed beta publication exposes provenance-backed npm packages but no approved outer Studio browser archive or detached archive checksum."
+        ]
+    },
+    "files": [
+        {
+            "file": "studio-release.json",
+            "sha256": "19f8d64ff4d8cf7b8f637a9b8bfff739595d53e4e63cdbf45f6f95a01bade966"
+        },
+        {
+            "file": "protocol/studio-release.json",
+            "sha256": "19f8d64ff4d8cf7b8f637a9b8bfff739595d53e4e63cdbf45f6f95a01bade966"
+        },
+        {
+            "file": "protocol/schemas/manifest.json",
+            "sha256": "b7d41d6cbe71a770f433ddce12bdcd5582a2be0249191f4845ad5278079ff6e9"
+        },
+        {
+            "file": "testkit/studio-release.json",
+            "sha256": "19f8d64ff4d8cf7b8f637a9b8bfff739595d53e4e63cdbf45f6f95a01bade966"
+        },
+        {
+            "file": "testkit/corpus-manifest.json",
+            "sha256": "3eea5d655bfe86d234c1dedb9c5b7055d173858541ec3c535e1faf8a204294d3"
+        },
+        {
+            "file": "browser/studio-assets.json",
+            "sha256": "89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68"
+        },
+        {
+            "file": "browser/assets/studio-browser-93e7abeb4a64b850.min.js",
+            "sha256": "93e7abeb4a64b850e0493b5e908a31c5660b76489913b38729a952fcac6067a6"
+        },
+        {
+            "file": "browser/assets/studio-enhancements-828c6d329278457c.min.js",
+            "sha256": "828c6d329278457c54eecfa422cba63272ff5ee1a8be565420e1c5060b743155"
+        },
+        {
+            "file": "browser/LICENSE",
+            "sha256": "5504b237aa7e6663ea7dba095c99e6118e754a743b3dc0d15b188f4f3598532a"
+        },
+        {
+            "file": "browser/THIRD_PARTY_NOTICES.md",
+            "sha256": "af7c5e2383c8c4587c000cac7208ef0fba515a559a241835cb9ac924a9f027a3"
+        },
+        {
+            "file": "browser/third-party-licenses/codex-notifier-1.1.2.txt",
+            "sha256": "698022d282ae51ef05451e18cda80381aa74c6a8bb19b4ee4565b1926d36e08a"
+        },
+        {
+            "file": "browser/third-party-licenses/codex-tooltip-1.0.6.txt",
+            "sha256": "4350bad7723eb798e1b61d8bb006dbdba611d64257b711f81bc9dc737e82b69f"
+        },
+        {
+            "file": "browser/third-party-licenses/editorjs__caret-1.1.0.txt",
+            "sha256": "5955c6e9d1de490608d7a41b4cfff00e769867ddb5fac2999b8efc874500e3a1"
+        },
+        {
+            "file": "browser/third-party-licenses/editorjs__dom-1.1.0.txt",
+            "sha256": "5955c6e9d1de490608d7a41b4cfff00e769867ddb5fac2999b8efc874500e3a1"
+        },
+        {
+            "file": "browser/third-party-licenses/editorjs__editorjs-2.31.6.txt",
+            "sha256": "b946f387bbb7de6843c0db34f87a8956f229d220b3bf81b16b8425788cacf3ed"
+        },
+        {
+            "file": "browser/third-party-licenses/editorjs__helpers-1.2.2.txt",
+            "sha256": "5955c6e9d1de490608d7a41b4cfff00e769867ddb5fac2999b8efc874500e3a1"
+        },
+        {
+            "file": "browser/third-party-licenses/lit__reactive-element-2.1.2.txt",
+            "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+        },
+        {
+            "file": "browser/third-party-licenses/lit-3.3.3.txt",
+            "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+        },
+        {
+            "file": "browser/third-party-licenses/lit-element-4.2.2.txt",
+            "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+        },
+        {
+            "file": "browser/third-party-licenses/lit-html-3.3.3.txt",
+            "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+        },
+        {
+            "file": "browser/third-party-licenses/lit-labs__ssr-dom-shim-1.6.0.txt",
+            "sha256": "2b66f9390afde29edfe4314daff93f01fb182e1178053e228120178987e5db75"
+        },
+        {
+            "file": "browser/third-party-licenses/types__trusted-types-2.0.7.txt",
+            "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+        }
+    ]
 }

@@ -4,8 +4,20 @@
     {
       "files": [
         {
-          "digest": "sha256-3Ym7JF4bCkJYwAEShdm3ztHDQ3PDKdpQxZ/yOx2b6Xs=",
+          "digest": "sha256-YuNbHhSY0b4oz/98G3cHYkhNguXAFniLaGjp8dLbrQM=",
           "file": "authoring-message-catalog.en.json"
+        },
+        {
+          "digest": "sha256-8JYR5mUlMvswled3UGVoc0EhoDm89eFDDqhFMzYg+oo=",
+          "file": "authoring-save.plan.example.json"
+        },
+        {
+          "digest": "sha256-zmP9grVS7kYOVsoH6nWd/15IlllVW1vYRJjz3AvajI8=",
+          "file": "authoring-session.example.json"
+        },
+        {
+          "digest": "sha256-oDINh/ZoTlEzYlf+/E31mYddo1LXSYG33aEaUGq2i4I=",
+          "file": "authoring-target.example.json"
         },
         {
           "digest": "sha256-VPvgjeVcou8k/vGgrFXfMOx2ureah7+HADcuV1ze8To=",
@@ -48,7 +60,7 @@
           "file": "host-error.conflict.example.json"
         },
         {
-          "digest": "sha256-SJwDS1MjbhC9zDyHhmuXPVjhTrxQnxfKhtJ9o2Uvv+Q=",
+          "digest": "sha256-52sSih7W3FfACN77wf9w69JAnUSiKYmMGGgIELB3tqw=",
           "file": "host-operations.example.json"
         },
         {
@@ -84,7 +96,7 @@
           "file": "pattern.example.json"
         },
         {
-          "digest": "sha256-RhghT+jsQKZY8AddDzLrzeC92FBj00MT3rlsJm6eXog=",
+          "digest": "sha256-gjrUSkrEuT9RaaYLt7cqYg9CDa/0xoJpdez/f2fdzbc=",
           "file": "plugin.example.json"
         },
         {
@@ -96,12 +108,24 @@
           "file": "provenance.example.json"
         },
         {
+          "digest": "sha256-t9UP5fgKknUbGHJtIjhDy9z96gqkTuSCth+vgJHg+Mo=",
+          "file": "reusable-content-type.example.json"
+        },
+        {
           "digest": "sha256-EXaD+hJHyRCGQoxSVo/a7jJBUJ2ZqH5a6eXdjTPfros=",
           "file": "rich-text.example.json"
         },
         {
           "digest": "sha256-FzjalpM4jDkbkK8rGnmH6HSFxU9PhMp0vI9aPTCyEJE=",
           "file": "studio-config.example.json"
+        },
+        {
+          "digest": "sha256-ng0RLEGil8PQ52ER/iKqKDRjJ9cpi4cla0uoij/r/0Q=",
+          "file": "studio-deployment.hosted.example.json"
+        },
+        {
+          "digest": "sha256-8KnarP4nAaFJTfm9gjXT7mAo501Oa1NLosajuEyatoE=",
+          "file": "studio-deployment.standalone.example.json"
         },
         {
           "digest": "sha256-fuMTN0/YCVdx5cpXDzT72aoDKe7iKUeOTSGRm3Axq6k=",
@@ -604,6 +628,16 @@
     {
       "files": [
         {
+          "digest": "sha256-UjioXieC+7goKt+iLia/4IXh7wxx9KZc/vxPD4ewyfM=",
+          "file": "transport-matrix.json"
+        }
+      ],
+      "group": "authoring-http-vectors",
+      "path": "vectors/authoring-http"
+    },
+    {
+      "files": [
+        {
           "digest": "sha256-6+FxAWx+Ml5Gj5bwlFIo68XVPGwi2sPBf64g5WVjH3U=",
           "file": "canonical-preorder.json"
         },
@@ -926,6 +960,26 @@
     {
       "files": [
         {
+          "digest": "sha256-ljTJiEiRDi0K8gevNB0CJbiTk8Elh4Nof6H0vvaeVRk=",
+          "file": "authoring-save.plan-missing-coordinates.json"
+        },
+        {
+          "digest": "sha256-KJwtRIuXAwAA5iuNjM59dCCiJdBWGf75AwIM9T7JUrA=",
+          "file": "authoring-save.plan-missing-successor-context.json"
+        },
+        {
+          "digest": "sha256-cm+XIGq1B+jHZ5rnMqP8Ar30sSe7i4mBaL9naAABTGI=",
+          "file": "authoring-save.request-plan-missing-successor-context.json"
+        },
+        {
+          "digest": "sha256-MCJnARlTtq/Bu6cEfE4mgKn+/bF9Ie49nVzjNh1q+ZY=",
+          "file": "authoring-session.missing-entry-state.json"
+        },
+        {
+          "digest": "sha256-cmSS67Tsvof3kidNu4igl/Gx21+4WwW0iSrpCcX74z0=",
+          "file": "authoring-target.missing-resource-types.json"
+        },
+        {
           "digest": "sha256-QioG6zTTAy2LjLUO5oNmYvvvzJ754+kQq9fMCAz2iFA=",
           "file": "binding-projection-vector.unknown-status.json"
         },
@@ -1018,6 +1072,18 @@
           "file": "host-capabilities.invalid-protocol-version.json"
         },
         {
+          "digest": "sha256-9DF9DTP0FSwJ9P3kj/pOlFOik3p2JtSBsjFBii551WE=",
+          "file": "host-error.retry-delay-without-retry.json"
+        },
+        {
+          "digest": "sha256-cjukTWhUZMALqEY0IXBPcIlE4xTRb6n8UA3XiBPJ8/o=",
+          "file": "host-error.retry-delay-wrong-category.json"
+        },
+        {
+          "digest": "sha256-eYNlSGuvJiINWipDkv/F+wcDpFTbdUR7tD6+srZ4bdI=",
+          "file": "host-error.revision-without-conflict.json"
+        },
+        {
           "digest": "sha256-TbyqAfnspj0axcP3sJNAj+Sqqg0XaOpCmYy6l6MEF2Y=",
           "file": "host-sequence.pending-expectation.json"
         },
@@ -1086,6 +1152,10 @@
           "file": "preview-message.viewport-unsafe-role.json"
         },
         {
+          "digest": "sha256-Cq6bZogn1IJfqzkIgNtu3mpMHASFAf0hSbRqPjlIhDc=",
+          "file": "reusable-content-type.entry-values.json"
+        },
+        {
           "digest": "sha256-Ha4ygQciWMcqcM8k/7qDW3CW4mr2EIwdrRCxglwBG2c=",
           "file": "rich-text.embedded-html.json"
         },
@@ -1096,6 +1166,18 @@
         {
           "digest": "sha256-w3ZWv4DbsOsPn/99raEr4O1LHinoK5V2AePlIpHtqr8=",
           "file": "studio-chart.script-config.json"
+        },
+        {
+          "digest": "sha256-NlwsVag8hq4JMb3+OLQ72nJAWio8oyBqsyemCznDdnQ=",
+          "file": "studio-deployment.long-lived-token.json"
+        },
+        {
+          "digest": "sha256-oDXveuLa6aefSSvVeFWJAv6037lqqIcy8Iuczsg8qbA=",
+          "file": "studio-deployment.missing-required.json"
+        },
+        {
+          "digest": "sha256-mp8F0wbXMvjnJbiRunRXnx7H+w+1JyNHxdQP5cnn6Jo=",
+          "file": "studio-deployment.unknown-member.json"
         },
         {
           "digest": "sha256-m1+/TT3sDNebrcKQjKgnD3VMBZuu0gA5IpPtnvD4N94=",
@@ -1172,35 +1254,35 @@
     {
       "files": [
         {
-          "digest": "sha256-um5bUbyx+OjtIAus2YHG00cP/2zSjS3JTCdfnsFOpfw=",
+          "digest": "sha256-2oGROiWkPVzuaR5SUt781ys7Q6itRY3IBwK7MXq4yAA=",
           "file": "blob-default-deny.json"
         },
         {
-          "digest": "sha256-Oehibv24K+zMZTUR12Ixfzb6F8FByn66QJtPrd3nXbI=",
+          "digest": "sha256-IIiRyZBhwOx6mmHQkYkVivizehpbNOTssHNHwEe0YwA=",
           "file": "chart-fallback.json"
         },
         {
-          "digest": "sha256-NXARG7Ek/CMM4fzudJ5b89syBnQjQCM6nI/2NkFZ7i4=",
+          "digest": "sha256-ScdG3XmPTIr8iUNo6oIe73876e3I626nGK0VdWqkOCg=",
           "file": "complete-catalog.json"
         },
         {
-          "digest": "sha256-7lirFue9gaXchg9DzSllFjDp9p4dcW/C4M3+iEdORRQ=",
+          "digest": "sha256-8MSR3lTM8xTYOzo7IsVFjvxIf46gh/xo6z9YIrURVUo=",
           "file": "escaped-heading.json"
         },
         {
-          "digest": "sha256-7JwEi3hJV5J21CdHrii1WP28m8wDz9vO0zcxVcTAF48=",
+          "digest": "sha256-mqB9ODQSu5BmCcZwUKVWEzZMYjsXTj6qnzsXpIearaU=",
           "file": "interactive-behaviors.json"
         },
         {
-          "digest": "sha256-dgJ3SWlGYPHLQtp1WXgmiWlwE35LitFsrQOgvYw3aqM=",
+          "digest": "sha256-cCRU6GZqgWqd2G+yR3CoGjY9R9bal/9t/x4M48bCAIo=",
           "file": "presentation-capabilities.json"
         },
         {
-          "digest": "sha256-mSB0xRbCvWVb1QmcjjKcZEhXibjbr+5Xxg1FKIIkMrk=",
+          "digest": "sha256-bJpIcWGTUkKxXbAmMTkvPIs40dBjE4wO39xHRJn2eYs=",
           "file": "responsive-grid.json"
         },
         {
-          "digest": "sha256-e4Y140UiCb3kabaYhc5QzNFvOzCrLpE3RSSXf2c9x8E=",
+          "digest": "sha256-M6fXBiAu5c73xGHt7m2914EHPvMbIfkcJxJUCqyXm7o=",
           "file": "security-fallbacks.json"
         }
       ],

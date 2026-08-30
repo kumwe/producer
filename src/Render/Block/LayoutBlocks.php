@@ -142,7 +142,7 @@ final class LayoutBlocks implements BlockRenderer
         $expandedValue = $columns instanceof \stdClass ? ($columns->expanded ?? null) : null;
         $medium = Properties::integerProperty($mediumValue, 1, 12, $compact);
         $expanded = Properties::integerProperty($expandedValue, 1, 12, $medium);
-        $state->css[] = '[data-studio-scope="' . $scope . '"]{--studio-columns-compact:' . $compact
+        $state->css[] = '[data-studio-scope=' . $scope . ']{--studio-columns-compact:' . $compact
             . ';--studio-columns-medium:' . $medium . ';--studio-columns-expanded:' . $expanded . '}';
 
         return '<div data-studio-layout="' . $kind . '" data-studio-part="content">'
@@ -181,7 +181,7 @@ final class LayoutBlocks implements BlockRenderer
             'strong' => '0.65',
             default => '0.4',
         };
-        $state->css[] = '[data-studio-scope="' . $scope . '"]{--studio-cover-overlay:' . $opacity . '}';
+        $state->css[] = '[data-studio-scope=' . $scope . ']{--studio-cover-overlay:' . $opacity . '}';
         $alignment = Properties::enumProperty(
             Properties::property($node, 'alignment'),
             ['center', 'end', 'start'],

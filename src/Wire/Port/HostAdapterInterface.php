@@ -19,7 +19,7 @@ namespace Kumwe\Producer\Wire\Port;
 
 /**
  * The host's side of the wire, complete: the authorities the dispatcher
- * always consults and the nine operation ports of the pinned registry.
+ * always consults and the ten operation ports of the pinned registry.
  *
  * What the host must guarantee: {@see authorization()},
  * {@see mutations()}, and {@see artifact()} always return an
@@ -68,6 +68,16 @@ interface HostAdapterInterface
      * @since   0.1.0
      */
     public function artifact(): ArtifactPortInterface;
+
+    /**
+     * The optional contextual authoring port, studio.port/authoring.
+     *
+     * @return AuthoringPortInterface|null The port, or null when this host
+     *                                     does not serve contextual authoring.
+     *
+     * @since 0.1.0
+     */
+    public function authoring(): ?AuthoringPortInterface;
 
     /**
      * The optional localization port, studio.port/localization.

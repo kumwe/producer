@@ -43,7 +43,7 @@ final class CompositionRenderer
     /**
      * Render a list of Blueprint root nodes into the page's HTML, its
      * static CSS (the base stylesheet followed by every non-empty per-node
-     * scoped sheet, in encounter order, joined by newlines), and the
+     * scoped sheet, in encounter order, concatenated byte-exactly), and the
      * enhancement requests in document order.
      *
      * @param   list<\stdClass>  $roots    Decoded Blueprint nodes.
@@ -99,7 +99,7 @@ final class CompositionRenderer
             throw new RenderException('The preview marker inventory does not match the rendered tree.');
         }
         $parts = [BaseStylesheet::css(), ...$state->css];
-        $css = implode("\n", array_values(array_filter($parts, static fn (string $part): bool => $part !== '')));
+        $css = implode('', array_values(array_filter($parts, static fn (string $part): bool => $part !== '')));
 
         return new RenderResult($html, $css, $state->enhancements);
     }
