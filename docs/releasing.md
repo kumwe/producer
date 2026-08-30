@@ -5,9 +5,9 @@ the pin, never through matching version numbers.
 
 Releasing is merging. Every Kumwe PHP library delivers the same way:
 
-1. Prove that the pinned Studio record is release-ready. Package provenance and manifest-verified
-   browser assets are required but do not replace an approved outer Studio browser archive and its
-   detached checksum; a blocked pin stays under `## Unreleased`.
+1. Prove that the pinned Studio record is release-ready. Package provenance, manifest-verified
+   browser assets, and a locally reproduced outer-archive candidate are required but do not replace
+   the two exact governed GitHub release assets; a blocked pin stays under `## Unreleased`.
 2. Land the work on `main` with its `CHANGELOG.md` section for the next version — the heading
    `## X.Y.Z - date` is the release record.
 3. The `Release on record` workflow runs on every push to `main`: it re-proves the complete check
@@ -21,9 +21,28 @@ Releasing is merging. Every Kumwe PHP library delivers the same way:
 The current Studio `0.1.0-beta.2` integration at source commit
 `38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48` is intentionally unreleased. Its eight npm packages,
 55 schemas, 301 corpus members, browser module, and enhancement runtime are provenance- or
-manifest-verified, and it claims zero conformance profiles. It cannot become a Producer release
-until an approved outer Studio browser archive and detached checksum are published and recorded in
-the pin.
+manifest-verified, and it claims zero conformance profiles. Its deterministic 74-member browser
+archive and detached checksum have also been reproduced and independently verified as non-vendored
+inputs. It cannot become a Producer release until the governed GitHub prerelease publishes those
+two exact files and the pin is re-generated from the public downloads.
+
+The deterministic re-pin command requires all evidence-bearing inputs explicitly; it never fetches
+or discovers a mutable coordinate:
+
+```sh
+php tools/import-studio-contract.php STUDIO_ROOT EVIDENCE_JSON \
+    STUDIO_TGZ RENDERER_TGZ BROWSER_TAR BROWSER_SHA256
+```
+
+Every input path must be canonical and contain no symbolic-link component. The Studio checkout's
+`HEAD` must equal the evidence commit, but controlled bytes are read directly from that commit's
+ordinary Git blobs with replacement objects disabled and Git configuration inputs sanitized; dirty
+tracked files and `refs/replace` cannot affect the import. npm gzip/tar input is streamed through
+fixed compressed, inflated, member-count, member-size, type, path, and padding bounds.
+
+For the blocked candidate the outer inputs may be a workflow-equivalent local reproduction used
+only for verification. Release readiness may become `ready` only after re-running against both
+files downloaded from the exact governed GitHub prerelease URLs recorded in the evidence.
 
 Version policy:
 

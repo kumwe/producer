@@ -279,16 +279,42 @@ if (
 
 $readiness = is_array($pin['release_readiness'] ?? null) ? $pin['release_readiness'] : [];
 $blockers = is_array($readiness['blockers'] ?? null) ? $readiness['blockers'] : [];
-$archiveReason = $archivePin['reason'] ?? null;
+$archiveReason = 'The exact Studio beta.2 browser archive and detached checksum are locally reproduced '
+    . 'and fully verified, but the governed GitHub prerelease does not publish both assets yet.';
+$archiveSha256 = 'e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01';
+$archiveFile = 'studio-browser-0.1.0-beta.2-' . substr($archiveSha256, 0, 16) . '.tar';
+$archiveTag = 'studio-v0.1.0-beta.2';
+$downloadRoot = 'https://github.com/kumwe/studio/releases/download/' . $archiveTag . '/';
+$expectedArchivePin = [
+    'archive_stem' => 'studio-browser-0.1.0-beta.2',
+    'status' => 'verified-local-candidate',
+    'archive_file' => $archiveFile,
+    'archive_bytes' => 1401344,
+    'archive_budget_bytes' => 2097152,
+    'archive_sha256' => $archiveSha256,
+    'archive_sha512' => '630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501'
+        . 'd09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764',
+    'archive_integrity' => 'sha512-Ywoz6/bqAyFVn9x4ZERZIlVE8WIckeRCztijV6HWhQHQlxX1xmBSa+'
+        . 'gZUySI/ID6XFNTarkGDmi6yA/b2Q7XZA==',
+    'manifest_sha256' => '89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68',
+    'member_count' => 74,
+    'checksum_file' => $archiveFile . '.sha256',
+    'checksum_bytes' => 115,
+    'checksum_sha256' => '25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0',
+    'publication_status' => 'unavailable',
+    'expected_tag' => $archiveTag,
+    'expected_release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,
+    'expected_archive_url' => $downloadRoot . $archiveFile,
+    'expected_checksum_url' => $downloadRoot . $archiveFile . '.sha256',
+    'reason' => $archiveReason,
+];
 if (
     ($readiness['status'] ?? null) !== 'blocked'
-    || count($blockers) !== 1
-    || !is_string($archiveReason)
     || $blockers !== [$archiveReason]
+    || $archivePin !== $expectedArchivePin
     || ($archivePin['archive_stem'] ?? null) !== ($archiveLocator['archiveStem'] ?? null)
-    || ($archivePin['status'] ?? null) !== 'unavailable'
 ) {
-    $errors[] = 'PIN.json must fail closed on the unavailable governed outer browser archive.';
+    $errors[] = 'PIN.json must retain the exact verified candidate while public assets remain unavailable.';
 }
 
 $manifestAssets = is_array($browserManifest['assets'] ?? null) ? $browserManifest['assets'] : [];
@@ -584,7 +610,7 @@ if ($errors !== []) {
 
 echo sprintf(
     "Studio contract verified: release %s, protocol %s, %d schemas, %d corpus files, "
-        . "%d redistribution files.\n",
+        . "%d redistribution files, and one blocked 74-member outer-archive candidate.\n",
     $release['release'],
     $release['protocolVersion'],
     count($schemaManifest['schemas']),

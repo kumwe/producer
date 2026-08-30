@@ -28,6 +28,68 @@ final class StudioContractResources
     private const MAX_RESOURCE_BYTES = 1048576;
 
     /**
+     * Exact locally reproduced, non-vendored Studio beta.2 outer archive.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_ARCHIVE_BYTES = 1401344;
+
+    /**
+     * Studio's fixed outer-archive publication budget.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_ARCHIVE_BUDGET_BYTES = 2097152;
+
+    /**
+     * Exact regular-file ustar member count: manifest plus 73 assets.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_ARCHIVE_MEMBERS = 74;
+
+    /**
+     * Exact reviewed Studio beta.2 outer-archive SHA-256.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_ARCHIVE_SHA256 =
+        'e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01';
+
+    /**
+     * Exact reviewed Studio beta.2 outer-archive SHA-512.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_ARCHIVE_SHA512 =
+        '630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501'
+        . 'd09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764';
+
+    /**
+     * Exact reviewed detached-checksum byte count.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_CHECKSUM_BYTES = 115;
+
+    /**
+     * Exact reviewed detached-checksum SHA-256.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_CHECKSUM_SHA256 =
+        '25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0';
+
+    /**
+     * Single remaining release blocker until both governed assets exist.
+     *
+     * @since 0.2.0
+     */
+    private const BROWSER_ARCHIVE_BLOCKER =
+        'The exact Studio beta.2 browser archive and detached checksum are locally reproduced and fully '
+        . 'verified, but the governed GitHub prerelease does not publish both assets yet.';
+
+    /**
      * Static utility; never instantiated.
      *
      * @since   0.2.0
@@ -525,14 +587,10 @@ final class StudioContractResources
             || ($manifestPin->package_path ?? null) !== 'dist/browser/' . $locators->manifestName()
             || !is_string($manifestSha256)
             || preg_match('/^[a-f0-9]{64}$/', $manifestSha256) !== 1
-            || ($archivePin->archive_stem ?? null) !== $locators->authoringArchiveStem()
-            || ($archivePin->status ?? null) !== 'unavailable'
-            || !is_string($archivePin->reason ?? null)
-            || $release->releaseReady()
-            || !in_array($archivePin->reason, $release->releaseBlockers(), true)
         ) {
             throw new \RuntimeException('The installed Studio browser PIN is malformed.');
         }
+        self::assertBlockedAuthoringArchive($archivePin, $locators, $release, $manifestSha256);
 
         $manifestPath = $root . '/browser/' . $locators->manifestName();
         $manifestBytes = self::fileBytes($manifestPath);
@@ -660,6 +718,81 @@ final class StudioContractResources
         $shared = $assets;
 
         return $shared;
+    }
+
+    /**
+     * Verify the closed local-candidate envelope without claiming publication.
+     *
+     * The importer proves the unshipped tar/checksum bytes. Installed runtime
+     * verification retains their exact identity and keeps release readiness
+     * blocked until the governed GitHub prerelease publishes both files.
+     *
+     * @param \stdClass             $archive        Closed candidate PIN envelope.
+     * @param StudioBrowserArtifacts $locators      Typed release artifact locators.
+     * @param StudioContractRelease  $release       Exact coordinated release.
+     * @param string                 $manifestSha256 Vendored manifest SHA-256.
+     *
+     * @since 0.2.0
+     */
+    private static function assertBlockedAuthoringArchive(
+        \stdClass $archive,
+        StudioBrowserArtifacts $locators,
+        StudioContractRelease $release,
+        string $manifestSha256,
+    ): void {
+        $stem = $locators->authoringArchiveStem();
+        $archiveFile = $stem . '-' . substr(self::BROWSER_ARCHIVE_SHA256, 0, 16) . '.tar';
+        $checksumFile = $archiveFile . '.sha256';
+        $tag = 'studio-v' . $release->release();
+        $downloadRoot = 'https://github.com/kumwe/studio/releases/download/' . $tag . '/';
+        $integrity = 'sha512-' . base64_encode((string) hex2bin(self::BROWSER_ARCHIVE_SHA512));
+        if (
+            self::sortedMemberNames($archive) !== [
+                'archive_budget_bytes',
+                'archive_bytes',
+                'archive_file',
+                'archive_integrity',
+                'archive_sha256',
+                'archive_sha512',
+                'archive_stem',
+                'checksum_bytes',
+                'checksum_file',
+                'checksum_sha256',
+                'expected_archive_url',
+                'expected_checksum_url',
+                'expected_release_url',
+                'expected_tag',
+                'manifest_sha256',
+                'member_count',
+                'publication_status',
+                'reason',
+                'status',
+            ]
+            || ($archive->archive_stem ?? null) !== $stem
+            || ($archive->status ?? null) !== 'verified-local-candidate'
+            || ($archive->archive_file ?? null) !== $archiveFile
+            || ($archive->archive_bytes ?? null) !== self::BROWSER_ARCHIVE_BYTES
+            || ($archive->archive_budget_bytes ?? null) !== self::BROWSER_ARCHIVE_BUDGET_BYTES
+            || ($archive->archive_sha256 ?? null) !== self::BROWSER_ARCHIVE_SHA256
+            || ($archive->archive_sha512 ?? null) !== self::BROWSER_ARCHIVE_SHA512
+            || ($archive->archive_integrity ?? null) !== $integrity
+            || ($archive->manifest_sha256 ?? null) !== $manifestSha256
+            || ($archive->member_count ?? null) !== self::BROWSER_ARCHIVE_MEMBERS
+            || ($archive->checksum_file ?? null) !== $checksumFile
+            || ($archive->checksum_bytes ?? null) !== self::BROWSER_CHECKSUM_BYTES
+            || ($archive->checksum_sha256 ?? null) !== self::BROWSER_CHECKSUM_SHA256
+            || ($archive->publication_status ?? null) !== 'unavailable'
+            || ($archive->expected_tag ?? null) !== $tag
+            || ($archive->expected_release_url ?? null)
+                !== 'https://github.com/kumwe/studio/releases/tag/' . $tag
+            || ($archive->expected_archive_url ?? null) !== $downloadRoot . $archiveFile
+            || ($archive->expected_checksum_url ?? null) !== $downloadRoot . $checksumFile
+            || ($archive->reason ?? null) !== self::BROWSER_ARCHIVE_BLOCKER
+            || $release->releaseReady()
+            || $release->releaseBlockers() !== [self::BROWSER_ARCHIVE_BLOCKER]
+        ) {
+            throw new \RuntimeException('The installed Studio browser archive candidate is malformed.');
+        }
     }
 
     /**

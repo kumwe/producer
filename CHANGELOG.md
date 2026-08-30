@@ -15,13 +15,26 @@ Delivered, repository-verified behaviour only; roadmap position and claims live 
   package paths, byte budgets, content hashes, and SRI values verified end to end. The package now
   also preserves and independently verifies all fourteen manifest-declared Studio and third-party
   redistribution notice/license files.
+- Reproduced and independently verified the exact non-vendored Studio beta.2 browser archive and
+  detached checksum: deterministic regular-file ustar, 74 members, fixed byte budget, SHA-256,
+  SHA-512/SRI, inner-manifest digest, and byte equality with every manifest-declared npm member.
+  The PIN records its local-candidate envelope and expected public coordinates without shipping
+  the 1.4 MB release assets in Producer's Composer archive.
+- Hardened the deterministic importer so Studio release, schema, corpus-manifest, and member bytes
+  come only from bounded ordinary blobs in the exact evidence commit, never a dirty checkout. Git
+  plumbing uses a canonical executable, sanitized configuration environment, and disabled replace
+  objects so `refs/replace` cannot substitute the evidence tree.
+  Canonical inputs reject final and ancestor links; regular-file reads preflight identity and size;
+  npm packages use a bounded streaming gzip/type-0-ustar reader that rejects links, special members,
+  oversized inflation, and compressed bombs before retaining member bytes. Contract replacement
+  now has checked rollback, explicit recovery state when rollback itself fails, and post-commit
+  backup cleanup that cannot misreport a successfully installed generation as failed.
 - Restored the seven released authoring operations, their schemas and fixtures, and the optional
   authoring port interface. The wire now reproduces Studio `0.1.0-beta.2`'s released
   thirty-one-operation, ten-port registry exactly, with no alternate host-specific paths.
-- Kept the Producer release blocked because the governed Studio beta publication has no approved
-  outer Studio browser archive or detached archive checksum. Provenance-backed npm packages and
-  manifest-verified inner assets are necessary evidence, but are not a substitute for that release
-  artifact; no Producer 0.2 release is claimed by this section.
+- Kept the Producer release blocked because the governed Studio GitHub prerelease does not publish
+  both exact outer-archive assets yet. The locally verified candidate is necessary evidence, but
+  is not a substitute for public governed publication; no Producer 0.2 release is claimed here.
 - Replaced the split idempotency lookup/write seam with one host-atomic mutation boundary for
   keyed and unkeyed mutations. Hosts can commit trusted scope, mutation, audit, and an optional
   protected replay representation together; replay may deterministically rehydrate secrets, and
