@@ -42,7 +42,7 @@ final class PublicApiManifestTest extends TestCase
         if (!is_array($types)) {
             throw new \RuntimeException('The API manifest has no canonical type map.');
         }
-        $this->assertSame(67, count($types), 'Exactly the reviewed Producer public types must ship.');
+        $this->assertSame(70, count($types), 'Exactly the reviewed Producer public types must ship.');
         $response = $types['Kumwe\\Producer\\Wire\\Response'] ?? null;
         $this->assertTrue(
             is_array($response)

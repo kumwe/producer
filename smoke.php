@@ -50,9 +50,9 @@ declare(strict_types=1);
         !is_array($snapshot)
         || ($snapshot['schema'] ?? null) !== 2
         || !is_array($snapshot['types'] ?? null)
-        || count($snapshot['types']) !== 67
+        || count($snapshot['types']) !== 70
     ) {
-        fwrite(STDERR, "The package must expose exactly 67 reviewed public types.\n");
+        fwrite(STDERR, "The package must expose exactly 70 reviewed public types.\n");
         exit(1);
     }
 
@@ -97,8 +97,8 @@ declare(strict_types=1);
     $schemas = is_array($schemaManifest) && is_array($schemaManifest['schemas'] ?? null)
         ? $schemaManifest['schemas']
         : [];
-    if (count($schemas) !== 47) {
-        $errors[] = 'The package must contain exactly 47 released Studio schemas.';
+    if (count($schemas) !== 55) {
+        $errors[] = 'The package must contain exactly 55 released Studio schemas.';
     }
 
     $corpusFiles = [];
@@ -127,14 +127,27 @@ declare(strict_types=1);
             }
         }
     }
-    if (count($corpusFiles) !== 282) {
-        $errors[] = 'The package must contain exactly 282 released Studio corpus files.';
+    if (count($corpusFiles) !== 301) {
+        $errors[] = 'The package must contain exactly 301 released Studio corpus files.';
     }
 
     try {
         $release = \Kumwe\Producer\Schema\StudioContractResources::releaseRecord();
-        if ($release->release() !== '0.1.0-rc.1') {
-            $errors[] = 'The installed Studio release coordinate is not 0.1.0-rc.1.';
+        if (
+            $release->release() !== '0.1.0-beta.2'
+            || $release->sourceCommit() !== '38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48'
+        ) {
+            $errors[] = 'The installed Studio beta.2 release coordinate or provenance commit drifted.';
+        }
+        $browser = \Kumwe\Producer\Schema\StudioContractResources::browserAsset('browser-module');
+        $enhancement = \Kumwe\Producer\Schema\StudioContractResources::browserAsset('enhancement-runtime');
+        if (
+            strlen(\Kumwe\Producer\Schema\StudioContractResources::browserAssetBytes('browser-module'))
+                !== $browser->bytes()
+            || strlen(\Kumwe\Producer\Schema\StudioContractResources::browserAssetBytes('enhancement-runtime'))
+                !== $enhancement->bytes()
+        ) {
+            $errors[] = 'The installed Studio browser assets failed their exact manifest proof.';
         }
         $fixture = \Kumwe\Producer\Schema\StudioContractResources::testkitBytes(
             'fixtures/blueprint.product.example.json'
@@ -155,5 +168,5 @@ declare(strict_types=1);
     }
 
     $mode = $noDev ? 'authoritative no-dev' : 'development';
-    echo "Package smoke verified ({$mode}): 67 public types, 47 Studio schemas, 282 corpus files.\n";
+    echo "Package smoke verified ({$mode}): 70 public types, 55 Studio schemas, 301 corpus files.\n";
 })();

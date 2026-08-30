@@ -13,8 +13,10 @@ reality on a PHP host:
   no-JavaScript fallbacks for the complete Studio block catalog.
 - **Stylesheets** — generates the static CSS a design's tokens and layout vocabulary imply; nothing
   is computed per request and nothing is inlined.
-- **Contract proof** — vendors the Studio corpus at one exact pinned release, digest-verifies it,
-  and replays the published conformance vectors, so what this library claims is what it proves.
+- **Contract proof** — vendors Studio `0.1.0-beta.2` at source commit
+  `38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48`, digest-verifies all 55 protocol schemas and all
+  301 testkit corpus members, and replays the published conformance vectors, so what this library
+  claims is what it proves.
 
 Producer deliberately contains **no authority, no storage, no Node.js, and no render-time code
 generation** — your application keeps authentication, authorization, persistence, and templates,
@@ -70,19 +72,32 @@ if (!$validation->valid()) {
 }
 ```
 
-`StudioContractResources::releaseRecord()` exposes immutable typed release coordinates, while
-`testkitBytes()` reads only digest-verified corpus-manifest members for consumer conformance
-tests. Neither API exposes the package root or a generalized filesystem reader. Decoded inputs
-must use the canonical JSON shape (`stdClass` objects and list arrays) and the interoperable
-ECMAScript safe-integer range.
+`StudioContractResources::releaseRecord()` exposes immutable typed release coordinates and release
+readiness. Its browser-artifact surface binds the manifest, browser module, and enhancement runtime
+to exact package paths, byte counts, SHA-256 content hashes, and SRI values. The Composer package
+also carries the manifest's complete fourteen-file redistribution notice/license closure, with
+every member package-path and digest bound by the same proof. `testkitBytes()` reads only
+digest-verified corpus-manifest members for consumer conformance tests. None of these APIs exposes
+the package root or a generalized filesystem reader. Decoded inputs must use the canonical JSON
+shape (`stdClass` objects and list arrays) and the interoperable ECMAScript safe-integer range.
 
 ## Status
 
-The 0.2 release line is the supported host-integration foundation for the exact coordinated Studio
-`0.1.0-rc.1` release. Canonical JSON, exact document-schema admission, contributed schema-profile
-validation, the twenty-four-operation wire, host-atomic mutation and protected replay, rendering,
-rich text, and stylesheets are corpus-proven. Deployment emitters and optional template bridges
-remain roadmap work and are not claimed. See
+The current, unreleased 0.2 work is aligned to the provenance-backed eight-package Studio
+`0.1.0-beta.2` npm publication at commit
+`38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48`. It vendors 55 schemas and 301 corpus files, reproduces
+the released thirty-one-operation wire across ten operational ports (including the seven authoring
+operations), and claims zero Studio conformance profiles. Canonical JSON, exact document-schema
+admission, host-atomic mutation and protected replay, rendering, rich text, and stylesheets are
+corpus-proven. The Studio asset manifest also proves the exact browser module and enhancement
+runtime bytes carried by the npm packages and all fourteen redistribution notice/license members
+that accompany those bytes.
+
+This work is **not release-ready**: the governed Studio beta publication has no approved outer
+Studio browser archive or detached archive checksum. The npm provenance and manifest-verified inner
+assets do not replace that release artifact, so Producer 0.2 remains unreleased until the blocker is
+resolved and re-pinned. Deployment emitters and optional template bridges also remain roadmap work
+and are not claimed. See
 [the roadmap](https://github.com/kumwe/producer/blob/main/docs/roadmap.md) for the precise boundary.
 
 ## Requirements

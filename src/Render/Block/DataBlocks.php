@@ -373,7 +373,7 @@ final class DataBlocks implements BlockRenderer
             ['cards', 'grid', 'list', 'slideshow'],
             'cards'
         );
-        if ($presentation === 'slideshow') {
+        if ($presentation === 'slideshow' && $resources !== []) {
             $state->enhance('slideshow', $node, $scope, ['autoplay' => false]);
         }
         $items = '';
@@ -382,7 +382,9 @@ final class DataBlocks implements BlockRenderer
                 . '>' . self::renderResource($resource, true) . '</article>';
         }
 
-        return '<div data-studio-collection="' . $presentation . '" data-studio-part="content">'
+        return '<div data-studio-collection="' . $presentation . '"'
+            . ($presentation === 'slideshow' ? ' data-studio-slideshow-autoplay="false"' : '')
+            . ' data-studio-part="content">'
             . $items . '</div>';
     }
 

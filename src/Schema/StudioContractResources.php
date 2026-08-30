@@ -57,6 +57,7 @@ final class StudioContractResources
         }
 
         $root = dirname(self::testkitRoot());
+        $pin = self::objectDocument($root . '/PIN.json');
         $recordPath = $root . '/studio-release.json';
         $recordBytes = self::fileBytes($recordPath);
         $directFiles = [
@@ -66,6 +67,20 @@ final class StudioContractResources
             'testkit/studio-release.json' => self::fileBytes($root . '/testkit/studio-release.json'),
             'testkit/corpus-manifest.json' => self::fileBytes($root . '/testkit/corpus-manifest.json'),
         ];
+        $pinFiles = $pin->files ?? null;
+        if (!is_array($pinFiles) || !array_is_list($pinFiles) || count($pinFiles) !== 22) {
+            throw new \RuntimeException('The installed Studio PIN has no ordered direct-file bindings.');
+        }
+        foreach ($pinFiles as $entry) {
+            $file = $entry instanceof \stdClass ? ($entry->file ?? null) : null;
+            if (
+                is_string($file)
+                && str_starts_with($file, 'browser/')
+                && self::safeRelative($file)
+            ) {
+                $directFiles[$file] = self::fileBytes($root . '/' . $file);
+            }
+        }
         foreach (['protocol/studio-release.json', 'testkit/studio-release.json'] as $copy) {
             if (!hash_equals($recordBytes, $directFiles[$copy])) {
                 throw new \RuntimeException('The installed Studio release records are not byte-identical.');
@@ -73,21 +88,24 @@ final class StudioContractResources
         }
 
         $sha256 = hash('sha256', $recordBytes);
-        $pin = self::objectDocument($root . '/PIN.json');
         $binding = $pin->release_record ?? null;
         $record = self::decodeObject($recordBytes, $recordPath);
         if (
             self::sortedMemberNames($pin) !== [
-            'claimed_profiles',
-            'corpus_manifest_digest',
-            'files',
-            'packages',
-            'pin',
-            'protocol_version',
-            'release_record',
-            'source',
+                'browser_artifacts',
+                'claimed_profiles',
+                'corpus_manifest_digest',
+                'files',
+                'package_provenance',
+                'packages',
+                'pin',
+                'protocol_version',
+                'release_readiness',
+                'release_record',
+                'source',
             ]
             || self::sortedMemberNames($record) !== [
+                'browserArtifacts',
                 'claimedProfiles',
                 'contractVersion',
                 'corpusManifestDigest',
@@ -107,11 +125,15 @@ final class StudioContractResources
         }
 
         $source = $pin->source ?? null;
+        $sourceCommit = $source instanceof \stdClass ? ($source->commit ?? null) : null;
         if (
             !$source instanceof \stdClass
             || ($source->repository ?? null) !== 'https://github.com/kumwe/studio'
-            || ($source->kind ?? null) !== 'coordinated-release'
+            || ($source->kind ?? null) !== 'provenance-backed-npm-release'
             || ($source->release ?? null) !== ($record->release ?? null)
+            || !is_string($sourceCommit)
+            || preg_match('/^[a-f0-9]{40}$/', $sourceCommit) !== 1
+            || !is_string($source->workflow ?? null)
         ) {
             throw new \RuntimeException('The installed Studio PIN does not name its coordinated release.');
         }
@@ -130,6 +152,16 @@ final class StudioContractResources
             $claimedProfiles[] = $profile;
         }
         $packages = self::packageMap($packageObject);
+        $packageIntegrities = self::packageIntegrities(
+            $pin->package_provenance ?? null,
+            $packages,
+            $sourceCommit,
+        );
+        $browserArtifacts = self::browserArtifactLocators(
+            $record->browserArtifacts ?? null,
+            self::requiredString($record, 'release'),
+        );
+        [$releaseReady, $releaseBlockers] = self::releaseReadiness($pin->release_readiness ?? null);
         if (
             ($pin->protocol_version ?? null) !== ($record->protocolVersion ?? null)
             || ($pin->corpus_manifest_digest ?? null) !== ($record->corpusManifestDigest ?? null)
@@ -148,17 +180,31 @@ final class StudioContractResources
                 self::requiredString($record, 'corpusManifestDigest'),
                 $claimedProfiles,
                 $packages,
-                $sha256
+                $sourceCommit,
+                $packageIntegrities,
+                $browserArtifacts,
+                $releaseReady,
+                $releaseBlockers,
+                $sha256,
             );
         } catch (\InvalidArgumentException $error) {
             throw new \RuntimeException('The installed Studio release coordinates are malformed.', 0, $error);
+        }
+
+        try {
+            self::browserAssets();
+        } catch (\Throwable $error) {
+            $shared = null;
+            throw $error;
         }
 
         return $shared;
     }
 
     /**
-     * Prove that PIN.json binds exactly the five release and manifest files.
+     * Prove that PIN.json binds the release records, manifests, both
+     * executable browser assets, and every redistributed notice/license
+     * member exactly.
      *
      * @param mixed                 $entries Exact ordered PIN file entries.
      * @param array<string, string> $bytes   Required relative files and bytes.
@@ -218,6 +264,144 @@ final class StudioContractResources
     }
 
     /**
+     * Verify one public npm envelope record for every coordinated package.
+     *
+     * @param mixed                 $entries      Ordered PIN provenance entries.
+     * @param array<string, string> $packages     Exact coordinated package versions.
+     * @param string                $sourceCommit Provenance-authenticated source commit.
+     *
+     * @return array<string, string> Package name to SHA-512 registry integrity.
+     *
+     * @since 0.2.0
+     */
+    private static function packageIntegrities(
+        mixed $entries,
+        array $packages,
+        string $sourceCommit,
+    ): array {
+        if (
+            !is_array($entries)
+            || !array_is_list($entries)
+            || preg_match('/^[a-f0-9]{40}$/', $sourceCommit) !== 1
+        ) {
+            throw new \RuntimeException('The installed Studio PIN has no package provenance family.');
+        }
+        $integrities = [];
+        foreach ($entries as $entry) {
+            $name = $entry instanceof \stdClass ? ($entry->name ?? null) : null;
+            $sha256 = $entry instanceof \stdClass ? ($entry->sha256 ?? null) : null;
+            $shasum = $entry instanceof \stdClass ? ($entry->shasum ?? null) : null;
+            $integrity = $entry instanceof \stdClass ? ($entry->integrity ?? null) : null;
+            if (
+                !is_string($name)
+                || !isset($packages[$name])
+                || isset($integrities[$name])
+                || ($entry->version ?? null) !== $packages[$name]
+                || !is_string($entry->tarball ?? null)
+                || !str_starts_with($entry->tarball, 'https://registry.npmjs.org/')
+                || !is_int($entry->bytes ?? null)
+                || $entry->bytes < 1
+                || !is_string($sha256)
+                || preg_match('/^[a-f0-9]{64}$/', $sha256) !== 1
+                || !is_string($shasum)
+                || preg_match('/^[a-f0-9]{40}$/', $shasum) !== 1
+                || !is_string($integrity)
+                || preg_match(
+                    '/^sha512-[A-Za-z0-9+\/]+={0,2}$/',
+                    $integrity,
+                ) !== 1
+                || !is_string($entry->attestation ?? null)
+                || !str_starts_with($entry->attestation, 'https://registry.npmjs.org/-/npm/v1/attestations/')
+            ) {
+                throw new \RuntimeException('The installed Studio PIN has malformed package provenance.');
+            }
+            $integrities[$name] = $integrity;
+        }
+        ksort($integrities, SORT_STRING);
+        $expected = $packages;
+        ksort($expected, SORT_STRING);
+        if (array_keys($integrities) !== array_keys($expected)) {
+            throw new \RuntimeException('The installed Studio PIN package provenance is incomplete or expanded.');
+        }
+
+        return $integrities;
+    }
+
+    /**
+     * Build the closed browser locator value from the release record.
+     *
+     * @param mixed  $value   Decoded browserArtifacts member.
+     * @param string $release Exact coordinated Studio version.
+     *
+     * @since 0.2.0
+     */
+    private static function browserArtifactLocators(mixed $value, string $release): StudioBrowserArtifacts
+    {
+        $manifest = $value instanceof \stdClass ? ($value->manifest ?? null) : null;
+        $authoring = $value instanceof \stdClass ? ($value->authoringArchive ?? null) : null;
+        $enhancement = $value instanceof \stdClass ? ($value->enhancementRuntime ?? null) : null;
+        if (
+            !$manifest instanceof \stdClass
+            || !$authoring instanceof \stdClass
+            || !$enhancement instanceof \stdClass
+            || self::sortedMemberNames($value) !== ['authoringArchive', 'enhancementRuntime', 'manifest']
+        ) {
+            throw new \RuntimeException('The installed Studio release has malformed browser locators.');
+        }
+
+        try {
+            return new StudioBrowserArtifacts(
+                $release,
+                self::requiredString($manifest, 'name'),
+                self::requiredString($manifest, 'schema'),
+                self::requiredString($authoring, 'archiveStem'),
+                self::requiredString($authoring, 'assetRole'),
+                self::requiredString($authoring, 'loading'),
+                self::requiredString($enhancement, 'assetRole'),
+                self::requiredString($enhancement, 'loading'),
+                self::requiredString($enhancement, 'package'),
+                self::requiredString($enhancement, 'packageBasePath'),
+            );
+        } catch (\InvalidArgumentException $error) {
+            throw new \RuntimeException('The installed Studio browser locators are invalid.', 0, $error);
+        }
+    }
+
+    /**
+     * Parse the explicit release gate carried by the immutable PIN.
+     *
+     * @param mixed $value Decoded release_readiness member.
+     *
+     * @return array{0: bool, 1: list<string>}
+     *
+     * @since 0.2.0
+     */
+    private static function releaseReadiness(mixed $value): array
+    {
+        $status = $value instanceof \stdClass ? ($value->status ?? null) : null;
+        $entries = $value instanceof \stdClass ? ($value->blockers ?? null) : null;
+        if (
+            !in_array($status, ['ready', 'blocked'], true)
+            || !is_array($entries)
+            || !array_is_list($entries)
+        ) {
+            throw new \RuntimeException('The installed Studio PIN has no exact release-readiness decision.');
+        }
+        $blockers = [];
+        foreach ($entries as $entry) {
+            if (!is_string($entry) || $entry === '' || !mb_check_encoding($entry, 'UTF-8')) {
+                throw new \RuntimeException('The installed Studio PIN carries a malformed release blocker.');
+            }
+            $blockers[] = $entry;
+        }
+        if (($status === 'ready') === ($blockers !== [])) {
+            throw new \RuntimeException('The installed Studio release decision and blockers disagree.');
+        }
+
+        return [$status === 'ready', $blockers];
+    }
+
+    /**
      * Return object member names in deterministic lexical order.
      *
      * @param \stdClass $value Decoded object.
@@ -232,6 +416,348 @@ final class StudioContractResources
         sort($members, SORT_STRING);
 
         return $members;
+    }
+
+    /**
+     * Read the exact provenance-backed Studio browser manifest bytes.
+     *
+     * @since 0.2.0
+     */
+    public static function browserManifestBytes(): string
+    {
+        self::browserAssets();
+
+        return self::fileBytes(dirname(self::testkitRoot()) . '/browser/studio-assets.json');
+    }
+
+    /**
+     * Return one exact executable asset selected by its closed Studio role.
+     *
+     * @param string $role Browser-module or enhancement-runtime.
+     *
+     * @throws \InvalidArgumentException When the role is not one of the two released runtime roles.
+     *
+     * @since 0.2.0
+     */
+    public static function browserAsset(string $role): StudioBrowserAsset
+    {
+        $assets = self::browserAssets();
+        if (!isset($assets[$role])) {
+            throw new \InvalidArgumentException('Studio exposes only browser-module and enhancement-runtime assets.');
+        }
+
+        return $assets[$role];
+    }
+
+    /**
+     * Read exact bytes only after manifest identity, digest and budget proof.
+     *
+     * @param string $role Browser-module or enhancement-runtime.
+     *
+     * @throws \InvalidArgumentException When the role is not released.
+     * @throws \RuntimeException         When installed asset bytes drift.
+     *
+     * @since 0.2.0
+     */
+    public static function browserAssetBytes(string $role): string
+    {
+        $asset = self::browserAsset($role);
+        $path = dirname(self::testkitRoot()) . '/browser/' . $asset->path();
+        $bytes = self::fileBytes($path);
+        $integrity = 'sha256-' . base64_encode(hash('sha256', $bytes, true));
+        if (
+            strlen($bytes) !== $asset->bytes()
+            || !hash_equals($asset->contentHash(), hash('sha256', $bytes))
+            || !hash_equals($asset->integrity(), $integrity)
+            || strlen($bytes) > $asset->budgetBytes()
+        ) {
+            throw new \RuntimeException('The installed Studio browser asset differs from its manifest.');
+        }
+
+        return $bytes;
+    }
+
+    /**
+     * Parse and prove the manifest/PIN/package chain for both runtime assets.
+     *
+     * @return array<string, StudioBrowserAsset>
+     *
+     * @since 0.2.0
+     */
+    private static function browserAssets(): array
+    {
+        /** @var array<string, StudioBrowserAsset>|null $shared */
+        static $shared = null;
+        if ($shared !== null) {
+            return $shared;
+        }
+
+        $release = self::releaseRecord();
+        $root = dirname(self::testkitRoot());
+        $pin = self::objectDocument($root . '/PIN.json');
+        $browserPin = $pin->browser_artifacts ?? null;
+        $manifestPin = $browserPin instanceof \stdClass ? ($browserPin->manifest ?? null) : null;
+        $archivePin = $browserPin instanceof \stdClass ? ($browserPin->authoring_archive ?? null) : null;
+        $assetPins = $browserPin instanceof \stdClass ? ($browserPin->resolved_assets ?? null) : null;
+        $redistributionPins = $browserPin instanceof \stdClass
+            ? ($browserPin->redistribution_files ?? null)
+            : null;
+        $locators = $release->browserArtifacts();
+        $manifestSha256 = $manifestPin instanceof \stdClass ? ($manifestPin->sha256 ?? null) : null;
+        if (
+            !$manifestPin instanceof \stdClass
+            || !$archivePin instanceof \stdClass
+            || !$browserPin instanceof \stdClass
+            || self::sortedMemberNames($browserPin) !== [
+                'authoring_archive',
+                'manifest',
+                'redistribution_files',
+                'resolved_assets',
+            ]
+            || !is_array($assetPins)
+            || !array_is_list($assetPins)
+            || count($assetPins) !== 2
+            || !is_array($redistributionPins)
+            || !array_is_list($redistributionPins)
+            || count($redistributionPins) !== 14
+            || ($manifestPin->file ?? null) !== 'browser/' . $locators->manifestName()
+            || ($manifestPin->package ?? null) !== '@kumwe/studio'
+            || ($manifestPin->package_path ?? null) !== 'dist/browser/' . $locators->manifestName()
+            || !is_string($manifestSha256)
+            || preg_match('/^[a-f0-9]{64}$/', $manifestSha256) !== 1
+            || ($archivePin->archive_stem ?? null) !== $locators->authoringArchiveStem()
+            || ($archivePin->status ?? null) !== 'unavailable'
+            || !is_string($archivePin->reason ?? null)
+            || $release->releaseReady()
+            || !in_array($archivePin->reason, $release->releaseBlockers(), true)
+        ) {
+            throw new \RuntimeException('The installed Studio browser PIN is malformed.');
+        }
+
+        $manifestPath = $root . '/browser/' . $locators->manifestName();
+        $manifestBytes = self::fileBytes($manifestPath);
+        if (!hash_equals($manifestSha256, hash('sha256', $manifestBytes))) {
+            throw new \RuntimeException('The installed Studio browser manifest differs from its PIN.');
+        }
+        $manifest = self::decodeObject($manifestBytes, $manifestPath);
+        $identity = $manifest->release ?? null;
+        $entries = $manifest->assets ?? null;
+        $module = $manifest->module ?? null;
+        $enhancementRuntime = $manifest->enhancementRuntime ?? null;
+        if (
+            ($manifest->kind ?? null) !== 'studio-browser-assets'
+            || ($manifest->schemaVersion ?? null) !== 1
+            || !$identity instanceof \stdClass
+            || ($identity->version ?? null) !== $release->release()
+            || ($identity->corpusManifestDigest ?? null) !== $release->corpusManifestDigest()
+            || !is_array($entries)
+            || !array_is_list($entries)
+            || !$module instanceof \stdClass
+            || !$enhancementRuntime instanceof \stdClass
+        ) {
+            throw new \RuntimeException('The installed Studio browser manifest has the wrong release identity.');
+        }
+        self::assertBrowserRedistributionFiles($entries, $redistributionPins, $root);
+
+        $manifestByRole = [];
+        foreach ($entries as $entry) {
+            $role = $entry instanceof \stdClass ? ($entry->role ?? null) : null;
+            if (in_array($role, ['browser-module', 'enhancement-runtime'], true)) {
+                if (isset($manifestByRole[$role])) {
+                    throw new \RuntimeException('The Studio browser manifest repeats a runtime role.');
+                }
+                $manifestByRole[$role] = $entry;
+            }
+        }
+        if (array_keys($manifestByRole) !== ['browser-module', 'enhancement-runtime']) {
+            throw new \RuntimeException('The Studio browser manifest does not resolve both runtime roles exactly.');
+        }
+        $browserModuleEntry = $manifestByRole['browser-module'] ?? null;
+        $enhancementEntry = $manifestByRole['enhancement-runtime'] ?? null;
+        if (
+            !$browserModuleEntry instanceof \stdClass
+            || !$enhancementEntry instanceof \stdClass
+            || ($module->entryPoint ?? null) !== ($browserModuleEntry->path ?? null)
+            || ($enhancementRuntime->entryPoint ?? null)
+                !== ($enhancementEntry->path ?? null)
+        ) {
+            throw new \RuntimeException('The Studio browser manifest entry points differ from their runtime roles.');
+        }
+
+        $pinByRole = [];
+        foreach ($assetPins as $entry) {
+            $role = $entry instanceof \stdClass ? ($entry->role ?? null) : null;
+            if (!is_string($role) || isset($pinByRole[$role])) {
+                throw new \RuntimeException('The installed Studio PIN repeats or malforms a browser role.');
+            }
+            $pinByRole[$role] = $entry;
+        }
+
+        $assets = [];
+        foreach (
+            [
+                'browser-module' => '@kumwe/studio',
+                'enhancement-runtime' => '@kumwe/studio-renderer-web',
+            ] as $role => $package
+        ) {
+            $entry = $manifestByRole[$role] ?? null;
+            $binding = $pinByRole[$role] ?? null;
+            $path = $entry instanceof \stdClass ? ($entry->path ?? null) : null;
+            $assetBytes = $entry instanceof \stdClass ? ($entry->bytes ?? null) : null;
+            $budgetBytes = $entry instanceof \stdClass ? ($entry->budgetBytes ?? null) : null;
+            $contentHash = $entry instanceof \stdClass ? ($entry->contentHash ?? null) : null;
+            $assetIntegrity = $entry instanceof \stdClass ? ($entry->integrity ?? null) : null;
+            $minified = $entry instanceof \stdClass ? ($entry->minified ?? null) : null;
+            if (
+                !$entry instanceof \stdClass
+                || !$binding instanceof \stdClass
+                || !is_string($path)
+                || !self::safeRelative($path)
+                || !is_int($assetBytes)
+                || !is_int($budgetBytes)
+                || !is_string($contentHash)
+                || !is_string($assetIntegrity)
+                || !is_bool($minified)
+                || ($entry->mediaType ?? null) !== 'text/javascript'
+                || ($binding->file ?? null) !== 'browser/' . $path
+                || ($binding->package ?? null) !== $package
+                || ($binding->package_path ?? null) !== 'dist/browser/' . $path
+                || ($binding->bytes ?? null) !== $assetBytes
+                || ($binding->budget_bytes ?? null) !== $budgetBytes
+                || ($binding->content_hash ?? null) !== $contentHash
+                || ($binding->integrity ?? null) !== $assetIntegrity
+                || ($binding->minified ?? null) !== true
+            ) {
+                throw new \RuntimeException('The installed Studio PIN and browser manifest disagree.');
+            }
+            try {
+                $asset = new StudioBrowserAsset(
+                    $role,
+                    $path,
+                    $package,
+                    $assetBytes,
+                    $budgetBytes,
+                    $contentHash,
+                    $assetIntegrity,
+                    $minified,
+                );
+            } catch (\InvalidArgumentException $error) {
+                throw new \RuntimeException('The installed Studio browser asset is malformed.', 0, $error);
+            }
+            $bytes = self::fileBytes($root . '/browser/' . $path);
+            $integrity = 'sha256-' . base64_encode(hash('sha256', $bytes, true));
+            if (
+                strlen($bytes) !== $asset->bytes()
+                || strlen($bytes) > $asset->budgetBytes()
+                || !hash_equals($asset->contentHash(), hash('sha256', $bytes))
+                || !hash_equals($asset->integrity(), $integrity)
+            ) {
+                throw new \RuntimeException('The installed Studio browser bytes differ from their manifest.');
+            }
+            $assets[$role] = $asset;
+        }
+
+        $shared = $assets;
+
+        return $shared;
+    }
+
+    /**
+     * Prove the complete manifest-declared notice/license redistribution set.
+     *
+     * The ordered PIN entries must match every manifest member carrying a
+     * `license` or `notice` role. Repeated content is valid, so path identity
+     * and both digest spellings are checked independently for every file.
+     *
+     * @param list<mixed> $manifestEntries    Ordered Studio browser manifest assets.
+     * @param list<mixed> $redistributionPins Ordered immutable package bindings.
+     * @param string      $root               Installed contract resource root.
+     *
+     * @since 0.2.0
+     */
+    private static function assertBrowserRedistributionFiles(
+        array $manifestEntries,
+        array $redistributionPins,
+        string $root,
+    ): void {
+        $manifestRedistribution = [];
+        $seenPaths = [];
+        $roleCounts = ['license' => 0, 'notice' => 0];
+        foreach ($manifestEntries as $entry) {
+            $role = $entry instanceof \stdClass ? ($entry->role ?? null) : null;
+            if (!in_array($role, ['license', 'notice'], true)) {
+                continue;
+            }
+            $path = $entry instanceof \stdClass ? ($entry->path ?? null) : null;
+            if (!is_string($path) || isset($seenPaths[$path])) {
+                throw new \RuntimeException('The Studio browser manifest repeats a redistribution path.');
+            }
+            $seenPaths[$path] = true;
+            $roleCounts[$role]++;
+            $manifestRedistribution[] = $entry;
+        }
+        if (
+            count($manifestRedistribution) !== 14
+            || $roleCounts !== ['license' => 13, 'notice' => 1]
+            || count($redistributionPins) !== count($manifestRedistribution)
+        ) {
+            throw new \RuntimeException('The Studio browser redistribution closure is incomplete or expanded.');
+        }
+
+        foreach ($manifestRedistribution as $index => $entry) {
+            $binding = $redistributionPins[$index] ?? null;
+            $role = $entry->role ?? null;
+            $path = $entry->path ?? null;
+            $assetBytes = $entry->bytes ?? null;
+            $mediaType = $entry->mediaType ?? null;
+            $assetIntegrity = $entry->integrity ?? null;
+            if (
+                !$binding instanceof \stdClass
+                || self::sortedMemberNames($entry) !== ['bytes', 'integrity', 'mediaType', 'path', 'role']
+                || self::sortedMemberNames($binding) !== [
+                    'bytes',
+                    'file',
+                    'integrity',
+                    'media_type',
+                    'package',
+                    'package_path',
+                    'role',
+                    'sha256',
+                ]
+                || !is_string($path)
+                || !self::safeRelative($path)
+                || !is_int($assetBytes)
+                || $assetBytes < 1
+                || !is_string($assetIntegrity)
+                || ($role === 'notice'
+                    && ($path !== 'THIRD_PARTY_NOTICES.md' || $mediaType !== 'text/markdown'))
+                || ($role === 'license' && $mediaType !== 'text/plain')
+                || ($role === 'license'
+                    && $path !== 'LICENSE'
+                    && preg_match('#^third-party-licenses/[^/]+\.txt$#', $path) !== 1)
+                || ($binding->role ?? null) !== $role
+                || ($binding->file ?? null) !== 'browser/' . $path
+                || ($binding->package ?? null) !== '@kumwe/studio'
+                || ($binding->package_path ?? null) !== 'dist/browser/' . $path
+                || ($binding->bytes ?? null) !== $assetBytes
+                || ($binding->media_type ?? null) !== $mediaType
+                || ($binding->integrity ?? null) !== $assetIntegrity
+            ) {
+                throw new \RuntimeException('The Studio redistribution PIN and browser manifest disagree.');
+            }
+
+            $bytes = self::fileBytes($root . '/browser/' . $path);
+            $sha256 = hash('sha256', $bytes);
+            $integrity = 'sha256-' . base64_encode(hash('sha256', $bytes, true));
+            if (
+                strlen($bytes) !== $assetBytes
+                || !hash_equals($assetIntegrity, $integrity)
+                || !is_string($binding->sha256 ?? null)
+                || !hash_equals($binding->sha256, $sha256)
+            ) {
+                throw new \RuntimeException('The installed Studio redistribution bytes differ from their PIN.');
+            }
+        }
     }
 
     /**

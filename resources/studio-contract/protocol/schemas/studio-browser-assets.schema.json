@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.kumwe.org/studio/v1/studio-browser-assets.schema.json",
+  "title": "Studio prebuilt browser asset manifest",
+  "description": "Integrity, CSP, runtime, and public-renderer materialization metadata for Studio's host-neutral prebuilt authoring ESM and published-page enhancement IIFE surfaces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "schemaVersion",
+    "assets",
+    "module",
+    "enhancementRuntime",
+    "publicRenderer",
+    "contentSecurityPolicy",
+    "productionRuntime",
+    "release"
+  ],
+  "properties": {
+    "kind": { "const": "studio-browser-assets" },
+    "schemaVersion": { "const": 1 },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "propertyNames": {
+              "enum": [
+                "path",
+                "role",
+                "mediaType",
+                "bytes",
+                "budgetBytes",
+                "contentHash",
+                "integrity",
+                "minified"
+              ]
+            },
+            "properties": { "role": { "const": "browser-module" } },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "propertyNames": {
+              "enum": [
+                "path",
+                "role",
+                "mediaType",
+                "bytes",
+                "budgetBytes",
+                "contentHash",
+                "integrity",
+                "minified"
+              ]
+            },
+            "properties": { "role": { "const": "enhancement-runtime" } },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ],
+      "items": { "$ref": "#/$defs/asset" }
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entryPoint", "format", "exports"],
+      "properties": {
+        "entryPoint": {
+          "description": "Must equal the path of the one assets member whose role is browser-module; builders and consumers enforce this cross-member equality after schema validation.",
+          "$ref": "#/$defs/path"
+        },
+        "format": { "const": "esm" },
+        "exports": {
+          "type": "array",
+          "minItems": 16,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "prefixItems": [
+            { "const": "mountStudio" },
+            { "const": "mountStudioFromConfigElement" },
+            { "const": "autoMountStudio" },
+            { "const": "parseStudioDeploymentConfiguration" },
+            { "const": "resolveStudioDeploymentRuntime" },
+            { "const": "createBrowserHttpHostAdapter" },
+            { "const": "createCoreProductionBlockDefinitions" },
+            { "const": "createCoreProductionPatterns" },
+            { "const": "createStudioStandaloneRuntime" },
+            { "const": "defineKumweStudio" },
+            { "const": "defineKumweStudioContextual" },
+            { "const": "defineKumweStudioStandalone" },
+            { "const": "defineStudioBrowserElements" },
+            { "const": "mountStudioHosted" },
+            { "const": "mountStudioStandalone" },
+            { "const": "openContextualStudioSession" }
+          ],
+          "items": false
+        }
+      }
+    },
+    "enhancementRuntime": {
+      "description": "The one trusted public-page behavior file. Producer includes it only when renderer-web output requests at least one member of the closed family set; the file discovers renderer-emitted data attributes and is safe to include unconditionally.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entryPoint",
+        "format",
+        "loading",
+        "enhancements",
+        "needSignal",
+        "activation",
+        "safeToIncludeUnconditionally",
+        "noJavaScriptFallback",
+        "contentSecurityPolicy"
+      ],
+      "properties": {
+        "entryPoint": { "$ref": "#/$defs/path" },
+        "format": { "const": "iife" },
+        "loading": { "const": "defer" },
+        "enhancements": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "prefixItems": [
+            { "const": "countdown" },
+            { "const": "dialog" },
+            { "const": "lightbox" },
+            { "const": "navigation" },
+            { "const": "notice" },
+            { "const": "popover" },
+            { "const": "slideshow" },
+            { "const": "tabs" }
+          ],
+          "items": false
+        },
+        "needSignal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "rule"],
+          "properties": {
+            "source": { "const": "renderer-web.enhancements" },
+            "rule": { "const": "closed-family-intersection-non-empty" }
+          }
+        },
+        "activation": { "const": "renderer-data-attributes" },
+        "safeToIncludeUnconditionally": { "const": true },
+        "noJavaScriptFallback": { "const": "semantic-renderer-output" },
+        "contentSecurityPolicy": {
+          "const": "default-src 'none'; script-src 'self'; require-trusted-types-for 'script'; trusted-types 'none'"
+        }
+      }
+    },
+    "publicRenderer": {
+      "description": "The language-neutral rule Producer and other server renderers use to materialize the exact canonical renderer-web CSS bytes without a host-selected minifier.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["style"],
+      "properties": {
+        "style": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "materialization",
+            "fileNameTemplate",
+            "mediaType",
+            "contentHashAlgorithm",
+            "integrityAlgorithm",
+            "outputSchema",
+            "minified",
+            "budgetBytes"
+          ],
+          "properties": {
+            "source": { "const": "renderer-web.css" },
+            "materialization": { "const": "exact-utf8-bytes" },
+            "fileNameTemplate": {
+              "const": "studio-public-{{CONTENT_HASH_16}}.min.css"
+            },
+            "mediaType": { "const": "text/css" },
+            "contentHashAlgorithm": { "const": "sha256" },
+            "integrityAlgorithm": { "const": "sha256" },
+            "outputSchema": {
+              "const": "https://schemas.kumwe.org/studio/v1/studio-browser-assets.schema.json#/$defs/publicStyleAsset"
+            },
+            "minified": { "const": true },
+            "budgetBytes": { "const": 262144 }
+          }
+        }
+      }
+    },
+    "contentSecurityPolicy": { "$ref": "#/$defs/contentSecurityPolicy" },
+    "productionRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["servingModel", "requires", "forbidden"],
+      "properties": {
+        "servingModel": { "const": "static-files" },
+        "requires": {
+          "type": "array",
+          "maxItems": 0,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+        },
+        "forbidden": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+        }
+      }
+    },
+    "release": { "$ref": "#/$defs/release" }
+  },
+  "$defs": {
+    "release": {
+      "description": "The exact coordinated Studio release identity copied into every deployment configuration served with this asset generation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "corpusManifestDigest"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)(?:-(?:beta|rc)\\.(?:0|[1-9][0-9]*))?$"
+        },
+        "corpusManifestDigest": {
+          "type": "string",
+          "pattern": "^sha256-[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$"
+        }
+      }
+    },
+    "contentSecurityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "headerTemplate", "styleNonce", "inertConfigurationScript"],
+      "properties": {
+        "profile": { "const": "same-origin-http" },
+        "headerTemplate": {
+          "const": "default-src 'none'; script-src 'self'; require-trusted-types-for 'script'; trusted-types lit-html; style-src 'self' 'nonce-{{STYLE_NONCE}}'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'self'; worker-src 'none'; frame-src 'none'; manifest-src 'none'; object-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'"
+        },
+        "styleNonce": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["placeholder", "minimumEntropyBits", "scope"],
+          "properties": {
+            "placeholder": { "const": "{{STYLE_NONCE}}" },
+            "minimumEntropyBits": { "const": 128 },
+            "scope": { "const": "response" }
+          }
+        },
+        "inertConfigurationScript": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["element", "mediaType", "requiresHash", "requiresNonce"],
+          "properties": {
+            "element": { "const": "script" },
+            "mediaType": { "const": "application/json" },
+            "requiresHash": { "const": false },
+            "requiresNonce": { "const": false }
+          }
+        }
+      }
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[\\\\?#])[A-Za-z0-9._/-]+$"
+    },
+    "publicStyleAsset": {
+      "description": "The closed per-page delivery-manifest record for exact canonical renderer-web CSS materialized by Producer or another server renderer.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "role",
+        "mediaType",
+        "bytes",
+        "budgetBytes",
+        "contentHash",
+        "integrity",
+        "minified"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 36,
+          "maxLength": 500,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*[\\\\?#])(?:[A-Za-z0-9._-]+/)*studio-public-[a-f0-9]{16}\\.min\\.css$"
+        },
+        "role": { "const": "public-style" },
+        "mediaType": { "const": "text/css" },
+        "bytes": { "type": "integer", "minimum": 1, "maximum": 262144 },
+        "budgetBytes": { "const": 262144 },
+        "contentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "integrity": {
+          "type": "string",
+          "pattern": "^sha256-[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$"
+        },
+        "minified": { "const": true }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "mediaType", "bytes", "integrity"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": { "enum": ["browser-module", "enhancement-runtime"] }
+            },
+            "required": ["role"]
+          },
+          "then": {
+            "properties": {
+              "budgetBytes": {},
+              "contentHash": {},
+              "mediaType": { "const": "text/javascript" },
+              "minified": {}
+            },
+            "required": ["budgetBytes", "contentHash", "minified"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "mediaType": { "const": "text/javascript" } },
+            "required": ["mediaType"]
+          },
+          "then": {
+            "properties": {
+              "role": { "enum": ["browser-module", "enhancement-runtime"] }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "path": { "$ref": "#/$defs/path" },
+        "role": {
+          "enum": [
+            "browser-module",
+            "enhancement-runtime",
+            "license",
+            "notice",
+            "release-record",
+            "documentation",
+            "schema"
+          ]
+        },
+        "mediaType": {
+          "enum": ["text/javascript", "text/plain", "text/markdown", "application/json"]
+        },
+        "bytes": { "type": "integer", "minimum": 1, "maximum": 1073741824 },
+        "budgetBytes": { "type": "integer", "minimum": 1, "maximum": 1073741824 },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "integrity": {
+          "type": "string",
+          "pattern": "^sha256-[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$"
+        },
+        "minified": { "const": true }
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The closed operation registry: all twenty-four pinned operations with their
+ * The closed operation registry: all thirty-one pinned operations with their
  * exact metadata, refusal of anything outside the registry, and byte
  * equality with the pinned contract's canonical registry document.
  *
@@ -35,10 +35,10 @@ final class WireOperationRegistryTest extends TestCase
         );
     }
 
-    public function testTheRegistryIsClosedAtTwentyFourOperationsAcrossNinePorts(): void
+    public function testTheRegistryIsClosedAtThirtyOneOperationsAcrossTenPorts(): void
     {
         $operations = OperationRegistry::all();
-        $this->assertSame(24, count($operations), 'The pinned registry binds exactly twenty-four operations.');
+        $this->assertSame(31, count($operations), 'The pinned registry binds exactly thirty-one operations.');
 
         $ports = [];
         $capabilities = [];
@@ -53,13 +53,24 @@ final class WireOperationRegistryTest extends TestCase
         $portNames = array_keys($ports);
         sort($portNames, SORT_STRING);
         $this->assertSame(
-            ['artifact', 'localization', 'media', 'model', 'permission', 'preview', 'recovery', 'resource', 'telemetry'],
+            [
+                'artifact',
+                'authoring',
+                'localization',
+                'media',
+                'model',
+                'permission',
+                'preview',
+                'recovery',
+                'resource',
+                'telemetry',
+            ],
             $portNames,
-            'Exactly the nine contract ports appear.'
+            'Exactly the ten contract ports appear.'
         );
         $this->assertSame(count($capabilities), count(array_unique($capabilities)), 'Capabilities are unique.');
         $this->assertSame(count($routes), count(array_unique($routes)), 'Routes are unique.');
-        $this->assertSame(24, count($methodsByPort), 'Method names are unique within their port.');
+        $this->assertSame(31, count($methodsByPort), 'Method names are unique within their port.');
 
         $sorted = $capabilities;
         sort($sorted, SORT_STRING);
@@ -96,6 +107,10 @@ final class WireOperationRegistryTest extends TestCase
                 'studio.operation/artifact.publish',
                 'studio.operation/artifact.save',
                 'studio.operation/artifact.unpublish',
+                'studio.operation/authoring.save-as-new-type',
+                'studio.operation/authoring.save-item',
+                'studio.operation/authoring.save-new-type-version',
+                'studio.operation/authoring.start',
                 'studio.operation/media.abort-upload',
                 'studio.operation/media.authorize-upload',
                 'studio.operation/media.complete-upload',

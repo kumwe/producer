@@ -158,12 +158,11 @@ final class MediaBlocks implements BlockRenderer
         }
         $presentation = Properties::property($node, 'presentation') === 'slideshow' ? 'slideshow' : 'grid';
         $lightbox = Properties::property($node, 'lightbox') === true;
+        $autoplay = Properties::property($node, 'autoplay') === true;
         $columns = Properties::integerProperty(Properties::property($node, 'columns'), 1, 12, 4);
-        $state->css[] = '[data-studio-scope="' . $scope . '"]{--studio-gallery-columns:' . $columns . '}';
-        if ($presentation === 'slideshow') {
-            $state->enhance('slideshow', $node, $scope, [
-                'autoplay' => Properties::property($node, 'autoplay') === true,
-            ]);
+        $state->css[] = '[data-studio-scope=' . $scope . ']{--studio-gallery-columns:' . $columns . '}';
+        if ($presentation === 'slideshow' && $media !== []) {
+            $state->enhance('slideshow', $node, $scope, ['autoplay' => $autoplay]);
         }
         if ($lightbox && $media !== []) {
             $state->enhance('lightbox', $node, $scope);
@@ -184,9 +183,13 @@ final class MediaBlocks implements BlockRenderer
                 . '</figure>';
         }
 
-        return '<section data-studio-gallery="' . $presentation . '" aria-label="Media gallery">'
-            . '<div data-studio-part="content">' . $items . '</div>'
+        return '<section data-studio-gallery="' . $presentation . '"'
             . ($presentation === 'slideshow'
+                ? ' data-studio-slideshow-autoplay="' . ($autoplay ? 'true' : 'false') . '"'
+                : '')
+            . ' aria-label="Media gallery">'
+            . '<div data-studio-part="content">' . $items . '</div>'
+            . ($presentation === 'slideshow' && $media !== []
                 ? '<p><button type="button" data-studio-slide-previous>Previous</button>'
                     . '<button type="button" data-studio-slide-next>Next</button></p>'
                 : '')

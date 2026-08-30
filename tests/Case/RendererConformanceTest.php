@@ -40,6 +40,48 @@ final class RendererConformanceTest extends TestCase
             foreach ($vector->expect->cssContains as $needle) {
                 $this->assertStringContains($needle, $result->css, "{$label} CSS must contain the expected rules.");
             }
+            foreach ($vector->expect->activationMarkers as $marker) {
+                $this->assertStringContains(
+                    $marker,
+                    $result->html,
+                    "{$label} must emit every declared public-runtime marker."
+                );
+            }
+            $this->assertSame(
+                $vector->expect->htmlBytes,
+                strlen($result->html),
+                "{$label} HTML byte count must match renderer-web."
+            );
+            $this->assertSame(
+                $vector->expect->htmlSha256,
+                hash('sha256', $result->html),
+                "{$label} HTML digest must match renderer-web."
+            );
+            $this->assertSame(
+                $vector->expect->cssBytes,
+                strlen($result->css),
+                "{$label} CSS byte count must match renderer-web."
+            );
+            $this->assertSame(
+                $vector->expect->cssSha256,
+                hash('sha256', $result->css),
+                "{$label} CSS digest must match renderer-web."
+            );
+            $this->assertSame(
+                $vector->expect->publicStyleAsset->bytes,
+                strlen($result->css),
+                "{$label} public-style asset byte count must bind the rendered CSS."
+            );
+            $this->assertSame(
+                $vector->expect->publicStyleAsset->contentHash,
+                hash('sha256', $result->css),
+                "{$label} public-style content hash must bind the rendered CSS."
+            );
+            $this->assertSame(
+                $vector->expect->publicStyleAsset->integrity,
+                'sha256-' . base64_encode(hash('sha256', $result->css, true)),
+                "{$label} public-style SRI must bind the rendered CSS."
+            );
             $this->assertSame(
                 $vector->expect->enhancements,
                 $result->enhancementNames(),
@@ -90,6 +132,7 @@ final class RendererConformanceTest extends TestCase
         foreach ($vector->media as $descriptor) {
             $media[$descriptor->assetId] = $descriptor;
         }
+        $scopedStyles = $vector->context->scopedStyles ?? null;
 
         return new RenderContext(
             allowBlobMedia: ($vector->context->allowBlobMedia ?? false) === true,
@@ -103,6 +146,7 @@ final class RendererConformanceTest extends TestCase
 
                 return $descriptor === null ? null : ResolvedMedia::fromDescriptor($descriptor);
             },
+            scopedStyles: $scopedStyles instanceof \stdClass ? get_object_vars($scopedStyles) : [],
         );
     }
 }

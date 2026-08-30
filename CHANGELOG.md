@@ -3,15 +3,25 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
-## 0.2.0 - 2026-08-29
+## Unreleased
 
-- Re-pinned Producer from an unreleased Studio branch commit to the exact coordinated Studio
-  `0.1.0-rc.1` release: byte-identical release records, protocol schemas,
-  complete testkit corpus, manifest digests, package coordinates, protocol version, and profile
-  claims are now one fail-closed contract proof.
-- Removed the seven post-release authoring operations, their three schemas, and the authoring port
-  interface that were not part of Studio `0.1.0-rc.1`; the wire now reproduces the released
-  twenty-four-operation, nine-port registry exactly, with no alternate host-specific paths.
+- Re-pinned Producer to the provenance-backed Studio `0.1.0-beta.2` publication at exact source
+  commit `38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48`: byte-identical release records, all 55 protocol
+  schemas, all 301 testkit corpus members, manifest digests, package coordinates, protocol version,
+  and the deliberately empty conformance-profile claim are now one fail-closed contract proof.
+- Bound all eight coordinated Studio npm packages to their exact tarball sizes, SHA-1 shasums,
+  SHA-256 hashes, SHA-512 integrity values, and npm provenance attestations. Added typed access to
+  the Studio asset manifest and its exact browser-module and enhancement-runtime bytes, with
+  package paths, byte budgets, content hashes, and SRI values verified end to end. The package now
+  also preserves and independently verifies all fourteen manifest-declared Studio and third-party
+  redistribution notice/license files.
+- Restored the seven released authoring operations, their schemas and fixtures, and the optional
+  authoring port interface. The wire now reproduces Studio `0.1.0-beta.2`'s released
+  thirty-one-operation, ten-port registry exactly, with no alternate host-specific paths.
+- Kept the Producer release blocked because the governed Studio beta publication has no approved
+  outer Studio browser archive or detached archive checksum. Provenance-backed npm packages and
+  manifest-verified inner assets are necessary evidence, but are not a substitute for that release
+  artifact; no Producer 0.2 release is claimed by this section.
 - Replaced the split idempotency lookup/write seam with one host-atomic mutation boundary for
   keyed and unkeyed mutations. Hosts can commit trusted scope, mutation, audit, and an optional
   protected replay representation together; replay may deterministically rehydrate secrets, and

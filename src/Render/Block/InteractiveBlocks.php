@@ -153,8 +153,10 @@ final class InteractiveBlocks implements BlockRenderer
     private function tabs(\stdClass $node, string $scope, RenderState $state): string
     {
         $activation = Properties::property($node, 'activation') === 'manual' ? 'manual' : 'automatic';
-        $state->enhance('tabs', $node, $scope, ['activation' => $activation]);
         $tabNodes = $state->slotNodes($node, 'items');
+        if ($tabNodes !== []) {
+            $state->enhance('tabs', $node, $scope, ['activation' => $activation]);
+        }
         $buttons = '';
         foreach ($tabNodes as $index => $tabNode) {
             $buttons .= '<button type="button" data-studio-tab="' . $index . '">'
@@ -162,7 +164,8 @@ final class InteractiveBlocks implements BlockRenderer
                 . '</button>';
         }
 
-        return '<div data-studio-tabs><div data-studio-tab-list hidden>' . $buttons . '</div>'
+        return '<div data-studio-tabs data-studio-tabs-activation="' . $activation
+            . '"><div data-studio-tab-list hidden>' . $buttons . '</div>'
             . '<div data-studio-part="content">' . $state->renderNodes($tabNodes) . '</div></div>';
     }
 
@@ -278,8 +281,9 @@ final class InteractiveBlocks implements BlockRenderer
             ['dropbar', 'dropdown', 'tooltip'],
             'popover'
         );
+        $dismissOnBlur = Properties::property($node, 'dismiss-on-blur') !== false;
         $state->enhance('popover', $node, $scope, [
-            'dismissOnBlur' => Properties::property($node, 'dismiss-on-blur') !== false,
+            'dismissOnBlur' => $dismissOnBlur,
             'presentation' => $presentation,
         ]);
         $titleMarkup = $title === ''
@@ -289,7 +293,8 @@ final class InteractiveBlocks implements BlockRenderer
                 . SafeMarkup::escapeHtml($title) . '</h3>';
 
         return '<details data-studio-popover data-studio-popover-placement="' . $placement
-            . '" data-studio-popover-presentation="' . $presentation . '">'
+            . '" data-studio-popover-presentation="' . $presentation
+            . '" data-studio-popover-dismiss-on-blur="' . ($dismissOnBlur ? 'true' : 'false') . '">'
             . '<summary data-studio-popover-trigger>' . SafeMarkup::escapeHtml($trigger) . '</summary>'
             . '<aside data-studio-popover-panel role="' . ($presentation === 'tooltip' ? 'tooltip' : 'region')
             . '" aria-labelledby="' . $scope . '-popover-title" tabindex="-1">' . $titleMarkup
@@ -596,7 +601,9 @@ final class InteractiveBlocks implements BlockRenderer
             'target' => $targetIso,
         ]);
 
-        return '<time data-studio-countdown datetime="' . $targetIso . '" aria-live="polite">'
+        return '<time data-studio-countdown data-studio-countdown-display="' . $display
+            . '" data-studio-countdown-expired-behavior="' . $expiredBehavior
+            . '" datetime="' . $targetIso . '" aria-live="polite">'
             . '<span data-studio-countdown-value>' . SafeMarkup::escapeHtml($targetIso) . '</span>'
             . '<span data-studio-countdown-complete hidden>' . SafeMarkup::escapeHtml($completionMessage)
             . '</span></time>';

@@ -379,7 +379,7 @@ final class Dispatcher
 
     /**
      * Resolves the operation's port on the host. The match is closed over
-     * the registry's nine port names; an absent optional port is refused as
+     * the registry's ten port names; an absent optional port is refused as
      * unavailable with retryable false, never guessed at.
      *
      * @param   Operation  $operation  The resolved registry row.
@@ -395,6 +395,7 @@ final class Dispatcher
     {
         $port = match ($operation->port) {
             'artifact' => $this->host->artifact(),
+            'authoring' => $this->host->authoring(),
             'localization' => $this->host->localization(),
             'media' => $this->host->media(),
             'model' => $this->host->model(),

@@ -107,7 +107,7 @@ final class StudioDocumentSchemaRegistryTest extends TestCase
                 basename($file) . ' diagnostics must be deterministic across fresh runs.'
             );
         }
-        $this->assertSame(23, $validated, 'Every hostile fixture for the exposed document kinds must run.');
+        $this->assertSame(26, $validated, 'Every hostile fixture for the exposed document kinds must run.');
     }
 
     public function testUnknownKindsAndInconsistentVerdictsAreRefused(): void

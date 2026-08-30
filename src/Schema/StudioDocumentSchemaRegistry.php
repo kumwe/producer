@@ -12,7 +12,7 @@ use Kumwe\Producer\Canonical\CanonicalEncodingException;
  * document schemas.
  *
  * Construction begins at the coordinated release pin, verifies the released
- * schema manifest and all 47 manifested schema bytes, admits the closed
+ * schema manifest and all 55 manifested schema bytes, admits the closed
  * interpreter grammar, compiles the reviewed lexical patterns, and resolves
  * every local or cross-document reference without network access. Only the
  * published document kinds can be validated. Callers cannot inject roots,
@@ -154,13 +154,14 @@ final class StudioDocumentSchemaRegistry
     private const SUPPORTED_KEYWORDS = [
         '$defs' => true, '$id' => true, '$ref' => true, '$schema' => true,
         'additionalProperties' => true, 'allOf' => true, 'anyOf' => true,
+        'contains' => true,
         'const' => true, 'default' => true, 'dependentRequired' => true,
         'description' => true, 'else' => true, 'enum' => true, 'examples' => true,
         'exclusiveMaximum' => true, 'exclusiveMinimum' => true, 'if' => true,
-        'items' => true, 'maxItems' => true, 'maxLength' => true,
+        'items' => true, 'maxContains' => true, 'maxItems' => true, 'maxLength' => true,
         'maxProperties' => true, 'maximum' => true, 'minItems' => true,
         'minLength' => true, 'minProperties' => true, 'minimum' => true,
-        'multipleOf' => true, 'not' => true, 'oneOf' => true, 'pattern' => true,
+        'minContains' => true, 'multipleOf' => true, 'not' => true, 'oneOf' => true, 'pattern' => true,
         'prefixItems' => true, 'properties' => true, 'propertyNames' => true,
         'readOnly' => true, 'required' => true, 'then' => true, 'title' => true,
         'type' => true, 'uniqueItems' => true, 'writeOnly' => true,
@@ -794,6 +795,7 @@ final class StudioDocumentSchemaRegistry
                         }
                         break;
                     case 'additionalProperties':
+                    case 'contains':
                     case 'else':
                     case 'if':
                     case 'items':
@@ -845,7 +847,8 @@ final class StudioDocumentSchemaRegistry
             'enum' => is_array($operand) && array_is_list($operand) && $operand !== [],
             'examples' => is_array($operand) && array_is_list($operand),
             'description', 'title' => is_string($operand) && mb_check_encoding($operand, 'UTF-8'),
-            'maxItems', 'maxLength', 'maxProperties', 'minItems', 'minLength', 'minProperties'
+            'maxContains', 'maxItems', 'maxLength', 'maxProperties',
+            'minContains', 'minItems', 'minLength', 'minProperties'
                 => is_int($operand) && $operand >= 0,
             'exclusiveMaximum', 'exclusiveMinimum', 'maximum', 'minimum'
                 => (is_int($operand) || is_float($operand)) && is_finite((float) $operand),
@@ -1569,6 +1572,33 @@ final class StudioDocumentSchemaRegistry
                     $duplicate[0],
                     $duplicate[1]
                 ));
+            }
+        }
+
+        if (property_exists($schema, 'contains')) {
+            $matches = 0;
+            foreach ($instance as $index => $item) {
+                $scratch = [];
+                $fresh = new \SplObjectStorage();
+                if (
+                    $this->subschema(
+                        self::asSubschema($schema->contains),
+                        $item,
+                        $path . '/' . $index,
+                        $scratch,
+                        $fresh,
+                    )
+                ) {
+                    $matches++;
+                }
+            }
+            $minimum = is_int($schema->minContains ?? null) ? $schema->minContains : 1;
+            $maximum = is_int($schema->maxContains ?? null) ? $schema->maxContains : null;
+            if ($matches < $minimum) {
+                $fail('minContains', sprintf('must contain at least %d matching items', $minimum));
+            }
+            if ($maximum !== null && $matches > $maximum) {
+                $fail('maxContains', sprintf('must contain at most %d matching items', $maximum));
             }
         }
 

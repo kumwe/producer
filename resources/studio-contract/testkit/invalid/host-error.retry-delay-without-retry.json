@@ -1,0 +1,16 @@
+{
+  "schema": "host-error.schema.json",
+  "description": "A retry delay is present only on a retryable rate-limit or unavailable failure.",
+  "value": {
+    "contractVersion": "0.1-draft",
+    "kind": "host-error",
+    "category": "rate-limited",
+    "correlationId": "requests/invalid-retry-delay",
+    "message": {
+      "key": "studio.host/rate-limited",
+      "defaultMessage": "The request is rate limited."
+    },
+    "retryable": false,
+    "retryAfterMilliseconds": 1000
+  }
+}
