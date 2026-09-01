@@ -28,15 +28,15 @@ const PRODUCER_IMPORT_BROWSER_ARCHIVE_BYTES = 1401344;
 const PRODUCER_IMPORT_BROWSER_ARCHIVE_BUDGET_BYTES = 2097152;
 const PRODUCER_IMPORT_BROWSER_ARCHIVE_MEMBERS = 74;
 const PRODUCER_IMPORT_BROWSER_ARCHIVE_SHA256 =
-    'e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01';
+    'f56b3d70e7bd44eb490693add611420dbfe9ae9f98a39468e232437f906c4ea0';
 const PRODUCER_IMPORT_BROWSER_ARCHIVE_SHA512 =
-    '630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501'
-    . 'd09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764';
+    '03ad304ffe58fa7081e6baed0fa7522b9aa044ed97e707be0ef6e5d848523a6e'
+    . 'f15fb8134b59adb012f4f97335faa63c8b639abc6a91f5e2e17708d8af0fc329';
 const PRODUCER_IMPORT_BROWSER_MANIFEST_SHA256 =
-    '89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68';
+    'c4e1c5438db99279405d14fe291f5460a0ea6b86b8c744138c5d2e0a3aeb567d';
 const PRODUCER_IMPORT_BROWSER_CHECKSUM_BYTES = 115;
 const PRODUCER_IMPORT_BROWSER_CHECKSUM_SHA256 =
-    '25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0';
+    'f3b7a75f53f39edca913317eb4035f4cb74b250b26bbe461b106b49fe98f215f';
 const PRODUCER_IMPORT_NPM_UNCOMPRESSED_MAX_BYTES = 33554432;
 const PRODUCER_IMPORT_NPM_MAX_MEMBERS = 4096;
 
@@ -751,7 +751,6 @@ function producerImportVerifyBrowserArchive(
             'archiveStem',
             'candidate',
             'publication',
-            'reason',
             'status',
         ]
         || !$candidate instanceof stdClass
@@ -771,16 +770,14 @@ function producerImportVerifyBrowserArchive(
         || producerImportSortedMembers($checksum) !== ['bytes', 'file', 'sha256']
         || !$publication instanceof stdClass
         || producerImportSortedMembers($publication) !== [
-            'expectedArchiveUrl',
-            'expectedChecksumUrl',
-            'expectedReleaseUrl',
-            'expectedTag',
+            'archiveUrl',
+            'checksumUrl',
+            'releaseUrl',
             'status',
+            'tag',
         ]
         || ($browserEvidence->archiveStem ?? null) !== $archiveStem
-        || ($browserEvidence->status ?? null) !== 'verified-local-candidate'
-        || !is_string($browserEvidence->reason ?? null)
-        || $browserEvidence->reason === ''
+        || ($browserEvidence->status ?? null) !== 'verified-publication'
         || ($archive->file ?? null) !== $archiveFile
         || ($archive->bytes ?? null) !== PRODUCER_IMPORT_BROWSER_ARCHIVE_BYTES
         || ($archive->budgetBytes ?? null) !== PRODUCER_IMPORT_BROWSER_ARCHIVE_BUDGET_BYTES
@@ -792,13 +789,13 @@ function producerImportVerifyBrowserArchive(
         || ($checksum->file ?? null) !== $checksumFile
         || ($checksum->bytes ?? null) !== PRODUCER_IMPORT_BROWSER_CHECKSUM_BYTES
         || ($checksum->sha256 ?? null) !== PRODUCER_IMPORT_BROWSER_CHECKSUM_SHA256
-        || ($publication->status ?? null) !== 'unavailable'
-        || ($publication->expectedTag ?? null) !== $tag
-        || ($publication->expectedReleaseUrl ?? null) !== $releaseUrl
-        || ($publication->expectedArchiveUrl ?? null) !== $downloadRoot . $archiveFile
-        || ($publication->expectedChecksumUrl ?? null) !== $downloadRoot . $checksumFile
+        || ($publication->status ?? null) !== 'available'
+        || ($publication->tag ?? null) !== $tag
+        || ($publication->releaseUrl ?? null) !== $releaseUrl
+        || ($publication->archiveUrl ?? null) !== $downloadRoot . $archiveFile
+        || ($publication->checksumUrl ?? null) !== $downloadRoot . $checksumFile
     ) {
-        throw new RuntimeException('Publication evidence has no exact blocked browser-archive candidate.');
+        throw new RuntimeException('Publication evidence has no exact published browser-archive record.');
     }
     if (basename($archivePath) !== $archiveFile || basename($checksumPath) !== $checksumFile) {
         throw new RuntimeException('Browser archive inputs do not use their content-derived release names.');
@@ -1310,7 +1307,7 @@ function producerImportBrowserManifest(stdClass $release, stdClass $manifest): a
         || $roleCounts !== ['license' => 13, 'notice' => 1]
     ) {
         throw new RuntimeException(
-            'Studio beta.2 browser manifest must declare its complete 14-file redistribution closure.',
+            'The Studio browser manifest must declare its complete 14-file redistribution closure.',
         );
     }
 
@@ -1515,11 +1512,10 @@ function producerImportPin(
         || !$checksumCandidate instanceof stdClass
         || !$publication instanceof stdClass
         || ($archive->archiveStem ?? null) !== ($release->browserArtifacts->authoringArchive->archiveStem ?? null)
-        || ($archive->status ?? null) !== 'verified-local-candidate'
-        || ($publication->status ?? null) !== 'unavailable'
-        || !is_string($archive->reason ?? null)
+        || ($archive->status ?? null) !== 'verified-publication'
+        || ($publication->status ?? null) !== 'available'
     ) {
-        throw new RuntimeException('Publication evidence must retain the blocked verified browser candidate.');
+        throw new RuntimeException('Publication evidence must carry the published verified browser archive.');
     }
 
     return [
@@ -1563,11 +1559,10 @@ function producerImportPin(
                 'checksum_bytes' => $checksumCandidate->bytes,
                 'checksum_sha256' => $checksumCandidate->sha256,
                 'publication_status' => $publication->status,
-                'expected_tag' => $publication->expectedTag,
-                'expected_release_url' => $publication->expectedReleaseUrl,
-                'expected_archive_url' => $publication->expectedArchiveUrl,
-                'expected_checksum_url' => $publication->expectedChecksumUrl,
-                'reason' => $archive->reason,
+                'tag' => $publication->tag,
+                'release_url' => $publication->releaseUrl,
+                'archive_url' => $publication->archiveUrl,
+                'checksum_url' => $publication->checksumUrl,
             ],
             'resolved_assets' => [
                 producerImportPinnedAsset($browserAsset, '@kumwe/studio'),
@@ -1582,8 +1577,8 @@ function producerImportPin(
             ),
         ],
         'release_readiness' => [
-            'status' => 'blocked',
-            'blockers' => [$archive->reason],
+            'status' => 'ready',
+            'blockers' => [],
         ],
         'files' => $files,
     ];

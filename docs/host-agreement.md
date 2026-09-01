@@ -29,11 +29,11 @@ additional wire ports.
   page; the host's layout, navigation, language, and direction wrap the fragment.
 - Studio's approved prebuilt browser artifacts, served as immutable static files under the host's
   cache and Content-Security-Policy discipline. Producer's current pin verifies the browser module
-  and public enhancement runtime from their published npm package paths. It also records a fully
-  verified local candidate for Studio `0.1.0-beta.2`'s deterministic 74-member outer archive and
-  detached checksum, but the governed GitHub prerelease does not publish both exact assets yet. A
-  host must not treat the candidate's expected URLs as live, relabel an npm tarball, or reconstruct
-  its own archive as that governed release artifact.
+  and public enhancement runtime from their published npm package paths, and binds Studio
+  `0.1.0-beta.3`'s deterministic 74-member outer archive and detached checksum to the exact assets
+  the governed GitHub prerelease publishes at the recorded URLs. A host downloads that governed
+  archive; it must not relabel an npm tarball or reconstruct its own archive as that governed
+  release artifact.
 
 ## What Producer promises the host
 
@@ -64,11 +64,11 @@ additional wire ports.
 4. A Studio contract change reaches a host only as: Studio release → Producer re-pin (one change,
    its own review) → Producer release → host pin bump. No stage may be skipped; nothing floats.
 
-The current Studio `0.1.0-beta.2` pin proves its source commit, eight npm packages, 55 schemas, 301
+The current Studio `0.1.0-beta.3` pin proves its source commit, eight npm packages, 55 schemas, 301
 corpus members, browser module, and enhancement runtime, and claims zero conformance profiles. Its
-local outer-archive candidate is byte- and manifest-verified but deliberately not vendored. Its
-release-readiness state remains blocked until Studio publishes that exact archive and detached
-checksum at the recorded governed URLs; Producer must not publish while that state is blocked.
+outer archive is byte- and manifest-verified against the governed GitHub prerelease downloads and
+deliberately not vendored. Its release-readiness state is ready: Studio publishes the exact archive
+and detached checksum at the recorded governed URLs, and the pin binds them.
 
 ## Raising a mismatch
 

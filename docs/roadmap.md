@@ -13,15 +13,13 @@ forty-five-type renderer with its escaping discipline and fallbacks (P-4, P-5), 
 generator (P-6), rich-text projection rendering (P-7), and the enhancement need signal on the
 render result (the Producer half of P-8).
 
-Producer is pinned to the provenance-backed eight-package Studio `0.1.0-beta.2` npm publication at
-source commit `38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48`, including all 55 protocol schemas and all 301
+Producer is pinned to the provenance-backed eight-package Studio `0.1.0-beta.3` npm publication at
+source commit `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a`, including all 55 protocol schemas and all 301
 testkit corpus members. The release claims zero Studio conformance profiles. The Studio asset
-manifest, browser module, and enhancement runtime are package-path- and digest-verified, but the
-exact deterministic 74-member outer archive and detached checksum are only a fully verified local
-candidate: the governed GitHub prerelease does not publish both files. That publication gap blocks
-a Producer release; expected URLs and npm inner assets do not replace public governed assets. Host
-integration may claim only the delivered surfaces above; P-10, P-11, P-12, and release readiness
-remain open.
+manifest, browser module, and enhancement runtime are package-path- and digest-verified, and the
+exact deterministic 74-member outer archive and detached checksum are published by the governed
+GitHub prerelease; the pin was regenerated from those public downloads, so release readiness is
+`ready`. Host integration may claim only the delivered surfaces above; P-10 and P-11 remain open.
 
 ## Steps
 

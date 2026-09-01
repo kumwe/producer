@@ -13,8 +13,8 @@ reality on a PHP host:
   no-JavaScript fallbacks for the complete Studio block catalog.
 - **Stylesheets** — generates the static CSS a design's tokens and layout vocabulary imply; nothing
   is computed per request and nothing is inlined.
-- **Contract proof** — vendors Studio `0.1.0-beta.2` at source commit
-  `38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48`, digest-verifies all 55 protocol schemas and all
+- **Contract proof** — vendors Studio `0.1.0-beta.3` at source commit
+  `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a`, digest-verifies all 55 protocol schemas and all
   301 testkit corpus members, and replays the published conformance vectors, so what this library
   claims is what it proves.
 
@@ -86,9 +86,9 @@ shape (`stdClass` objects and list arrays) and the interoperable ECMAScript safe
 
 ## Status
 
-The current, unreleased 0.2 work is aligned to the provenance-backed eight-package Studio
-`0.1.0-beta.2` npm publication at commit
-`38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48`. It vendors 55 schemas and 301 corpus files, reproduces
+The 0.2 release line is aligned to the provenance-backed eight-package Studio
+`0.1.0-beta.3` npm publication at commit
+`42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a`. It vendors 55 schemas and 301 corpus files, reproduces
 the released thirty-one-operation wire across ten operational ports (including the seven authoring
 operations), and claims zero Studio conformance profiles. Canonical JSON, exact document-schema
 admission, host-atomic mutation and protected replay, rendering, rich text, and stylesheets are
@@ -96,12 +96,10 @@ corpus-proven. The Studio asset manifest also proves the exact browser module an
 runtime bytes carried by the npm packages and all fourteen redistribution notice/license members
 that accompany those bytes.
 
-This work is **not release-ready**: the exact outer Studio browser archive and detached checksum
-have been reproduced locally and fully verified, but the governed GitHub prerelease does not yet
-publish both assets. The PIN records the candidate's complete immutable envelope without claiming
-that its expected download URLs are live, so Producer 0.2 remains unreleased until those exact
-public assets exist and are re-pinned. Deployment emitters and optional template bridges also
-remain roadmap work and are not claimed. See
+This work is **release-ready**: the governed Studio prerelease publishes the exact deterministic
+74-member outer browser archive and its detached checksum, and the PIN was regenerated from those
+public downloads, binding their live URLs, bytes, and digests as one fail-closed contract proof.
+Deployment emitters and optional template bridges remain roadmap work and are not claimed. See
 [the roadmap](https://github.com/kumwe/producer/blob/main/docs/roadmap.md) for the precise boundary.
 
 ## Requirements

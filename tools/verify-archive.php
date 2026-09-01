@@ -207,44 +207,41 @@ if (
 ) {
     $errors[] = 'The Studio PIN does not carry the exact browser proof members.';
 }
-$archiveReason = 'The exact Studio beta.2 browser archive and detached checksum are locally reproduced '
-    . 'and fully verified, but the governed GitHub prerelease does not publish both assets yet.';
-$archiveSha256 = 'e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01';
-$archiveFile = 'studio-browser-0.1.0-beta.2-' . substr($archiveSha256, 0, 16) . '.tar';
-$archiveTag = 'studio-v0.1.0-beta.2';
+$archiveSha256 = 'f56b3d70e7bd44eb490693add611420dbfe9ae9f98a39468e232437f906c4ea0';
+$archiveFile = 'studio-browser-0.1.0-beta.3-' . substr($archiveSha256, 0, 16) . '.tar';
+$archiveTag = 'studio-v0.1.0-beta.3';
 $downloadRoot = 'https://github.com/kumwe/studio/releases/download/' . $archiveTag . '/';
 $expectedArchivePin = [
-    'archive_stem' => 'studio-browser-0.1.0-beta.2',
-    'status' => 'verified-local-candidate',
+    'archive_stem' => 'studio-browser-0.1.0-beta.3',
+    'status' => 'verified-publication',
     'archive_file' => $archiveFile,
     'archive_bytes' => 1401344,
     'archive_budget_bytes' => 2097152,
     'archive_sha256' => $archiveSha256,
-    'archive_sha512' => '630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501'
-        . 'd09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764',
-    'archive_integrity' => 'sha512-Ywoz6/bqAyFVn9x4ZERZIlVE8WIckeRCztijV6HWhQHQlxX1xmBSa+'
-        . 'gZUySI/ID6XFNTarkGDmi6yA/b2Q7XZA==',
-    'manifest_sha256' => '89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68',
+    'archive_sha512' => '03ad304ffe58fa7081e6baed0fa7522b9aa044ed97e707be0ef6e5d848523a6e'
+        . 'f15fb8134b59adb012f4f97335faa63c8b639abc6a91f5e2e17708d8af0fc329',
+    'archive_integrity' => 'sha512-A60wT/5Y+nCB5rrtD6dSK5qgRO2X5we+Dvbl2EhSOm7xX7gTS1mtsBL0+'
+        . 'XM1+qY8i2OavGqR9eLhdwjYrw/DKQ==',
+    'manifest_sha256' => 'c4e1c5438db99279405d14fe291f5460a0ea6b86b8c744138c5d2e0a3aeb567d',
     'member_count' => 74,
     'checksum_file' => $archiveFile . '.sha256',
     'checksum_bytes' => 115,
-    'checksum_sha256' => '25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0',
-    'publication_status' => 'unavailable',
-    'expected_tag' => $archiveTag,
-    'expected_release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,
-    'expected_archive_url' => $downloadRoot . $archiveFile,
-    'expected_checksum_url' => $downloadRoot . $archiveFile . '.sha256',
-    'reason' => $archiveReason,
+    'checksum_sha256' => 'f3b7a75f53f39edca913317eb4035f4cb74b250b26bbe461b106b49fe98f215f',
+    'publication_status' => 'available',
+    'tag' => $archiveTag,
+    'release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,
+    'archive_url' => $downloadRoot . $archiveFile,
+    'checksum_url' => $downloadRoot . $archiveFile . '.sha256',
 ];
 $readiness = is_array($pin['release_readiness'] ?? null) ? $pin['release_readiness'] : [];
 if (
     $archivePin !== $expectedArchivePin
-    || ($readiness['status'] ?? null) !== 'blocked'
-    || ($readiness['blockers'] ?? null) !== [$archiveReason]
+    || ($readiness['status'] ?? null) !== 'ready'
+    || ($readiness['blockers'] ?? null) !== []
     || !is_file($contract . '/browser/studio-assets.json')
     || $archivePin['manifest_sha256'] !== hash_file('sha256', $contract . '/browser/studio-assets.json')
 ) {
-    $errors[] = 'The archive must retain the exact blocked, non-vendored Studio browser candidate proof.';
+    $errors[] = 'The archive must bind the exact published, non-vendored Studio browser archive proof.';
 }
 $assetRoles = [];
 $contractDirectFiles = [
@@ -275,9 +272,9 @@ foreach ($resolvedAssets as $entry) {
 $browserRelease = is_array($browser['release'] ?? null) ? $browser['release'] : [];
 if (
     array_keys($assetRoles) !== ['browser-module', 'enhancement-runtime']
-    || ($browserRelease['version'] ?? null) !== '0.1.0-beta.2'
+    || ($browserRelease['version'] ?? null) !== '0.1.0-beta.3'
 ) {
-    $errors[] = 'The package must contain both exact Studio beta.2 browser runtime assets.';
+    $errors[] = 'The package must contain both exact Studio beta.3 browser runtime assets.';
 }
 
 $manifestAssets = is_array($browser['assets'] ?? null) ? $browser['assets'] : [];

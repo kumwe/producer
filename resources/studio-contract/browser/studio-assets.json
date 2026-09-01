@@ -2,12 +2,12 @@
   "assets": [
     {
       "bytes": 940524,
-      "contentHash": "93e7abeb4a64b850e0493b5e908a31c5660b76489913b38729a952fcac6067a6",
-      "integrity": "sha256-k+er60pkuFDgSTtekIoxxWYLdkiZE7OHKalS/KxgZ6Y=",
+      "contentHash": "6d02cb9ee621429ac26ee0752d7e586f4f7f9fe2954bac41f8cecc761dbf0f7e",
+      "integrity": "sha256-bQLLnuYhQprCbuB1LX5Yb09/n+KVS6xB+M7Mdh2/D34=",
       "budgetBytes": 1048576,
       "mediaType": "text/javascript",
       "minified": true,
-      "path": "assets/studio-browser-93e7abeb4a64b850.min.js",
+      "path": "assets/studio-browser-6d02cb9ee621429a.min.js",
       "role": "browser-module"
     },
     {
@@ -421,7 +421,7 @@
     },
     {
       "bytes": 1129,
-      "integrity": "sha256-GfjWT/TYz3uPY3qbi//3OVldU+TmPNv0X2+VoBut6WY=",
+      "integrity": "sha256-wYYMZNGkzh5tm5bqlKLWPfQujrqvQj7VtPpN2EHtOaQ=",
       "mediaType": "application/json",
       "path": "studio-release.json",
       "role": "release-record"
@@ -558,7 +558,7 @@
   },
   "kind": "studio-browser-assets",
   "module": {
-    "entryPoint": "assets/studio-browser-93e7abeb4a64b850.min.js",
+    "entryPoint": "assets/studio-browser-6d02cb9ee621429a.min.js",
     "exports": [
       "mountStudio",
       "mountStudioFromConfigElement",
@@ -605,7 +605,7 @@
   },
   "release": {
     "corpusManifestDigest": "sha256-PupdZVv+htI0wd7bnFtwVdFzhYVB7DxTXh+viiBClNM=",
-    "version": "0.1.0-beta.2"
+    "version": "0.1.0-beta.3"
   },
   "schemaVersion": 1
 }

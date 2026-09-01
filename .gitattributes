@@ -19,7 +19,7 @@
 /tools export-ignore
 /vendor export-ignore
 
-# Studio 0.1.0-beta.2 owns only the manifest-bound protocol/, testkit/,
+# The pinned Studio release owns only the manifest-bound protocol/, testkit/,
 # and browser/ layout. Never resurrect legacy mirror paths in an archive.
 /resources/studio-contract/conformance export-ignore
 /resources/studio-contract/schemas export-ignore

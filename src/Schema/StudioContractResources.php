@@ -28,7 +28,7 @@ final class StudioContractResources
     private const MAX_RESOURCE_BYTES = 1048576;
 
     /**
-     * Exact locally reproduced, non-vendored Studio beta.2 outer archive.
+     * Exact published, non-vendored Studio outer-archive byte count.
      *
      * @since 0.2.0
      */
@@ -49,21 +49,21 @@ final class StudioContractResources
     private const BROWSER_ARCHIVE_MEMBERS = 74;
 
     /**
-     * Exact reviewed Studio beta.2 outer-archive SHA-256.
+     * Exact published Studio outer-archive SHA-256.
      *
      * @since 0.2.0
      */
     private const BROWSER_ARCHIVE_SHA256 =
-        'e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01';
+        'f56b3d70e7bd44eb490693add611420dbfe9ae9f98a39468e232437f906c4ea0';
 
     /**
-     * Exact reviewed Studio beta.2 outer-archive SHA-512.
+     * Exact published Studio outer-archive SHA-512.
      *
      * @since 0.2.0
      */
     private const BROWSER_ARCHIVE_SHA512 =
-        '630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501'
-        . 'd09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764';
+        '03ad304ffe58fa7081e6baed0fa7522b9aa044ed97e707be0ef6e5d848523a6e'
+        . 'f15fb8134b59adb012f4f97335faa63c8b639abc6a91f5e2e17708d8af0fc329';
 
     /**
      * Exact reviewed detached-checksum byte count.
@@ -78,16 +78,7 @@ final class StudioContractResources
      * @since 0.2.0
      */
     private const BROWSER_CHECKSUM_SHA256 =
-        '25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0';
-
-    /**
-     * Single remaining release blocker until both governed assets exist.
-     *
-     * @since 0.2.0
-     */
-    private const BROWSER_ARCHIVE_BLOCKER =
-        'The exact Studio beta.2 browser archive and detached checksum are locally reproduced and fully '
-        . 'verified, but the governed GitHub prerelease does not publish both assets yet.';
+        'f3b7a75f53f39edca913317eb4035f4cb74b250b26bbe461b106b49fe98f215f';
 
     /**
      * Static utility; never instantiated.
@@ -590,7 +581,7 @@ final class StudioContractResources
         ) {
             throw new \RuntimeException('The installed Studio browser PIN is malformed.');
         }
-        self::assertBlockedAuthoringArchive($archivePin, $locators, $release, $manifestSha256);
+        self::assertPublishedAuthoringArchive($archivePin, $locators, $release, $manifestSha256);
 
         $manifestPath = $root . '/browser/' . $locators->manifestName();
         $manifestBytes = self::fileBytes($manifestPath);
@@ -721,20 +712,20 @@ final class StudioContractResources
     }
 
     /**
-     * Verify the closed local-candidate envelope without claiming publication.
+     * Verify the closed published-archive envelope and its release decision.
      *
-     * The importer proves the unshipped tar/checksum bytes. Installed runtime
-     * verification retains their exact identity and keeps release readiness
-     * blocked until the governed GitHub prerelease publishes both files.
+     * The importer proves the governed tar/checksum bytes against the public
+     * GitHub prerelease downloads. Installed runtime verification retains
+     * their exact identity and requires release readiness with no blockers.
      *
-     * @param \stdClass             $archive        Closed candidate PIN envelope.
+     * @param \stdClass             $archive        Closed published PIN envelope.
      * @param StudioBrowserArtifacts $locators      Typed release artifact locators.
      * @param StudioContractRelease  $release       Exact coordinated release.
      * @param string                 $manifestSha256 Vendored manifest SHA-256.
      *
      * @since 0.2.0
      */
-    private static function assertBlockedAuthoringArchive(
+    private static function assertPublishedAuthoringArchive(
         \stdClass $archive,
         StudioBrowserArtifacts $locators,
         StudioContractRelease $release,
@@ -755,21 +746,20 @@ final class StudioContractResources
                 'archive_sha256',
                 'archive_sha512',
                 'archive_stem',
+                'archive_url',
                 'checksum_bytes',
                 'checksum_file',
                 'checksum_sha256',
-                'expected_archive_url',
-                'expected_checksum_url',
-                'expected_release_url',
-                'expected_tag',
+                'checksum_url',
                 'manifest_sha256',
                 'member_count',
                 'publication_status',
-                'reason',
+                'release_url',
                 'status',
+                'tag',
             ]
             || ($archive->archive_stem ?? null) !== $stem
-            || ($archive->status ?? null) !== 'verified-local-candidate'
+            || ($archive->status ?? null) !== 'verified-publication'
             || ($archive->archive_file ?? null) !== $archiveFile
             || ($archive->archive_bytes ?? null) !== self::BROWSER_ARCHIVE_BYTES
             || ($archive->archive_budget_bytes ?? null) !== self::BROWSER_ARCHIVE_BUDGET_BYTES
@@ -781,17 +771,16 @@ final class StudioContractResources
             || ($archive->checksum_file ?? null) !== $checksumFile
             || ($archive->checksum_bytes ?? null) !== self::BROWSER_CHECKSUM_BYTES
             || ($archive->checksum_sha256 ?? null) !== self::BROWSER_CHECKSUM_SHA256
-            || ($archive->publication_status ?? null) !== 'unavailable'
-            || ($archive->expected_tag ?? null) !== $tag
-            || ($archive->expected_release_url ?? null)
+            || ($archive->publication_status ?? null) !== 'available'
+            || ($archive->tag ?? null) !== $tag
+            || ($archive->release_url ?? null)
                 !== 'https://github.com/kumwe/studio/releases/tag/' . $tag
-            || ($archive->expected_archive_url ?? null) !== $downloadRoot . $archiveFile
-            || ($archive->expected_checksum_url ?? null) !== $downloadRoot . $checksumFile
-            || ($archive->reason ?? null) !== self::BROWSER_ARCHIVE_BLOCKER
-            || $release->releaseReady()
-            || $release->releaseBlockers() !== [self::BROWSER_ARCHIVE_BLOCKER]
+            || ($archive->archive_url ?? null) !== $downloadRoot . $archiveFile
+            || ($archive->checksum_url ?? null) !== $downloadRoot . $checksumFile
+            || !$release->releaseReady()
+            || $release->releaseBlockers() !== []
         ) {
-            throw new \RuntimeException('The installed Studio browser archive candidate is malformed.');
+            throw new \RuntimeException('The installed Studio browser archive publication is malformed.');
         }
     }
 

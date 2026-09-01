@@ -3,10 +3,10 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
-## Unreleased
+## 0.2.0 - 2026-09-01
 
-- Re-pinned Producer to the provenance-backed Studio `0.1.0-beta.2` publication at exact source
-  commit `38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48`: byte-identical release records, all 55 protocol
+- Re-pinned Producer to the provenance-backed Studio `0.1.0-beta.3` publication at exact source
+  commit `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a`: byte-identical release records, all 55 protocol
   schemas, all 301 testkit corpus members, manifest digests, package coordinates, protocol version,
   and the deliberately empty conformance-profile claim are now one fail-closed contract proof.
 - Bound all eight coordinated Studio npm packages to their exact tarball sizes, SHA-1 shasums,
@@ -15,11 +15,11 @@ Delivered, repository-verified behaviour only; roadmap position and claims live 
   package paths, byte budgets, content hashes, and SRI values verified end to end. The package now
   also preserves and independently verifies all fourteen manifest-declared Studio and third-party
   redistribution notice/license files.
-- Reproduced and independently verified the exact non-vendored Studio beta.2 browser archive and
-  detached checksum: deterministic regular-file ustar, 74 members, fixed byte budget, SHA-256,
-  SHA-512/SRI, inner-manifest digest, and byte equality with every manifest-declared npm member.
-  The PIN records its local-candidate envelope and expected public coordinates without shipping
-  the 1.4 MB release assets in Producer's Composer archive.
+- Verified the exact non-vendored Studio browser archive and detached checksum against the
+  governed GitHub prerelease downloads: deterministic regular-file ustar, 74 members, fixed byte
+  budget, SHA-256, SHA-512/SRI, inner-manifest digest, and byte equality with every
+  manifest-declared npm member. The PIN binds the published envelope and its live governed URLs
+  without shipping the 1.4 MB release assets in Producer's Composer archive.
 - Hardened the deterministic importer so Studio release, schema, corpus-manifest, and member bytes
   come only from bounded ordinary blobs in the exact evidence commit, never a dirty checkout. Git
   plumbing uses a canonical executable, sanitized configuration environment, and disabled replace
@@ -30,11 +30,13 @@ Delivered, repository-verified behaviour only; roadmap position and claims live 
   now has checked rollback, explicit recovery state when rollback itself fails, and post-commit
   backup cleanup that cannot misreport a successfully installed generation as failed.
 - Restored the seven released authoring operations, their schemas and fixtures, and the optional
-  authoring port interface. The wire now reproduces Studio `0.1.0-beta.2`'s released
+  authoring port interface. The wire now reproduces the pinned Studio release's
   thirty-one-operation, ten-port registry exactly, with no alternate host-specific paths.
-- Kept the Producer release blocked because the governed Studio GitHub prerelease does not publish
-  both exact outer-archive assets yet. The locally verified candidate is necessary evidence, but
-  is not a substitute for public governed publication; no Producer 0.2 release is claimed here.
+- Cleared the recorded release blocker: the governed Studio GitHub prerelease
+  `studio-v0.1.0-beta.3` publishes both exact outer-archive assets, the deterministic importer
+  re-ran against those public downloads, and the pin's release-readiness state is `ready` with no
+  blockers. The importer and installed-runtime verification now require the published envelope —
+  live governed tag, release, archive, and checksum URLs — instead of a blocked local candidate.
 - Replaced the split idempotency lookup/write seam with one host-atomic mutation boundary for
   keyed and unkeyed mutations. Hosts can commit trusted scope, mutation, audit, and an optional
   protected replay representation together; replay may deterministically rehydrate secrets, and

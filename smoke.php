@@ -134,10 +134,10 @@ declare(strict_types=1);
     try {
         $release = \Kumwe\Producer\Schema\StudioContractResources::releaseRecord();
         if (
-            $release->release() !== '0.1.0-beta.2'
-            || $release->sourceCommit() !== '38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48'
+            $release->release() !== '0.1.0-beta.3'
+            || $release->sourceCommit() !== '42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a'
         ) {
-            $errors[] = 'The installed Studio beta.2 release coordinate or provenance commit drifted.';
+            $errors[] = 'The installed Studio beta.3 release coordinate or provenance commit drifted.';
         }
         $browser = \Kumwe\Producer\Schema\StudioContractResources::browserAsset('browser-module');
         $enhancement = \Kumwe\Producer\Schema\StudioContractResources::browserAsset('enhancement-runtime');

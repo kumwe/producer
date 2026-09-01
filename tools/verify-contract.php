@@ -141,13 +141,13 @@ $source = is_array($pin['source'] ?? null) ? $pin['source'] : [];
 if (
     ($source['repository'] ?? null) !== 'https://github.com/kumwe/studio'
     || ($source['kind'] ?? null) !== 'provenance-backed-npm-release'
-    || ($source['release'] ?? null) !== '0.1.0-beta.2'
+    || ($source['release'] ?? null) !== '0.1.0-beta.3'
     || ($source['release'] ?? null) !== ($release['release'] ?? null)
-    || ($source['commit'] ?? null) !== '38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48'
+    || ($source['commit'] ?? null) !== '42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a'
     || ($source['workflow'] ?? null)
-        !== 'https://github.com/kumwe/studio/actions/runs/33181863797/attempts/1'
+        !== 'https://github.com/kumwe/studio/actions/runs/33502196545/attempts/1'
 ) {
-    $errors[] = 'PIN.json does not name the exact provenance-backed Studio beta.2 publication.';
+    $errors[] = 'PIN.json does not name the exact provenance-backed Studio beta.3 publication.';
 }
 if (
     ($releasePin['release'] ?? null) !== ($release['release'] ?? null)
@@ -187,7 +187,7 @@ if ($actualPackageNames !== $packageNames) {
 }
 foreach ($packageMap as $name => $version) {
     if (!is_string($name) || $version !== ($release['release'] ?? null)) {
-        $errors[] = 'Every Studio package must use the exact coordinated beta.2 version.';
+        $errors[] = 'Every Studio package must use the exact coordinated beta.3 version.';
     }
 }
 
@@ -279,42 +279,39 @@ if (
 
 $readiness = is_array($pin['release_readiness'] ?? null) ? $pin['release_readiness'] : [];
 $blockers = is_array($readiness['blockers'] ?? null) ? $readiness['blockers'] : [];
-$archiveReason = 'The exact Studio beta.2 browser archive and detached checksum are locally reproduced '
-    . 'and fully verified, but the governed GitHub prerelease does not publish both assets yet.';
-$archiveSha256 = 'e1bd88fa0bf6170e098bb50235783137d8d1aea9b28421a700b550886ffbab01';
-$archiveFile = 'studio-browser-0.1.0-beta.2-' . substr($archiveSha256, 0, 16) . '.tar';
-$archiveTag = 'studio-v0.1.0-beta.2';
+$archiveSha256 = 'f56b3d70e7bd44eb490693add611420dbfe9ae9f98a39468e232437f906c4ea0';
+$archiveFile = 'studio-browser-0.1.0-beta.3-' . substr($archiveSha256, 0, 16) . '.tar';
+$archiveTag = 'studio-v0.1.0-beta.3';
 $downloadRoot = 'https://github.com/kumwe/studio/releases/download/' . $archiveTag . '/';
 $expectedArchivePin = [
-    'archive_stem' => 'studio-browser-0.1.0-beta.2',
-    'status' => 'verified-local-candidate',
+    'archive_stem' => 'studio-browser-0.1.0-beta.3',
+    'status' => 'verified-publication',
     'archive_file' => $archiveFile,
     'archive_bytes' => 1401344,
     'archive_budget_bytes' => 2097152,
     'archive_sha256' => $archiveSha256,
-    'archive_sha512' => '630a33ebf6ea0321559fdc78644459225544f1621c91e442ced8a357a1d68501'
-        . 'd09715f5c660526be819532488fc80fa5c53536ab9060e68bac80fdbd90ed764',
-    'archive_integrity' => 'sha512-Ywoz6/bqAyFVn9x4ZERZIlVE8WIckeRCztijV6HWhQHQlxX1xmBSa+'
-        . 'gZUySI/ID6XFNTarkGDmi6yA/b2Q7XZA==',
-    'manifest_sha256' => '89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68',
+    'archive_sha512' => '03ad304ffe58fa7081e6baed0fa7522b9aa044ed97e707be0ef6e5d848523a6e'
+        . 'f15fb8134b59adb012f4f97335faa63c8b639abc6a91f5e2e17708d8af0fc329',
+    'archive_integrity' => 'sha512-A60wT/5Y+nCB5rrtD6dSK5qgRO2X5we+Dvbl2EhSOm7xX7gTS1mtsBL0+'
+        . 'XM1+qY8i2OavGqR9eLhdwjYrw/DKQ==',
+    'manifest_sha256' => 'c4e1c5438db99279405d14fe291f5460a0ea6b86b8c744138c5d2e0a3aeb567d',
     'member_count' => 74,
     'checksum_file' => $archiveFile . '.sha256',
     'checksum_bytes' => 115,
-    'checksum_sha256' => '25d9d43978e9bf156422794f668dcceba612e22c7ee2236b47f78d066434ddf0',
-    'publication_status' => 'unavailable',
-    'expected_tag' => $archiveTag,
-    'expected_release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,
-    'expected_archive_url' => $downloadRoot . $archiveFile,
-    'expected_checksum_url' => $downloadRoot . $archiveFile . '.sha256',
-    'reason' => $archiveReason,
+    'checksum_sha256' => 'f3b7a75f53f39edca913317eb4035f4cb74b250b26bbe461b106b49fe98f215f',
+    'publication_status' => 'available',
+    'tag' => $archiveTag,
+    'release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,
+    'archive_url' => $downloadRoot . $archiveFile,
+    'checksum_url' => $downloadRoot . $archiveFile . '.sha256',
 ];
 if (
-    ($readiness['status'] ?? null) !== 'blocked'
-    || $blockers !== [$archiveReason]
+    ($readiness['status'] ?? null) !== 'ready'
+    || $blockers !== []
     || $archivePin !== $expectedArchivePin
     || ($archivePin['archive_stem'] ?? null) !== ($archiveLocator['archiveStem'] ?? null)
 ) {
-    $errors[] = 'PIN.json must retain the exact verified candidate while public assets remain unavailable.';
+    $errors[] = 'PIN.json must bind the exact published governed browser archive and checksum.';
 }
 
 $manifestAssets = is_array($browserManifest['assets'] ?? null) ? $browserManifest['assets'] : [];
@@ -416,7 +413,7 @@ if (
     || $redistributionRoleCounts !== ['license' => 13, 'notice' => 1]
     || count($redistributionFiles) !== count($manifestRedistribution)
 ) {
-    $errors[] = 'Studio beta.2 must carry its complete 14-file redistribution closure.';
+    $errors[] = 'The Studio release must carry its complete 14-file redistribution closure.';
 }
 foreach ($manifestRedistribution as $index => $asset) {
     $binding = is_array($redistributionFiles[$index] ?? null)
@@ -543,7 +540,7 @@ if (
     }
 }
 if (count($schemaSeen) !== 55) {
-    $errors[] = 'The Studio beta.2 schema manifest must name exactly 55 files.';
+    $errors[] = 'The Studio schema manifest must name exactly 55 files.';
 }
 
 if (
@@ -587,7 +584,7 @@ if (
     }
 }
 if (count($corpusSeen) !== 301) {
-    $errors[] = 'The Studio beta.2 corpus manifest must name exactly 301 files.';
+    $errors[] = 'The Studio corpus manifest must name exactly 301 files.';
 }
 
 $corpusDigest = is_file($corpusManifestPath) ? sri($corpusManifestPath) : '';
@@ -610,7 +607,7 @@ if ($errors !== []) {
 
 echo sprintf(
     "Studio contract verified: release %s, protocol %s, %d schemas, %d corpus files, "
-        . "%d redistribution files, and one blocked 74-member outer-archive candidate.\n",
+        . "%d redistribution files, and one published 74-member outer archive.\n",
     $release['release'],
     $release['protocolVersion'],
     count($schemaManifest['schemas']),

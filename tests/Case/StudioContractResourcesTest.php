@@ -22,34 +22,31 @@ final class StudioContractResourcesTest extends TestCase
         $release = StudioContractResources::releaseRecord();
         $this->assertSame($release, StudioContractResources::releaseRecord(), 'Release parsing must be shared.');
         $this->assertSame('0.1-draft', $release->contractVersion(), 'The release-record version must match.');
-        $this->assertSame('0.1.0-beta.2', $release->release(), 'The coordinated release must match.');
+        $this->assertSame('0.1.0-beta.3', $release->release(), 'The coordinated release must match.');
         $this->assertSame('0.1.0-draft.2', $release->protocolVersion(), 'The protocol version must match.');
         $this->assertSame(
             'sha256-PupdZVv+htI0wd7bnFtwVdFzhYVB7DxTXh+viiBClNM=',
             $release->corpusManifestDigest(),
             'The corpus-manifest SRI must match the coordinated release.'
         );
-        $this->assertSame([], $release->claimedProfiles(), 'Beta.2 must not invent conformance-profile claims.');
+        $this->assertSame([], $release->claimedProfiles(), 'Beta must not invent conformance-profile claims.');
         $this->assertSame(8, count($release->packages()), 'Every coordinated package must remain pinned.');
         $this->assertSame(
-            '38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48',
+            '42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a',
             $release->sourceCommit(),
             'The npm-provenance-authenticated source commit must remain exact.'
         );
         $this->assertSame(8, count($release->packageIntegrities()), 'Every npm package must retain its integrity.');
         $this->assertSame(
-            '19f8d64ff4d8cf7b8f637a9b8bfff739595d53e4e63cdbf45f6f95a01bade966',
+            'c1860c64d1a4ce1e6d9b96ea94a2d63df42e8ebaaf423ed5b4fa4dd841ed39a4',
             $release->recordSha256(),
             'The exact release-record bytes must stay pinned.'
         );
-        $this->assertSame(false, $release->releaseReady(), 'The unpublished governed assets must block release.');
+        $this->assertSame(true, $release->releaseReady(), 'The published governed assets must make release ready.');
         $this->assertSame(
-            [
-                'The exact Studio beta.2 browser archive and detached checksum are locally reproduced and '
-                    . 'fully verified, but the governed GitHub prerelease does not publish both assets yet.',
-            ],
+            [],
             $release->releaseBlockers(),
-            'The exact unresolved publication proof must stay visible.'
+            'A ready release decision must carry no blockers.'
         );
 
         $profiles = $release->claimedProfiles();
@@ -66,9 +63,9 @@ final class StudioContractResourcesTest extends TestCase
         $locators = $release->browserArtifacts();
         $this->assertSame('studio-assets.json', $locators->manifestName(), 'The manifest locator must be exact.');
         $this->assertSame(
-            'studio-browser-0.1.0-beta.2',
+            'studio-browser-0.1.0-beta.3',
             $locators->authoringArchiveStem(),
-            'The verified local candidate must retain its release-derived archive identity.'
+            'The published archive must retain its release-derived identity.'
         );
         $this->assertSame(
             '@kumwe/studio-renderer-web',
@@ -78,7 +75,7 @@ final class StudioContractResourcesTest extends TestCase
 
         $manifest = StudioContractResources::browserManifestBytes();
         $this->assertSame(
-            '89cd32a0e30075853d06056855c61f814be061b5a6fe2021b87d37db0c4fde68',
+            'c4e1c5438db99279405d14fe291f5460a0ea6b86b8c744138c5d2e0a3aeb567d',
             hash('sha256', $manifest),
             'The public browser manifest bytes must match their package proof.'
         );

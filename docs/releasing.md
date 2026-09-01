@@ -18,13 +18,12 @@ Releasing is merging. Every Kumwe PHP library delivers the same way:
 4. Packagist follows tags through its GitHub integration — submit `kumwe/producer` once at
    packagist.org and every later release appears without a credential in this repository.
 
-The current Studio `0.1.0-beta.2` integration at source commit
-`38a96472ff4a5e1aa1fb92ed5451dc0fd112cf48` is intentionally unreleased. Its eight npm packages,
-55 schemas, 301 corpus members, browser module, and enhancement runtime are provenance- or
-manifest-verified, and it claims zero conformance profiles. Its deterministic 74-member browser
-archive and detached checksum have also been reproduced and independently verified as non-vendored
-inputs. It cannot become a Producer release until the governed GitHub prerelease publishes those
-two exact files and the pin is re-generated from the public downloads.
+The current Studio `0.1.0-beta.3` integration at source commit
+`42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a` is release-ready. Its eight npm packages, 55 schemas,
+301 corpus members, browser module, and enhancement runtime are provenance- or manifest-verified,
+and it claims zero conformance profiles. Its deterministic 74-member browser archive and detached
+checksum are published by the governed GitHub prerelease `studio-v0.1.0-beta.3`, and the pin was
+regenerated from those public downloads.
 
 The deterministic re-pin command requires all evidence-bearing inputs explicitly; it never fetches
 or discovers a mutable coordinate:
@@ -40,9 +39,9 @@ ordinary Git blobs with replacement objects disabled and Git configuration input
 tracked files and `refs/replace` cannot affect the import. npm gzip/tar input is streamed through
 fixed compressed, inflated, member-count, member-size, type, path, and padding bounds.
 
-For the blocked candidate the outer inputs may be a workflow-equivalent local reproduction used
-only for verification. Release readiness may become `ready` only after re-running against both
-files downloaded from the exact governed GitHub prerelease URLs recorded in the evidence.
+Release readiness may record `ready` only when the importer runs against both files downloaded
+from the exact governed GitHub prerelease URLs recorded in the evidence; a workflow-equivalent
+local reproduction proves a candidate but never substitutes for those public downloads.
 
 Version policy:
 
