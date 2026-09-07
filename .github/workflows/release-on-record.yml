@@ -43,7 +43,7 @@ jobs:
         uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2.35.5
         with:
           php-version: ${{ matrix.php }}
-          extensions: json, mbstring, simplexml, tokenizer, xmlwriter
+          extensions: json, mbstring, simplexml, tokenizer, xmlwriter, zip
           coverage: none
           tools: composer:2.10.3
 
@@ -79,6 +79,9 @@ jobs:
             --classmap-authoritative
           composer run smoke --working-dir="$package_dir"
 
+      - name: Prove a fresh authoritative archive dependency consumer
+        run: php tools/verify-clean-consumer.php
+
   release:
     name: Release the recorded version
     needs: check
@@ -100,6 +103,11 @@ jobs:
           extensions: json
           coverage: none
 
+      - name: Require protected main before release mutations
+        env:
+          RELEASE_REF_PROTECTED: ${{ github.ref_protected }}
+        run: bash tools/check-release-integrity.sh protected "$RELEASE_REF_PROTECTED"
+
       # The newest release record is the FIRST second-level heading, so a
       # malformed record fails this run loudly instead of silently
       # releasing nothing or re-reading an older heading.
@@ -108,21 +116,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          first="$(grep -m 1 -E '^## ' CHANGELOG.md || true)"
-          if [ "$first" = "## Unreleased" ] || [ "$first" = "## [Unreleased]" ]; then
-            echo "::notice::The newest changelog section is unreleased; nothing to publish."
-            echo "version=" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ -z "$first" ]; then
+          version="$(bash tools/read-release-record.sh < CHANGELOG.md)"
+          if [ -z "$version" ]; then
             echo "::notice::CHANGELOG.md records no released version yet; nothing to release."
             echo "version=" >> "$GITHUB_OUTPUT"
             exit 0
-          fi
-          version="$(sed -nE 's/^## \[?([0-9]+\.[0-9]+\.[0-9]+)\]?( .*)?$/\1/p' <<<"$first")"
-          if [ -z "$version" ]; then
-            echo "::error::The newest changelog heading does not parse as a release record: $first"
-            exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
@@ -146,6 +144,7 @@ jobs:
           release_status=0
           release_probe="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" 2>&1)" || release_status=$?
           if [ "$release_status" -eq 0 ]; then
+            bash tools/check-release-integrity.sh published "$VERSION" <<< "$release_probe"
             release_exists=true
           elif grep -q 'HTTP 404' <<<"$release_probe"; then
             release_exists=false
@@ -168,11 +167,7 @@ jobs:
               echo "::error::Tag v$VERSION points outside the pushed main history: $tag_sha."
               exit 1
             fi
-            tagged_heading="$(git show "$tag_sha:CHANGELOG.md" | grep -m 1 -E '^## ')"
-            if [ "$tagged_heading" = "## Unreleased" ] || [ "$tagged_heading" = "## [Unreleased]" ]; then
-              tagged_heading="$(git show "$tag_sha:CHANGELOG.md" | grep -E '^## ' | sed -n 2p)"
-            fi
-            tagged_version="$(sed -nE 's/^## \[?([0-9]+\.[0-9]+\.[0-9]+)\]?( .*)?$/\1/p' <<<"$tagged_heading")"
+            tagged_version="$(git show "$tag_sha:CHANGELOG.md" | bash tools/read-release-record.sh)"
             if [ "$tagged_version" != "$VERSION" ]; then
               echo "::error::Tag v$VERSION targets a commit whose newest release record is $tagged_version."
               exit 1
@@ -225,7 +220,8 @@ jobs:
           probe_status=0
           probe="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" 2>&1)" || probe_status=$?
           if [ "$probe_status" -eq 0 ]; then
-            echo "Release v$VERSION already exists; leaving it untouched."
+            bash tools/check-release-integrity.sh published "$VERSION" <<< "$probe"
+            echo "Release v$VERSION already exists and is immutable."
           elif grep -q 'HTTP 404' <<<"$probe"; then
             gh release create "v$VERSION" \
               --verify-tag \
@@ -236,3 +232,14 @@ jobs:
             echo "::error::Could not determine whether release v$VERSION exists."
             exit 1
           fi
+
+      - name: Verify the published release is immutable
+        if: steps.record.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.record.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" \
+            | bash tools/check-release-integrity.sh published "$VERSION"

@@ -40,7 +40,10 @@ foreach ($files as $file) {
         fwrite(STDERR, "Invalid test case: {$file}\n");
         exit(1);
     }
-    $methods = array_filter(get_class_methods($class), static fn (string $name): bool => str_starts_with($name, 'test'));
+    $methods = array_filter(
+        get_class_methods($class),
+        static fn (string $name): bool => str_starts_with($name, 'test'),
+    );
     if ($methods === []) {
         fwrite(STDERR, "Empty test case: {$file}\n");
         exit(1);
