@@ -95,6 +95,8 @@ elif [[ "$1" == release && "$2" == create ]]; then
   [[ "$(read_state '.fail_publish // false')" != true ]] || exit 1
   printf 'MUTATE publish %s\n' "$3" >> "$log"
   git show-ref --verify -q "refs/tags/$3" || exit 1
+  moved_sha="$(read_state '.move_tag_before_publish // ""')"
+  if [[ -n "$moved_sha" ]]; then git update-ref "refs/tags/$3" "$moved_sha"; fi
   update_state '.published = true'
 else
   printf 'Unexpected fixture command: %s\n' "$*" >&2
@@ -212,6 +214,13 @@ check fail 1 'publication failure preserves the created tag'
 state '.fail_publish = false'
 : > "$case_dir/calls"
 check pass 1 'retry finishes publication without moving the tag'
+
+new_case
+wrong_sha="$(printf 'Untested concurrent commit\n' | git -C "$case_dir/repo" commit-tree HEAD^{tree} -p HEAD)"
+[[ "$wrong_sha" != "$tested_sha" ]]
+state ".move_tag_before_publish = \"$wrong_sha\""
+check fail 2 'publication detects a concurrent tag move before the immutable lock'
+[[ "$(git -C "$case_dir/repo" rev-parse refs/tags/v0.1.0)" == "$wrong_sha" ]]
 
 new_case
 commit_file CHANGELOG.md $'# Changelog\n\n## Unreleased\n\nPending changes.'

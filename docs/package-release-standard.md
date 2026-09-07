@@ -7,17 +7,16 @@ This is the common Kumwe package release contract. Apply it to every new extract
 The repository's CI workflow is callable. Pull requests and release runs execute the same
 PHP matrix, package-owned behavior/boundary/conformance tests, static checks, API/manifest
 checks, production autoload smoke and clean archive consumer checks. The stable required
-check is **Package gate**. It requires package checks, release regression tests and the
-live **Release prerequisites** job to succeed; failure or a skipped required job blocks
-the aggregate. Access Control and Business Definition also require the live
-**Dependency release prerequisites** job. Package-specific runtime requirements and
-Studio evidence remain part of their owning package.
+check is **Package gate**. It requires package checks and release automation regression
+tests to succeed; failure or a skipped required job blocks the aggregate. Package-specific
+runtime requirements and Studio evidence remain part of their owning package.
 
-Release prerequisites discovers the current default branch, verifies its live protected
-state and checks that its effective rules require **Package gate** from GitHub Actions.
-A checked-in ruleset, a protection flag alone, or a passing offline fixture does not
-establish that the required check is enforced. This read-only job runs before merge and
-again in the post-rebase release gate. It does not need an administration credential.
+Source CI verifies the proposed code and package. Live repository configuration and
+independent upstream release evidence are checked before publication, outside Package
+gate. This follows the Version 2 evidence states: a complete green implementation PR is
+`package-implemented`; observed publication is `package-released`; successful independent
+artifact and consumer verification establishes `release-verified`. A source PR can pass
+while publication prerequisites remain outstanding. Report those states separately.
 
 ## Rebases and release identity
 
@@ -48,11 +47,17 @@ releases. It preserves unrelated rulesets. It needs an existing authenticated Gi
 session with repository Administration access. The workflow itself uses Contents access
 and must never store an administration credential.
 
-Apply the administrator settings and complete the administrator audit first. Then rerun
-the repair PR checks so the live prerequisites are observed with the new settings, and
-rebase only after the complete Package gate succeeds. Contents access cannot verify the
-repository's immutable-release setting; the administrator `--check` remains required.
-The live prerequisite job proves the branch/check policy, not complete release readiness.
+Repository setup is a publication prerequisite. It is separate from source CI so a repair
+PR can pass its complete Package gate while settings are being configured. Contents access
+cannot inspect the immutable-release administration setting; the administrator audit
+verifies it. To apply setup and request release runs on each discovered default branch:
+
+```bash
+bash tools/configure-release-repositories.sh --apply --dispatch
+```
+
+The script verifies settings before dispatch. A dispatch requests a workflow run; it does
+not prove publication. Follow each run and its logs, then verify the actual release.
 
 Committing a ruleset JSON file does not activate it. Packagist registration does not
 configure branch protection or immutable releases. Missing settings are reported as
@@ -60,9 +65,9 @@ release prerequisites, never disguised as unit-test failures or a successful pub
 
 ## Publication, retries and package contents
 
-Publication is serialized per branch, with pending default-branch releases queued. The helper checks live
-branch protection, then verifies or
-creates the exact semantic tag and publishes in the same run; a tag made by GITHUB_TOKEN
+Publication is serialized per branch, with pending default-branch releases queued. The
+helper checks live branch protection, then verifies or creates the exact semantic tag
+and publishes in the same run; a tag made by GITHUB_TOKEN
 does not trigger another workflow. Both lightweight and annotated tags are resolved to
 commits. Only a confirmed HTTP 404 permits creation; authentication, rate-limit and server
 errors fail without mutations. Existing tags and releases are never moved, deleted or
@@ -80,15 +85,13 @@ clean no-dev archive consumer gate; do not substitute a path repository or sourc
 
 ## Upstream release evidence
 
-Access Control and Business Definition run **Dependency release prerequisites** in CI
-and repeat the check before publication. After a production Composer install, they verify
-the exact resolved Kumwe dependencies against live immutable releases, tag/source/dist
-references and independent external attestations. The aggregate cannot pass while a
-selected dependency is mutable or its evidence is missing. A stale text flag cannot prove
-a release, and an unconditional failure cannot discover a repaired one. Their existing
-unresolved evidence remains blocked until real successor releases and independent
-verification are available. Updating repository settings alone does not repair old exact
-dependency pins or create attestations.
+Access Control and Business Definition verify upstream evidence before publication.
+After a production Composer install, their release jobs check the exact resolved Kumwe
+dependencies against live immutable releases, tag/source/dist references and independent
+external attestations. A mutable selected dependency or missing evidence blocks
+publication. Source CI still runs package tests and the dependency checker's offline
+regressions. Updating repository settings does not repair historical exact dependency
+pins or create attestations; select independently verified successor releases when needed.
 
 ## Regression requirements
 
@@ -96,9 +99,8 @@ Every package owns the common Bash release transition and setup fixtures. They e
 real Git histories including a rebase, successful publication and retry, immutable ancestor
 verification, annotated tags, mismatched commits, absent protection, mutable releases and
 API failures. Update these tests with the automation. Run them before opening the PR and
-verify the required Package gate on GitHub, including the live prerequisite jobs. Offline
-fixtures cannot establish current repository configuration or dependency publication.
-Do not report all packages as release-ready from unit tests or a green PR alone. Confirm
-the administrator setup audit and each package's outstanding dependency evidence. Report
-an actual release as successful only after its default-branch publication run succeeds
-and its immutable release metadata proves the recorded version was published.
+verify the required Package gate on GitHub. Offline fixtures validate release behavior;
+live publication checks establish current repository and dependency prerequisites.
+Confirm an actual release only after its default-branch publication run succeeds and
+immutable release metadata proves the recorded version was published. Complete the
+independent verification before declaring `release-verified` or adopting the package.

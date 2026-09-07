@@ -57,6 +57,20 @@ require_protection() {
   bash "$tools_dir/check-release-integrity.sh" protected-branch "$DEFAULT_BRANCH" < "$api_body"
 }
 
+resolve_tag_commit() {
+  local depth=0 object_type
+  while :; do
+    object_type="$(jq -r '.object.type' "$api_body")"
+    tag_sha="$(jq -r '.object.sha' "$api_body")"
+    [[ "$tag_sha" =~ ^[0-9a-f]{40}$ ]] || fail "Tag v$version has an invalid target SHA."
+    if [[ "$object_type" == commit ]]; then break; fi
+    [[ "$object_type" == tag ]] || fail "Tag v$version does not resolve to a commit."
+    depth=$((depth + 1))
+    [[ "$depth" -le 16 ]] || fail 'Annotated tag nesting exceeds the verification limit.'
+    api_read "repos/$GITHUB_REPOSITORY/git/tags/$tag_sha" || fail 'Cannot resolve the annotated tag.'
+  done
+}
+
 require_protection
 release_exists=false
 probe_status=0
@@ -69,19 +83,10 @@ elif [[ "$probe_status" -ne 4 ]]; then
 fi
 
 probe_status=0
+release_sha="$GITHUB_SHA"
 api_read "repos/$GITHUB_REPOSITORY/git/ref/tags/v$version" || probe_status=$?
 if [[ "$probe_status" -eq 0 ]]; then
-  depth=0
-  while :; do
-    object_type="$(jq -r '.object.type' "$api_body")"
-    tag_sha="$(jq -r '.object.sha' "$api_body")"
-    [[ "$tag_sha" =~ ^[0-9a-f]{40}$ ]] || fail "Tag v$version has an invalid target SHA."
-    if [[ "$object_type" == commit ]]; then break; fi
-    [[ "$object_type" == tag ]] || fail "Tag v$version does not resolve to a commit."
-    depth=$((depth + 1))
-    [[ "$depth" -le 16 ]] || fail 'Annotated tag nesting exceeds the verification limit.'
-    api_read "repos/$GITHUB_REPOSITORY/git/tags/$tag_sha" || fail 'Cannot resolve the annotated tag.'
-  done
+  resolve_tag_commit
   git cat-file -e "$tag_sha^{commit}" || fail 'The tag commit is missing from the complete checkout.'
   git merge-base --is-ancestor "$tag_sha" "$GITHUB_SHA" \
     || fail "Tag v$version is outside the tested default-branch history."
@@ -90,6 +95,7 @@ if [[ "$probe_status" -eq 0 ]]; then
   if [[ "$release_exists" != true && "$tag_sha" != "$GITHUB_SHA" ]]; then
     fail "Unpublished tag v$version must target the exact commit tested in this run; use a new release record."
   fi
+  release_sha="$tag_sha"
   echo "Verified tag v$version at $tag_sha."
 elif [[ "$probe_status" -eq 4 ]]; then
   [[ "$release_exists" != true ]] || fail 'The published release has no matching version tag.'
@@ -110,6 +116,11 @@ if [[ "$release_exists" != true ]]; then
 fi
 api_read "repos/$GITHUB_REPOSITORY/releases/tags/v$version" || fail 'Published release cannot be read.'
 bash "$tools_dir/check-release-integrity.sh" published "$version" < "$api_body"
+# Publication locks the tag. Verify its final target after that lock has taken effect,
+# since the unsealed tag could have changed after our pre-publication inspection.
+api_read "repos/$GITHUB_REPOSITORY/git/ref/tags/v$version" || fail 'The immutable release tag cannot be read.'
+resolve_tag_commit
+[[ "$tag_sha" == "$release_sha" ]] || fail 'The immutable release tag differs from the verified source commit.'
 if [[ "$release_exists" == true ]]; then
   output release_status verified
 else
