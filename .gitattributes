@@ -31,3 +31,5 @@
 # These obsolete idempotency seams stay outside package archives.
 /src/Wire/IdempotencyRecord.php export-ignore
 /src/Wire/Port/IdempotencyLedgerInterface.php export-ignore
+
+/AGENTS.md export-ignore
