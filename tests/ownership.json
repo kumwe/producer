@@ -1,0 +1,815 @@
+{
+  "schema": "kumwe-test-ownership/v1",
+  "package": "kumwe/producer",
+  "api_manifest": "resources/public-api.json",
+  "suite": {
+    "inventory_command": [
+      "php",
+      "tests/run.php",
+      "--list-json"
+    ]
+  },
+  "exports": {
+    "Kumwe\\Producer\\Canonical\\CanonicalEncodingException": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\CanonicalJsonTest::testAstralMemberNamesSortByUtf16CodeUnit",
+        "Kumwe\\Producer\\Tests\\Case\\CanonicalJsonTest::testReplaysTheCompleteCanonicalCorpus"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\CanonicalJsonTest::testInvalidUtf8AndNumbersOutsideTheSafeRangeAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Canonical\\CanonicalJson": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\CanonicalJsonTest::testAstralMemberNamesSortByUtf16CodeUnit",
+        "Kumwe\\Producer\\Tests\\Case\\CanonicalJsonTest::testReplaysTheCompleteCanonicalCorpus"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\CanonicalJsonTest::testInvalidUtf8AndNumbersOutsideTheSafeRangeAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Css\\BaseStylesheet": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testBaseStylesheetCarriesTheAttributeVocabulary",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesCompileTheClosedVocabulary"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesFailClosed",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testThemeTokensFailClosed"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Css\\CssException": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testBaseStylesheetCarriesTheAttributeVocabulary",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesCompileTheClosedVocabulary"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesFailClosed",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testThemeTokensFailClosed"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Css\\ScopedStylesheet": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testBaseStylesheetCarriesTheAttributeVocabulary",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesCompileTheClosedVocabulary"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesFailClosed",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testThemeTokensFailClosed"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Css\\ThemeStylesheet": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testBaseStylesheetCarriesTheAttributeVocabulary",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesCompileTheClosedVocabulary"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testScopedStylesFailClosed",
+        "Kumwe\\Producer\\Tests\\Case\\CssStylesheetTest::testThemeTokensFailClosed"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Error\\ContractGrammar": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalBytesMatchThePinnedConflictExample",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalErrorsRoundTripForProtectedReplay"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testDiagnosticsEnforceTheirBoundedStructure",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testHostRefusalCarriesOnlyTheStructuredError"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Error\\Diagnostic; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Error\\Diagnostic": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalBytesMatchThePinnedConflictExample",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalErrorsRoundTripForProtectedReplay"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testDiagnosticsEnforceTheirBoundedStructure",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testHostRefusalCarriesOnlyTheStructuredError"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Error\\DiagnosticLocation": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalBytesMatchThePinnedConflictExample",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalErrorsRoundTripForProtectedReplay"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testDiagnosticsEnforceTheirBoundedStructure",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testHostRefusalCarriesOnlyTheStructuredError"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Error\\HostError": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalBytesMatchThePinnedConflictExample",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalErrorsRoundTripForProtectedReplay"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testDiagnosticsEnforceTheirBoundedStructure",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testHostRefusalCarriesOnlyTheStructuredError"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Error\\HostRefusal": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalBytesMatchThePinnedConflictExample",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalErrorsRoundTripForProtectedReplay"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testDiagnosticsEnforceTheirBoundedStructure",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testHostRefusalCarriesOnlyTheStructuredError"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Error\\MessageReference": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalBytesMatchThePinnedConflictExample",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalErrorsRoundTripForProtectedReplay"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testDiagnosticsEnforceTheirBoundedStructure",
+        "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testHostRefusalCarriesOnlyTheStructuredError"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\BindingResolution": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\BlockCoordinate": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\BlockRenderer": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\BlockRendererRegistry; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\BlockRendererRegistry": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\BlockTypes": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\BlockRendererRegistry; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\Block\\DataBlocks": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\BlockRendererRegistry; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\Block\\InteractiveBlocks": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\BlockRendererRegistry; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\Block\\LayoutBlocks": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\BlockRendererRegistry; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\Block\\MediaBlocks": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\BlockRendererRegistry; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\Block\\TextBlocks": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\CompositionRenderer": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testChecklistBridgesSkippedLevels",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRendersTheSemanticHtmlProjection"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusedDocumentFallsBackToEscapedText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusesDocumentsOutsideThePortableGrammar"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\Enhancement": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testChecklistBridgesSkippedLevels",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRendersTheSemanticHtmlProjection"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusedDocumentFallsBackToEscapedText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusesDocumentsOutsideThePortableGrammar"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\CompositionRenderer; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\ProductionValues": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testDrawingTokensAndCoordinatesMatchTheirWholeBoundedInput",
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testMoneyPreservesExactDigitsAtInclusiveBounds"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testChartAndTableCountLimitsRefuseBeforeItemInspection",
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testDrawingTokensAndCoordinatesMatchTheirWholeBoundedInput"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\Properties": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\Block\\TextBlocks; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\RenderContext": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\RenderException": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testDrawingTokensAndCoordinatesMatchTheirWholeBoundedInput",
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testMoneyPreservesExactDigitsAtInclusiveBounds"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testChartAndTableCountLimitsRefuseBeforeItemInspection",
+        "Kumwe\\Producer\\Tests\\Case\\ProductionValuesBoundaryTest::testDrawingTokensAndCoordinatesMatchTheirWholeBoundedInput"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\RenderPolicy": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\RenderResult": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testChecklistBridgesSkippedLevels",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRendersTheSemanticHtmlProjection"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusedDocumentFallsBackToEscapedText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusesDocumentsOutsideThePortableGrammar"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\CompositionRenderer; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\RenderState": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\Block\\TextBlocks; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\ResolvedMedia": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\ResolvedResource": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Render\\BlockRendererRegistry; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Render\\RichText": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testChecklistBridgesSkippedLevels",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRendersTheSemanticHtmlProjection"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusedDocumentFallsBackToEscapedText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderRichTextTest::testRefusesDocumentsOutsideThePortableGrammar"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Render\\SafeMarkup": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBindingResolutionPreservesHiddenUnavailableAndNull",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testBlobMediaIsDeniedByDefaultAndActiveTypesAlways"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusedActionUrlRendersInertText",
+        "Kumwe\\Producer\\Tests\\Case\\RenderSafetyTest::testRefusesInvalidNodeIdentifiers"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Schema\\CodeUnitOrder": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testDecimalMultipleAndMemoDeterminism",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testLimitsPinToTheVendoredMetaSchema"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testApplicatorBranchesRefuseTheirMismatches",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testHandBuiltNonJsonOperandsAreRefused"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Schema\\SchemaPropertyProfile; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Schema\\SchemaAdmissionException": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testDecimalMultipleAndMemoDeterminism",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testLimitsPinToTheVendoredMetaSchema"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testApplicatorBranchesRefuseTheirMismatches",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testHandBuiltNonJsonOperandsAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Schema\\SchemaInstanceDiagnostic": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testDecimalMultipleAndMemoDeterminism",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testLimitsPinToTheVendoredMetaSchema"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testApplicatorBranchesRefuseTheirMismatches",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testHandBuiltNonJsonOperandsAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Schema\\SchemaPropertyProfile": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testDecimalMultipleAndMemoDeterminism",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testLimitsPinToTheVendoredMetaSchema"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testApplicatorBranchesRefuseTheirMismatches",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testHandBuiltNonJsonOperandsAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Schema\\SchemaPropertyValidator": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testDecimalMultipleAndMemoDeterminism",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testLimitsPinToTheVendoredMetaSchema"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testApplicatorBranchesRefuseTheirMismatches",
+        "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testHandBuiltNonJsonOperandsAreRefused"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Schema\\SchemaPropertyProfile; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Schema\\StudioBrowserArtifacts": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testManifestBytesAndManifestedFixtureAreAvailableWithoutARoot"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testPackageReadersRefuseLinksAndOversizedFilesBeforeUse"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Schema\\StudioContractResources; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Schema\\StudioBrowserAsset": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testManifestBytesAndManifestedFixtureAreAvailableWithoutARoot"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testPackageReadersRefuseLinksAndOversizedFilesBeforeUse"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Schema\\StudioContractRelease": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testManifestBytesAndManifestedFixtureAreAvailableWithoutARoot"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testPackageReadersRefuseLinksAndOversizedFilesBeforeUse"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Schema\\StudioContractResources; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Schema\\StudioContractResources": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testManifestBytesAndManifestedFixtureAreAvailableWithoutARoot"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testPackageReadersRefuseLinksAndOversizedFilesBeforeUse"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Schema\\StudioDocumentSchemaRegistry": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testLargeJsonNumbersRemainExactlyDistinct",
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testLongStringsValidateWithoutBecomingMemoKeys"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testNonCanonicalPhpShapesFailAsValidationResults",
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testOversizedScalarsAndContainersFailInBoundedPreflight"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Schema\\StudioDocumentValidation": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testLargeJsonNumbersRemainExactlyDistinct",
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testLongStringsValidateWithoutBecomingMemoKeys"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testNonCanonicalPhpShapesFailAsValidationResults",
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testOversizedScalarsAndContainersFailInBoundedPreflight"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Dispatcher": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ExampleHostTest::testTheDemoPageRendersTheCompositionFaithfully",
+        "Kumwe\\Producer\\Tests\\Case\\ExampleHostTest::testTheDemoRenderIsDeterministicAcrossRuns"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ExampleHostTest::testAnUnauthorizedActorReceivesTheCanonicalRefusal",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\HostResult": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\JsonShapeViolation": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testANullValuedResultEmitsExplicitAbsence",
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testARevisionedResultOrdersMembersCanonically"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testARefusalBodyIsTheCanonicalErrorDocument",
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testResultsOutsideTheContractShapeAreRefusedAtConstruction"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\JsonValueGuard": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Exercised through the owning public collaborator Kumwe\\Producer\\Wire\\HostResult; public signature pinning runs separately."
+    },
+    "Kumwe\\Producer\\Wire\\MutationOutcome": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Operation": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\OperationRegistry": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireOperationRegistryTest::testConcurrencyMutationAndRequirednessFlagsMatchThePin",
+        "Kumwe\\Producer\\Tests\\Case\\WireOperationRegistryTest::testLookupsResolveTheSameOperationByCapabilityAndRoute"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireOperationRegistryTest::testAnythingOutsideTheRegistryIsATypedRefusal"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\ArtifactPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\AuthoringPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\AuthorizationInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\HostAdapterInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\LocalizationPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\MediaPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\ModelPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\MutationBoundaryInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\PermissionPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\PreviewPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\RecoveryPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\ResourcePortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Port\\TelemetryPortInterface": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\RequestContext": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\RequestEnvelope": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ExampleHostTest::testTheDemoPageRendersTheCompositionFaithfully",
+        "Kumwe\\Producer\\Tests\\Case\\ExampleHostTest::testTheDemoRenderIsDeterministicAcrossRuns"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ExampleHostTest::testAnUnauthorizedActorReceivesTheCanonicalRefusal",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\Response": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAHostConflictPassesThroughVerbatimAndIsNotRecorded",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyedMutationRecordsThenReplaysWithoutReapplying"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testACommittedRefusalCommitsAndReplaysWithoutReapplying",
+        "Kumwe\\Producer\\Tests\\Case\\WireDispatcherTest::testAKeyReusedWithChangedIntentIsRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Wire\\StrictResponder": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testANullValuedResultEmitsExplicitAbsence",
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testARevisionedResultOrdersMembersCanonically"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testARefusalBodyIsTheCanonicalErrorDocument",
+        "Kumwe\\Producer\\Tests\\Case\\WireStrictResponderTest::testResultsOutsideTheContractShapeAreRefusedAtConstruction"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    }
+  },
+  "conformance": {
+    "status": "owned",
+    "rationale": "The pinned Studio corpus supplies canonical, renderer and schema conformance; Producer owns its replay and refusal tests.",
+    "tests": [
+      "Kumwe\\Producer\\Tests\\Case\\CanonicalJsonTest::testReplaysTheCompleteCanonicalCorpus",
+      "Kumwe\\Producer\\Tests\\Case\\RendererConformanceTest::testReplaysTheCompleteRendererCorpus",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testApplicatorBranchesRefuseTheirMismatches",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testDecimalMultipleAndMemoDeterminism",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testHandBuiltNonJsonOperandsAreRefused",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testLimitsPinToTheVendoredMetaSchema",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testOversizedDependencyMapIsRefused",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testReferenceResolutionWalksEveryOperandFamily",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testRejectionArmsTheCorpusLeavesUntaken",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testReplaysTheCompleteSchemaProfileCorpus",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testStructuredEqualityAndDiagnosticDeduplication",
+      "Kumwe\\Producer\\Tests\\Case\\SchemaPropertyProfileTest::testValidatorEdgeKeywords"
+    ],
+    "corpora": [
+      "resources/studio-contract/PIN.json"
+    ]
+  },
+  "architecture": [
+    "tools/verify-architecture.php"
+  ],
+  "host": {
+    "repository": "kumwe/app",
+    "baseline": "960ce8ec00cf724a7cae03e5ba09c4852c9ab54e",
+    "transfers": [],
+    "retained_responsibilities": [
+      "Authenticated host request authority and CSRF enforcement.",
+      "Database persistence, idempotent replay, recovery and extension lifecycle.",
+      "Real delivery/browser composition and authorized binding resolution."
+    ]
+  }
+}

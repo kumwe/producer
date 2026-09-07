@@ -32,6 +32,33 @@ $caseDirectory = __DIR__ . '/Case';
 $files = glob($caseDirectory . '/*Test.php') ?: [];
 sort($files);
 
+// Discovery is shared by execution and the package ownership gate.
+$inventory = [];
+foreach ($files as $file) {
+    $class = 'Kumwe\\Producer\\Tests\\Case\\' . basename($file, '.php');
+    if (!class_exists($class) || !is_subclass_of($class, 'Kumwe\\Producer\\Tests\\TestCase')) {
+        fwrite(STDERR, "Invalid test case: {$file}\n");
+        exit(1);
+    }
+    $methods = array_filter(get_class_methods($class), static fn (string $name): bool => str_starts_with($name, 'test'));
+    if ($methods === []) {
+        fwrite(STDERR, "Empty test case: {$file}\n");
+        exit(1);
+    }
+    foreach ($methods as $method) {
+        $inventory[$class . '::' . $method] = 'tests/Case/' . basename($file);
+    }
+}
+if ($inventory === []) {
+    fwrite(STDERR, "No test methods were discovered.\n");
+    exit(1);
+}
+if (($argv[1] ?? null) === '--list-json') {
+    ksort($inventory);
+    echo json_encode($inventory, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT) . "\n";
+    exit(0);
+}
+
 $totalTests = 0;
 $totalAssertions = 0;
 $failures = [];
