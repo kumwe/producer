@@ -5,6 +5,9 @@ Delivered, repository-verified behaviour only; roadmap position and claims live 
 
 ## 0.2.1 — 2026-09-07
 
+- Unify PR and post-rebase release gates, dynamic release identity, tested publication retries,
+  and administrator setup across the package family. Preserve immutable release and dependency evidence requirements.
+
 - Refuse terminal line feeds in typed money and drawing color values; own direct rendering-value boundary tests and enforce package test ownership.
 - Require protected main and immutable stable publication, with tested release-heading and integrity refusals.
 - App composition, authorization, persistence, lifecycle and delivery tests remain host-owned.

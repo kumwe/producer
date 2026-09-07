@@ -1,22 +1,32 @@
 # Releasing Producer
 
-Producer versions independently under semantic versioning; alignment with Studio travels through
-the pin, never through matching version numbers.
+Follow the [Package release standard](package-release-standard.md) for the shared
+quality gate, changelog parsing, publication and retry behavior. Complete the
+[repository release setup](repository-release-setup.md) with an administrator
+session before merging a release record:
 
-Releasing is merging. Every Kumwe PHP library delivers the same way:
+```bash
+bash tools/configure-release-repositories.sh --check kumwe/producer
+bash tools/configure-release-repositories.sh --apply kumwe/producer
+```
 
-1. Prove that the pinned Studio record is release-ready. Package provenance, manifest-verified
-   browser assets, and a locally reproduced outer-archive candidate are required but do not replace
-   the two exact governed GitHub release assets; a blocked pin stays under `## Unreleased`.
-2. Land the work on `main` with its `CHANGELOG.md` section for the next version — the heading
-   `## X.Y.Z - date` is the release record.
-3. The `Release on record` workflow runs on every push to `main`: it re-proves the complete check
-   lane, reads the newest recorded version, and when that version has no tag yet it creates
-   `vX.Y.Z` through the repository API and publishes the GitHub release naming the exact Studio
-   pin it implements. Nobody pushes a tag by hand; a push that records no new version is a
-   verification-only run.
-4. Packagist follows tags through its GitHub integration — submit `kumwe/producer` once at
-   packagist.org and every later release appears without a credential in this repository.
+The required CI check is **Package gate**. Maintainers rebase reviewed PRs into the
+repository's current default branch; the release workflow reruns the same quality
+gate on the resulting commit and derives its release identity from that run.
+A release intention in CHANGELOG.md is not evidence that publication occurred.
+Keep work that is not ready for publication under `## Unreleased`.
+
+Producer versions independently under semantic versioning; alignment with Studio
+travels through the pin, never through matching version numbers.
+
+## Studio publication prerequisites
+
+The pinned Studio record must be release-ready before a Producer version is
+recorded. Package provenance, manifest-verified browser assets and a locally
+reproduced outer archive are required, but do not replace the two exact governed
+GitHub release assets. A blocked pin stays under `## Unreleased`.
+`php tools/verify-release-ready.php` remains a package-specific release gate.
+Release notes identify the exact Studio pin implemented by the tagged package.
 
 The current Studio `0.1.0-beta.3` integration at source commit
 `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a` is release-ready. Its eight npm packages, 55 schemas,
@@ -50,8 +60,19 @@ Version policy:
 - **Major** — a change a host must act on, including a Studio re-pin that moves the wire.
 - While Studio's contract is pre-release, Producer stays `0.x` and hosts pin exactly.
 
-## Release integrity prerequisites
+## Publication evidence and recovery
 
-Before merging the recorded patch release, a maintainer must protect `main` and enable immutable releases in the repository or applicable organization policy. The release job refuses an unprotected ref before tag/publication mutations and requires the exact stable version to be published with `immutable: true`. A pre-existing mutable release fails verification. Changing settings now does not make past mutable releases independently verified.
+The maintainer performs the initial Packagist submission. Its GitHub integration
+then follows tags without a registry credential in CI. Before dependent publication
+or App adoption, a fresh independent verifier must bind the exact published
+source/tag, archive digest, manifests, registry coordinate, license/security and
+clean-consumer results in an external RELEASE-ATTESTATION.yaml. The artifact and
+handoff must not invent their own final commit, checksum or publication evidence.
 
-The shared release-heading parser is tested against malformed records and is used for both the pushed changelog and an existing tag. Source/tag checks, all package tests, true archive checks and dependency audit remain required. A fresh independent release verifier and exact artifact evidence are still required before dependent publication or App adoption. Agents open reviewable PRs; maintainers merge and publication follows the recorded version.
+Use the current release workflow on the default branch to retry after correcting
+repository settings. Historical mutable releases remain unchanged: enabling
+immutability affects future publications, so a mutable version requires an unused
+successor. Never move or delete a published tag or replace a released artifact.
+An unpublished tag can be completed only on the exact commit tested by the retry.
+A green PR does not replace the default-branch release result or independent
+verification. Administrator credentials do not belong in Actions.

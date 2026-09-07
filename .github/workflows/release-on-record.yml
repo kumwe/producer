@@ -1,245 +1,51 @@
 name: Release on record
 
-# Merging a change whose changelog records a new version IS the release.
-# Every push to main re-proves the check lane across every supported PHP
-# version, and when the newest recorded version has no tag yet, this
-# workflow creates the tag through the repository API and publishes the
-# GitHub release itself - a tag created by a workflow token triggers no
-# other workflow, so publication happens here. Runs are idempotent: an
-# already-tagged, already-released version makes this a verification-only
-# run. Packagist follows tags through its GitHub integration, so no
-# registry credential ever enters this repository's workflows.
-
+# The same package gate runs on PRs and the actual default-branch commit after rebase.
+# Relative reusable workflows resolve from this commit, never a remembered PR SHA.
 on:
   push:
-    branches:
-      - main
+    branches: ['**']
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-# Serialized so two pushes cannot race past the tag-existence check; the
-# later run then finds the tag and verifies instead of colliding.
 concurrency:
-  group: release-on-record
+  group: release-on-record-${{ github.ref }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   check:
-    name: PHP ${{ matrix.php }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
-    steps:
-      - name: Check out the pushed commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2.35.5
-        with:
-          php-version: ${{ matrix.php }}
-          extensions: json, mbstring, simplexml, tokenizer, xmlwriter, zip
-          coverage: none
-          tools: composer:2.10.3
-
-      - name: Install the validated package toolchain
-        run: |
-          composer validate --strict
-          composer install --no-interaction --no-progress --prefer-dist
-          composer audit --abandoned=fail
-
-      - name: Run the complete quality lane
-        run: php tools/check.php
-
-      - name: Prove the exact no-dev Composer archive
-        shell: bash
-        run: |
-          set -euo pipefail
-          archive_dir="$(mktemp -d)"
-          package_dir="$(mktemp -d)"
-          composer archive --format=zip --dir="$archive_dir"
-          archives=("$archive_dir"/*.zip)
-          if [ "${#archives[@]}" -ne 1 ] || [ ! -f "${archives[0]}" ]; then
-            echo "::error::Composer did not create exactly one ZIP archive."
-            exit 1
-          fi
-          unzip -q "${archives[0]}" -d "$package_dir"
-          php tools/verify-archive.php "$package_dir"
-          composer validate --strict --working-dir="$package_dir"
-          composer install \
-            --working-dir="$package_dir" \
-            --no-interaction \
-            --no-progress \
-            --no-dev \
-            --classmap-authoritative
-          composer run smoke --working-dir="$package_dir"
-
-      - name: Prove a fresh authoritative archive dependency consumer
-        run: php tools/verify-clean-consumer.php
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    uses: ./.github/workflows/ci.yml
 
   release:
     name: Release the recorded version
     needs: check
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: write
     steps:
-      - name: Check out the pushed commit
+      - name: Check out the exact commit that passed the package gate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Set up PHP for the release gate
-        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # v2.35.5
+      - name: Set up PHP for Studio release evidence
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
         with:
           php-version: '8.1'
-          extensions: json
           coverage: none
-
-      - name: Require protected main before release mutations
-        env:
-          RELEASE_REF_PROTECTED: ${{ github.ref_protected }}
-        run: bash tools/check-release-integrity.sh protected "$RELEASE_REF_PROTECTED"
-
-      # The newest release record is the FIRST second-level heading, so a
-      # malformed record fails this run loudly instead of silently
-      # releasing nothing or re-reading an older heading.
-      - name: Read the newest recorded version
-        id: record
-        shell: bash
-        run: |
-          set -euo pipefail
-          version="$(bash tools/read-release-record.sh < CHANGELOG.md)"
-          if [ -z "$version" ]; then
-            echo "::notice::CHANGELOG.md records no released version yet; nothing to release."
-            echo "version=" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
       - name: Require complete Studio publication evidence
-        if: steps.record.outputs.version != ''
         run: php tools/verify-release-ready.php
 
-      # Probe the release before the tag so recovery cannot publish a
-      # pre-positioned, untested tag. A version already published may be an
-      # ancestor of later main commits; a first publication must target the
-      # exact commit that just passed the full matrix.
-      - name: Verify or create the recorded version tag
-        if: steps.record.outputs.version != ''
+      - name: Publish or verify the recorded release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.record.outputs.version }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          release_status=0
-          release_probe="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" 2>&1)" || release_status=$?
-          if [ "$release_status" -eq 0 ]; then
-            bash tools/check-release-integrity.sh published "$VERSION" <<< "$release_probe"
-            release_exists=true
-          elif grep -q 'HTTP 404' <<<"$release_probe"; then
-            release_exists=false
-          else
-            echo "$release_probe"
-            echo "::error::Could not determine whether release v$VERSION exists."
-            exit 1
-          fi
-
-          tag_status=0
-          tag_probe="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" 2>&1)" || tag_status=$?
-          if [ "$tag_status" -eq 0 ]; then
-            tag_type="$(jq -r '.object.type' <<<"$tag_probe")"
-            tag_sha="$(jq -r '.object.sha' <<<"$tag_probe")"
-            if [ "$tag_type" != commit ]; then
-              echo "::error::Tag v$VERSION points to $tag_type $tag_sha instead of a lightweight release commit."
-              exit 1
-            fi
-            if ! git merge-base --is-ancestor "$tag_sha" "$GITHUB_SHA"; then
-              echo "::error::Tag v$VERSION points outside the pushed main history: $tag_sha."
-              exit 1
-            fi
-            tagged_version="$(git show "$tag_sha:CHANGELOG.md" | bash tools/read-release-record.sh)"
-            if [ "$tagged_version" != "$VERSION" ]; then
-              echo "::error::Tag v$VERSION targets a commit whose newest release record is $tagged_version."
-              exit 1
-            fi
-
-            if [ "$release_exists" = false ] && [ "$tag_sha" != "$GITHUB_SHA" ]; then
-              echo "::error::Unpublished tag v$VERSION targets $tag_sha, not the fully tested commit $GITHUB_SHA."
-              exit 1
-            fi
-            echo "Verified tag v$VERSION at release commit $tag_sha (published: $release_exists)."
-          elif grep -q 'HTTP 404' <<<"$tag_probe"; then
-            if [ "$release_exists" = true ]; then
-              echo "::error::Release v$VERSION exists but its repository tag is missing."
-              exit 1
-            fi
-            gh api "repos/$GITHUB_REPOSITORY/git/refs" \
-              --field ref="refs/tags/v$VERSION" \
-              --field sha="$GITHUB_SHA"
-            echo "Created tag v$VERSION at release commit $GITHUB_SHA."
-          else
-            echo "$tag_probe"
-            echo "::error::Could not determine whether tag v$VERSION exists."
-            exit 1
-          fi
-
-      # The pin is read from the tagged commit, not this run's checkout,
-      # so a heal-path release can never name a pin the tag does not carry.
-      - name: Read the Studio pin at the tagged commit
-        if: steps.record.outputs.version != ''
-        id: pin
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.record.outputs.version }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          pin="$(gh api "repos/$GITHUB_REPOSITORY/contents/resources/studio-contract/PIN.json?ref=v$VERSION" --jq .content \
-            | base64 -d | jq -r '.source.commit // .source.release // "unknown"')"
-          echo "studio_pin=$pin" >> "$GITHUB_OUTPUT"
-
-      - name: Publish the GitHub release when it is missing
-        if: steps.record.outputs.version != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.record.outputs.version }}
-          STUDIO_PIN: ${{ steps.pin.outputs.studio_pin }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          probe_status=0
-          probe="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" 2>&1)" || probe_status=$?
-          if [ "$probe_status" -eq 0 ]; then
-            bash tools/check-release-integrity.sh published "$VERSION" <<< "$probe"
-            echo "Release v$VERSION already exists and is immutable."
-          elif grep -q 'HTTP 404' <<<"$probe"; then
-            gh release create "v$VERSION" \
-              --verify-tag \
-              --title "v$VERSION" \
-              --notes "Implements the Studio contract at pin \`$STUDIO_PIN\` (see resources/studio-contract/PIN.json). Changelog: CHANGELOG.md section $VERSION."
-          else
-            echo "$probe"
-            echo "::error::Could not determine whether release v$VERSION exists."
-            exit 1
-          fi
-
-      - name: Verify the published release is immutable
-        if: steps.record.outputs.version != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.record.outputs.version }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" \
-            | bash tools/check-release-integrity.sh published "$VERSION"
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: bash tools/release-on-record.sh
