@@ -3,6 +3,11 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
+## Unreleased
+
+- Remove delivered runtime, browser-artifact and publication work from the forward roadmap;
+  retain the separate deployment-emitter and Twig-bridge objectives and published release evidence.
+
 ## 0.2.1 — 2026-09-07
 
 - Unify PR and post-rebase release gates, dynamic release identity, tested publication retries,
