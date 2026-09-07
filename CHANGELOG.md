@@ -3,6 +3,11 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
+## 0.2.1 — 2026-09-07
+
+- Refuse terminal line feeds in typed money and drawing color values; own direct rendering-value boundary tests and enforce package test ownership.
+- App composition, authorization, persistence, lifecycle and delivery tests remain host-owned.
+
 ## 0.2.0 - 2026-09-01
 
 - Re-pinned Producer to the provenance-backed Studio `0.1.0-beta.3` publication at exact source

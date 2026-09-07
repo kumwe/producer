@@ -31,14 +31,14 @@ final class ProductionValues
      *
      * @since   0.1.0
      */
-    private const MONEY_AMOUNT = '/^-?(?:0|[1-9][0-9]{0,17})(?:\.[0-9]{1,6})?$/';
+    private const MONEY_AMOUNT = '/^-?(?:0|[1-9][0-9]{0,17})(?:\.[0-9]{1,6})?$/D';
 
     /**
      * The money-currency grammar: exactly three uppercase ASCII letters.
      *
      * @since   0.1.0
      */
-    private const CURRENCY = '/^[A-Z]{3}$/';
+    private const CURRENCY = '/^[A-Z]{3}$/D';
 
     /**
      * The closed drawing-color grammar: a six-digit hex color or a bounded
@@ -46,7 +46,7 @@ final class ProductionValues
      *
      * @since   0.1.0
      */
-    private const DRAWING_COLOR = '%^(?:#[0-9A-Fa-f]{6}|[a-z][a-z0-9-]{0,62}/[a-z][a-z0-9-]{0,62})$%';
+    private const DRAWING_COLOR = '%^(?:#[0-9A-Fa-f]{6}|[a-z][a-z0-9-]{0,62}/[a-z][a-z0-9-]{0,62})$%D';
 
     /**
      * Static parser; never instantiated.
