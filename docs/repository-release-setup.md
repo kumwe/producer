@@ -1,6 +1,7 @@
 # Repository release setup
 
-The release workflow requires a protected default branch and immutable publication.
+The release workflow requires a protected default branch, an effective GitHub Actions
+**Package gate** requirement, and immutable publication.
 Repository settings must be established once by a GitHub administrator; merging
 workflow code does not create those settings. The GitHub connector used to prepare
 these changes has no repository administration capability.
@@ -38,11 +39,27 @@ reviews, extra required checks, and additional rule types are retained. A duplic
 managed name or a matching inherited ruleset is reported for administrator review
 instead of overwritten.
 
-Ensure each repair PR has a successful **Package gate** check before applying this
-configuration and rebasing it into the default branch. The required check names a
-job, not a source commit. The release workflow then tests the new default-branch
-commit created by rebase, and tags that tested commit. No PR head SHA belongs in
-the ruleset or release configuration.
+Apply this configuration and complete the administrator `--check` audit first. Then
+rerun the repair PR checks: the live **Release prerequisites** job must observe the
+protected current default branch and an effective rule requiring **Package gate**
+from GitHub Actions. The aggregate Package gate also requires package tests and
+release automation tests. Access Control and Business Definition additionally
+require the live **Dependency release prerequisites** job. A failed or skipped
+required job blocks the aggregate. Rebase only after the complete PR gate succeeds.
+
+The required check names a job, not a source commit. The release workflow repeats
+the complete gate on the new default-branch commit created by rebase, and tags that
+tested commit. No PR head SHA belongs in the ruleset or release configuration.
+Changing repository settings does not rerun an earlier failed check automatically;
+rerun the failed checks or dispatch the release workflow on the default branch.
+
+The workflow's Contents permission can verify branch protection and effective
+required checks, but cannot read the immutable-release administration setting.
+The administrator `--check` is therefore required even when Release prerequisites
+succeeds. A green prerequisite check does not establish that every package is
+ready to publish. Exact dependency releases and independent evidence must also
+pass where required, and actual publication must succeed before declaring a
+release complete.
 
 Enabling immutable releases affects future publications. Existing mutable releases
 remain mutable; their tags and releases are not deleted or moved. Publish a new

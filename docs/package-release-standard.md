@@ -7,9 +7,17 @@ This is the common Kumwe package release contract. Apply it to every new extract
 The repository's CI workflow is callable. Pull requests and release runs execute the same
 PHP matrix, package-owned behavior/boundary/conformance tests, static checks, API/manifest
 checks, production autoload smoke and clean archive consumer checks. The stable required
-check is **Package gate**, which fails when either package checks or release regression
-tests fail or are skipped. Package-specific runtime requirements and Studio evidence remain
-part of their owning package; they are not erased by a common workflow.
+check is **Package gate**. It requires package checks, release regression tests and the
+live **Release prerequisites** job to succeed; failure or a skipped required job blocks
+the aggregate. Access Control and Business Definition also require the live
+**Dependency release prerequisites** job. Package-specific runtime requirements and
+Studio evidence remain part of their owning package.
+
+Release prerequisites discovers the current default branch, verifies its live protected
+state and checks that its effective rules require **Package gate** from GitHub Actions.
+A checked-in ruleset, a protection flag alone, or a passing offline fixture does not
+establish that the required check is enforced. This read-only job runs before merge and
+again in the post-rebase release gate. It does not need an administration credential.
 
 ## Rebases and release identity
 
@@ -31,6 +39,7 @@ Run the same administrator setup once for the package family, from any checkout:
 ```bash
 bash tools/configure-release-repositories.sh --check
 bash tools/configure-release-repositories.sh --apply
+bash tools/configure-release-repositories.sh --check
 ```
 
 The setup manages its own named ruleset, requires PRs and the Package gate, prohibits
@@ -38,6 +47,12 @@ default-branch deletion/force pushes, permits linear rebase merges, and enables 
 releases. It preserves unrelated rulesets. It needs an existing authenticated GitHub CLI
 session with repository Administration access. The workflow itself uses Contents access
 and must never store an administration credential.
+
+Apply the administrator settings and complete the administrator audit first. Then rerun
+the repair PR checks so the live prerequisites are observed with the new settings, and
+rebase only after the complete Package gate succeeds. Contents access cannot verify the
+repository's immutable-release setting; the administrator `--check` remains required.
+The live prerequisite job proves the branch/check policy, not complete release readiness.
 
 Committing a ruleset JSON file does not activate it. Packagist registration does not
 configure branch protection or immutable releases. Missing settings are reported as
@@ -65,11 +80,15 @@ clean no-dev archive consumer gate; do not substitute a path repository or sourc
 
 ## Upstream release evidence
 
-Access Control and Business Definition additionally verify the exact resolved Kumwe
-dependencies against live immutable releases, tag/source/dist references and independent
-external attestations. A stale text flag cannot prove a release, and an unconditional
-failure cannot discover a repaired one. Their existing unresolved evidence remains blocked
-until real successor releases and independent verification are available.
+Access Control and Business Definition run **Dependency release prerequisites** in CI
+and repeat the check before publication. After a production Composer install, they verify
+the exact resolved Kumwe dependencies against live immutable releases, tag/source/dist
+references and independent external attestations. The aggregate cannot pass while a
+selected dependency is mutable or its evidence is missing. A stale text flag cannot prove
+a release, and an unconditional failure cannot discover a repaired one. Their existing
+unresolved evidence remains blocked until real successor releases and independent
+verification are available. Updating repository settings alone does not repair old exact
+dependency pins or create attestations.
 
 ## Regression requirements
 
@@ -77,5 +96,9 @@ Every package owns the common Bash release transition and setup fixtures. They e
 real Git histories including a rebase, successful publication and retry, immutable ancestor
 verification, annotated tags, mismatched commits, absent protection, mutable releases and
 API failures. Update these tests with the automation. Run them before opening the PR and
-verify the required Package gate on GitHub. Do not report an actual release as successful
-until the default-branch publication run and immutable release metadata prove it.
+verify the required Package gate on GitHub, including the live prerequisite jobs. Offline
+fixtures cannot establish current repository configuration or dependency publication.
+Do not report all packages as release-ready from unit tests or a green PR alone. Confirm
+the administrator setup audit and each package's outstanding dependency evidence. Report
+an actual release as successful only after its default-branch publication run succeeds
+and its immutable release metadata proves the recorded version was published.
