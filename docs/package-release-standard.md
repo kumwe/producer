@@ -45,7 +45,8 @@ release prerequisites, never disguised as unit-test failures or a successful pub
 
 ## Publication, retries and package contents
 
-Publication is serialized per branch, with pending default-branch releases queued. The helper checks live branch protection, then verifies or
+Publication is serialized per branch, with pending default-branch releases queued. The helper checks live
+branch protection, then verifies or
 creates the exact semantic tag and publishes in the same run; a tag made by GITHUB_TOKEN
 does not trigger another workflow. Both lightweight and annotated tags are resolved to
 commits. Only a confirmed HTTP 404 permits creation; authentication, rate-limit and server

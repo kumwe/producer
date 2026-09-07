@@ -188,10 +188,14 @@ configure_repository() {
             .parameters = (($old.parameters // {}) + .parameters
               | .required_approving_review_count = ([.required_approving_review_count,
                   ($old.parameters.required_approving_review_count // 0)] | max)
-              | .dismiss_stale_reviews_on_push = (.dismiss_stale_reviews_on_push or ($old.parameters.dismiss_stale_reviews_on_push // false))
-              | .require_code_owner_review = (.require_code_owner_review or ($old.parameters.require_code_owner_review // false))
-              | .require_last_push_approval = (.require_last_push_approval or ($old.parameters.require_last_push_approval // false))
-              | .required_review_thread_resolution = (.required_review_thread_resolution or ($old.parameters.required_review_thread_resolution // false)))
+              | .dismiss_stale_reviews_on_push = (.dismiss_stale_reviews_on_push
+                  or ($old.parameters.dismiss_stale_reviews_on_push // false))
+              | .require_code_owner_review = (.require_code_owner_review
+                  or ($old.parameters.require_code_owner_review // false))
+              | .require_last_push_approval = (.require_last_push_approval
+                  or ($old.parameters.require_last_push_approval // false))
+              | .required_review_thread_resolution = (.required_review_thread_resolution
+                  or ($old.parameters.required_review_thread_resolution // false)))
           elif .type == "required_status_checks" then
             .parameters = (($old.parameters // {}) + .parameters
               | .required_status_checks += [($old.parameters.required_status_checks // [])[]

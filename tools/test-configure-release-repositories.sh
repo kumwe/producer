@@ -82,9 +82,11 @@ chmod +x "$test_tmp/bin/gh"
 
 reset_fixture() {
   rm -f "$MOCK_STATE"/*
-  echo '{"permissions":{"admin":true},"archived":false,"disabled":false,"default_branch":"main","allow_rebase_merge":true}' > "$MOCK_STATE/metadata"
+  echo '{"permissions":{"admin":true},"archived":false,"disabled":false,
+    "default_branch":"main","allow_rebase_merge":true}' > "$MOCK_STATE/metadata"
   echo false > "$MOCK_STATE/immutable"
-  echo '[{"id":77,"name":"Existing policy","source_type":"Repository","source":"kumwe/conversion"}]' > "$MOCK_STATE/rulesets"
+  echo '[{"id":77,"name":"Existing policy","source_type":"Repository","source":"kumwe/conversion"}]' \
+    > "$MOCK_STATE/rulesets"
   : > "$MOCK_STATE/calls"
 }
 
@@ -112,7 +114,8 @@ passed 'default mode reports missing configuration without mutations'
 expect_exit 0 --apply kumwe/conversion
 jq -e '.conditions.ref_name.include == ["~DEFAULT_BRANCH"] and .bypass_actors == []
   and .enforcement == "active"
-  and ([.rules[].type] | sort) == ["deletion","non_fast_forward","pull_request","required_linear_history","required_status_checks"]
+  and ([.rules[].type] | sort) == ["deletion","non_fast_forward","pull_request",
+    "required_linear_history","required_status_checks"]
   and any(.rules[]; .type == "pull_request" and .parameters.allowed_merge_methods == ["rebase"]
     and .parameters.required_approving_review_count == 0)
   and any(.rules[]; .type == "required_status_checks" and .parameters.strict_required_status_checks_policy == true
@@ -149,7 +152,8 @@ expect_exit 0 --apply kumwe/conversion
 jq -e 'any(.rules[]; .type == "required_signatures")
   and any(.rules[]; .type == "pull_request" and .parameters.required_approving_review_count == 2
     and .parameters.require_code_owner_review == true)
-  and any(.rules[]; .type == "required_status_checks" and any(.parameters.required_status_checks[]; .context == "Extra security"))' \
+  and any(.rules[]; .type == "required_status_checks"
+    and any(.parameters.required_status_checks[]; .context == "Extra security"))' \
   "$MOCK_STATE/rule-501" >/dev/null
 passed 'stricter reviews, extra checks and additional rules survive managed updates'
 
@@ -174,13 +178,16 @@ assert_no_writes
 passed 'server failure refuses mutations'
 
 reset_fixture
-echo '[{"id":1,"name":"Kumwe package release standard","source_type":"Repository","source":"kumwe/conversion"},{"id":2,"name":"Kumwe package release standard","source_type":"Repository","source":"kumwe/conversion"}]' > "$MOCK_STATE/rulesets"
+echo '[{"id":1,"name":"Kumwe package release standard","source_type":"Repository","source":"kumwe/conversion"},
+  {"id":2,"name":"Kumwe package release standard","source_type":"Repository","source":"kumwe/conversion"}]' \
+  > "$MOCK_STATE/rulesets"
 expect_exit 2 --apply kumwe/conversion
 assert_no_writes
 passed 'duplicate managed names refuse ambiguous updates'
 
 reset_fixture
-echo '[{"id":1,"name":"Kumwe package release standard","source_type":"Organization","source":"kumwe"}]' > "$MOCK_STATE/rulesets"
+echo '[{"id":1,"name":"Kumwe package release standard","source_type":"Organization","source":"kumwe"}]' \
+  > "$MOCK_STATE/rulesets"
 expect_exit 2 --apply kumwe/conversion
 assert_no_writes
 passed 'inherited rulesets are never overwritten'
@@ -188,7 +195,8 @@ passed 'inherited rulesets are never overwritten'
 reset_fixture
 echo true > "$MOCK_STATE/immutable"
 jq -n '[range(100) | {id:.,name:("Existing " + tostring),source_type:"Repository",source:"kumwe/conversion"}]
-  + [{id:501,name:"Kumwe package release standard",source_type:"Repository",source:"kumwe/conversion"}]' > "$MOCK_STATE/rulesets"
+  + [{id:501,name:"Kumwe package release standard",source_type:"Repository",source:"kumwe/conversion"}]' \
+  > "$MOCK_STATE/rulesets"
 cp "$test_tmp/desired" "$MOCK_STATE/rule-501"
 expect_exit 0 --apply kumwe/conversion
 assert_no_writes

@@ -52,9 +52,11 @@ then publish it. Once a release is immutable, its assets and tag cannot be chang
 
 The implementation uses GitHub's documented repository endpoints:
 
-- [Immutable release settings: GET to inspect and PUT to enable](https://docs.github.com/en/rest/repos/repos?apiVersion=2026-03-10#enable-immutable-releases).
-- [Repository rulesets and the dynamic default-branch selector](https://docs.github.com/en/rest/repos/rules?apiVersion=2026-03-10#create-a-repository-ruleset).
-- [Why existing releases are unaffected by enabling immutability](https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/establish-provenance-and-integrity/prevent-release-changes).
+- [Immutable release settings: GET to inspect and PUT to enable][immutable].
+- [Repository rulesets and the dynamic default-branch selector][rulesets].
+
+[immutable]: https://docs.github.com/en/rest/repos/repos#enable-immutable-releases
+[rulesets]: https://docs.github.com/en/rest/repos/rules#create-a-repository-ruleset
 
 Run the isolated fixtures with:
 
