@@ -35,7 +35,9 @@ reply() {
 }
 if [[ -f "$MOCK_STATE/failure" ]]; then
   failure="$(cat "$MOCK_STATE/failure")"
-  if [[ "$endpoint" == "$(jq -r '.endpoint' <<< "$failure")" ]]; then
+  if [[ "$endpoint" == "$(jq -r '.endpoint' <<< "$failure")" ]] \
+    && [[ "$(jq -r '.method // "any"' <<< "$failure")" == any \
+      || "$method" == "$(jq -r '.method' <<< "$failure")" ]]; then
     reply "$(jq -r '.status' <<< "$failure")" '{"message":"fixture failure"}'
   fi
 fi
@@ -64,10 +66,23 @@ elif [[ "$endpoint" == repos/*/*/rulesets/* ]]; then
 elif [[ "$endpoint" == repos/*/*/rulesets ]]; then
   [[ "$method" == POST ]] || exit 93
   cp "$input" "$MOCK_STATE/rule-501"
-  jq '. + [{id:501,name:"Kumwe package release standard",source_type:"Repository",source:"kumwe/conversion"}]' \
+  repository="${endpoint#repos/}"
+  repository="${repository%/rulesets}"
+  jq --arg source "$repository" \
+    '. + [{id:501,name:"Kumwe package release standard",source_type:"Repository",source:$source}]' \
     "$MOCK_STATE/rulesets" > "$MOCK_STATE/next"
   mv "$MOCK_STATE/next" "$MOCK_STATE/rulesets"
   reply 201 '{"id":501}'
+elif [[ "$endpoint" == repos/*/*/actions/workflows/release-on-record.yml/dispatches ]]; then
+  [[ "$method" == POST ]] || exit 95
+  if [[ -f "$MOCK_STATE/dispatch-response" ]]; then
+    reply 200 "$(cat "$MOCK_STATE/dispatch-response")"
+  fi
+  repository="${endpoint#repos/}"
+  repository="${repository%/actions/workflows/release-on-record.yml/dispatches}"
+  reply 200 "$(jq -cn --arg repository "$repository" '{workflow_run_id:12345,
+    run_url:("https://api.github.com/repos/" + $repository + "/actions/runs/12345"),
+    html_url:("https://github.com/" + $repository + "/actions/runs/12345")}')"
 elif [[ "$endpoint" =~ ^repos/[^/]+/[^/]+$ ]]; then
   if [[ "$method" == PATCH ]]; then
     jq '.allow_rebase_merge = true' "$MOCK_STATE/metadata" > "$MOCK_STATE/next"
@@ -222,5 +237,76 @@ mv "$MOCK_STATE/next" "$MOCK_STATE/metadata"
 expect_exit 2 --apply kumwe/conversion
 assert_no_writes
 passed 'a connection without administrator rights cannot apply settings'
+
+reset_fixture
+expect_exit 2 --dispatch kumwe/conversion
+expect_exit 2 --check --dispatch kumwe/conversion
+expect_exit 2 --apply --dispatch --dispatch kumwe/conversion
+[[ ! -s "$MOCK_STATE/calls" ]]
+passed 'dispatch requires explicit apply and rejects duplicate flags before requests'
+
+reset_fixture
+expect_exit 0 --apply --dispatch kumwe/conversion
+jq -se '.[-2].method == "GET" and .[-2].endpoint == "repos/kumwe/conversion/rulesets/501"
+  and .[-1] == {method:"POST",endpoint:"repos/kumwe/conversion/actions/workflows/release-on-record.yml/dispatches",
+    body:{ref:"main"}}' "$MOCK_STATE/calls" >/dev/null
+grep -q 'Release workflow queued: https://github.com/kumwe/conversion/actions/runs/12345' "$test_tmp/stdout"
+passed 'recovery dispatch follows successful configuration verification and reports the actual run'
+
+: > "$MOCK_STATE/calls"
+expect_exit 0 --apply --dispatch kumwe/conversion
+jq -se '[.[] | select(.method != "GET")] == [
+  {method:"POST",endpoint:"repos/kumwe/conversion/actions/workflows/release-on-record.yml/dispatches",
+    body:{ref:"main"}}]' "$MOCK_STATE/calls" >/dev/null
+passed 'already configured repositories still dispatch without repeating administration writes'
+
+for branch in master release/stable; do
+  jq --arg branch "$branch" '.default_branch = $branch' "$MOCK_STATE/metadata" > "$MOCK_STATE/next"
+  mv "$MOCK_STATE/next" "$MOCK_STATE/metadata"
+  : > "$MOCK_STATE/calls"
+  expect_exit 0 --dispatch --apply kumwe/conversion
+  jq -se --arg branch "$branch" '.[-1].body == {ref:$branch}' "$MOCK_STATE/calls" >/dev/null
+done
+passed 'dispatch dynamically selects master and slash-containing default branch names'
+
+reset_fixture
+echo '{"endpoint":"repos/kumwe/conversion/immutable-releases","status":403}' > "$MOCK_STATE/failure"
+expect_exit 2 --apply --dispatch kumwe/conversion
+assert_no_writes
+passed 'denied configuration lookup never dispatches a workflow'
+
+reset_fixture
+echo '{"endpoint":"repos/kumwe/conversion/rulesets/501","status":403,"method":"GET"}' > "$MOCK_STATE/failure"
+expect_exit 2 --apply --dispatch kumwe/conversion
+jq -se 'all(.[]; (.endpoint | endswith("/dispatches")) | not)' "$MOCK_STATE/calls" >/dev/null
+passed 'failed verification after applying settings never dispatches a workflow'
+
+reset_fixture
+expect_exit 0 --apply kumwe/conversion
+: > "$MOCK_STATE/calls"
+echo '{"endpoint":"repos/kumwe/conversion/actions/workflows/release-on-record.yml/dispatches",
+  "status":403}' > "$MOCK_STATE/failure"
+expect_exit 2 --apply --dispatch kumwe/conversion
+jq -se '[.[] | select(.method != "GET")] == [
+  {method:"POST",endpoint:"repos/kumwe/conversion/actions/workflows/release-on-record.yml/dispatches",
+    body:{ref:"main"}}]' "$MOCK_STATE/calls" >/dev/null
+passed 'denied dispatch fails without retries, alternate credentials or other writes'
+
+rm "$MOCK_STATE/failure"
+echo '{"workflow_run_id":12345,"run_url":"https://api.github.com/repos/unrelated/repo/actions/runs/12345",
+  "html_url":"https://github.com/unrelated/repo/actions/runs/12345"}' > "$MOCK_STATE/dispatch-response"
+expect_exit 2 --apply --dispatch kumwe/conversion
+! grep -q 'Release workflow queued:' "$test_tmp/stdout"
+passed 'mismatched dispatch response cannot report an unrelated workflow as recovery success'
+
+reset_fixture
+echo '{"endpoint":"repos/kumwe/conversion/immutable-releases","status":403}' > "$MOCK_STATE/failure"
+expect_exit 2 --apply --dispatch kumwe/conversion kumwe/producer
+jq -se '[.[] | select(.endpoint | endswith("/dispatches"))] == [
+  {method:"POST",endpoint:"repos/kumwe/producer/actions/workflows/release-on-record.yml/dispatches",
+    body:{ref:"main"}}]
+  and all(.[] | select(.endpoint | startswith("repos/kumwe/conversion")); .method == "GET")' \
+  "$MOCK_STATE/calls" >/dev/null
+passed 'fleet recovery continues after a configuration failure and dispatches only verified repositories'
 
 printf 'Repository configuration fixtures passed: %s cases.\n' "$tests"

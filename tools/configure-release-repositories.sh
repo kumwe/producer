@@ -4,19 +4,22 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: bash tools/configure-release-repositories.sh [--check|--apply] [OWNER/REPO ...]
+Usage: bash tools/configure-release-repositories.sh [--check|--apply] [--dispatch] [OWNER/REPO ...]
 
 Without repository arguments, audits the 13 extracted Kumwe packages.
 --check  Read-only audit (default); exit 1 means configuration drift.
 --apply  Enable immutable releases and the managed package ruleset.
+--dispatch  With --apply, start the release workflow after configuration is verified.
 
 Requires Bash 4+, jq, GitHub CLI, and an authenticated repository administrator.
+Dispatch also requires Actions write permission; it preserves the workflow's release checks.
 Exit codes: 0 = configured; 1 = changes needed; 2 = request/validation failure.
 USAGE
 }
 
 mode=check
 mode_selected=false
+dispatch=false
 repositories=()
 while (($#)); do
   case "$1" in
@@ -28,12 +31,21 @@ while (($#)); do
       mode="${1#--}"
       mode_selected=true
       ;;
+    --dispatch)
+      [[ "$dispatch" == false ]] || { echo 'Specify --dispatch once.' >&2; exit 2; }
+      dispatch=true
+      ;;
     --help|-h) usage; exit 0 ;;
     -*) echo "Unknown option: $1" >&2; exit 2 ;;
     *) repositories+=("$1") ;;
   esac
   shift
 done
+
+if [[ "$dispatch" == true && "$mode" != apply ]]; then
+  echo '--dispatch requires --apply.' >&2
+  exit 2
+fi
 
 if ((${#repositories[@]} == 0)); then
   for package in conversion producer extension-sdk business-definition access-control \
@@ -125,6 +137,25 @@ normalize_ruleset() {
           do_not_enforce_on_create: (.do_not_enforce_on_create // false),
           required_status_checks: (.required_status_checks | sort_by(.context))}
       else . end))}'
+}
+
+dispatch_release() {
+  local repository="$1" default_branch="$2" run_id run_url
+  [[ "$dispatch" == true ]] || return 0
+  jq -n --arg ref "$default_branch" '{ref: $ref}' > "$task_tmp/dispatch.json"
+  api POST "repos/$repository/actions/workflows/release-on-record.yml/dispatches" "$task_tmp/dispatch.json"
+  expect_status 200
+  # API version 2026-03-10 returns the newly queued run. Keep recovery output
+  # tied to that run, not to an unrelated latest run from another event.
+  run_id="$(jq -er '.workflow_run_id | select(type == "number" and . > 0 and floor == .)' <<< "$api_body")" \
+    || fail "$repository dispatch returned no valid workflow run ID."
+  run_url="https://github.com/$repository/actions/runs/$run_id"
+  jq -e --arg html_url "$run_url" --arg run_url "https://api.github.com/repos/$repository/actions/runs/$run_id" \
+    '(.html_url | ascii_downcase) == ($html_url | ascii_downcase)
+      and (.run_url | ascii_downcase) == ($run_url | ascii_downcase)' <<< "$api_body" >/dev/null \
+    || fail "$repository dispatch returned mismatched workflow run URLs."
+  printf '  Release workflow queued: %s\n' "$run_url"
+  echo '  Publication remains subject to the workflow checks; a queued run is not a released package.'
 }
 
 configure_repository() {
@@ -226,6 +257,7 @@ configure_repository() {
   fi
   if [[ "$drift" == false ]]; then
     echo '  Configuration verified; no changes needed.'
+    dispatch_release "$repository" "$default_branch"
     return 0
   fi
   [[ "$mode" == apply ]] || return 1
@@ -259,6 +291,7 @@ configure_repository() {
     [[ "$current" == "$desired" ]] || fail 'Ruleset verification failed.'
   fi
   echo '  Applied and verified. Existing releases and tags were preserved.'
+  dispatch_release "$repository" "$default_branch"
 }
 
 overall=0

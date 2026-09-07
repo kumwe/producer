@@ -1,10 +1,9 @@
 # Repository release setup
 
-The release workflow requires a protected default branch, an effective GitHub Actions
-**Package gate** requirement, and immutable publication.
-Repository settings must be established once by a GitHub administrator; merging
-workflow code does not create those settings. The GitHub connector used to prepare
-these changes has no repository administration capability.
+The repository release configuration requires a protected default branch, the GitHub
+Actions **Package gate** check, and immutable publication. A GitHub administrator
+establishes these settings once; merging workflow code does not create them. Source CI
+tests package code and release automation independently of these live settings.
 
 Run this from any package checkout containing the common tools. The default audit
 covers conversion, producer, extension-sdk, business-definition, access-control,
@@ -22,10 +21,27 @@ The script needs Bash 4 or newer, `jq`, and an authenticated GitHub CLI (`gh aut
 login`) acting as a repository administrator. Use credentials with repository
 Administration read permission for auditing, or Administration write for applying.
 Credentials remain managed by `gh`; do not put a token in this script or workflow.
-Without `--apply`, every API request is read-only. Exit status 0 means configured,
+The default audit and `--check` are read-only. Exit status 0 means setup was verified,
 1 means changes are needed, and 2 means a request or validation failed. A failure
 does not hide results for subsequent repositories. Applying is idempotent, and
 each mutation is followed by a read that verifies the result.
+
+To apply setup and then request release runs with the verified settings:
+The new `--dispatch` option requires this updated PR checkout until the repair is merged.
+
+```bash
+bash tools/configure-release-repositories.sh --apply --dispatch
+```
+
+Dispatch also requires Actions write permission. The script discovers each repository's
+current default branch and dispatches `release-on-record.yml` after verifying its setup.
+A successful dispatch means GitHub accepted a run request, not that a release completed.
+Follow the runs and logs in Actions. From an individual repository checkout, use:
+
+```bash
+gh run list --workflow release-on-record.yml
+gh run watch --exit-status
+```
 
 The managed ruleset is named **Kumwe package release standard**. Its
 `~DEFAULT_BRANCH` selector follows a default-branch rename automatically. It
@@ -39,27 +55,24 @@ reviews, extra required checks, and additional rule types are retained. A duplic
 managed name or a matching inherited ruleset is reported for administrator review
 instead of overwritten.
 
-Apply this configuration and complete the administrator `--check` audit first. Then
-rerun the repair PR checks: the live **Release prerequisites** job must observe the
-protected current default branch and an effective rule requiring **Package gate**
-from GitHub Actions. The aggregate Package gate also requires package tests and
-release automation tests. Access Control and Business Definition additionally
-require the live **Dependency release prerequisites** job. A failed or skipped
-required job blocks the aggregate. Rebase only after the complete PR gate succeeds.
+The aggregate **Package gate** requires package tests and release automation regressions.
+A failed or skipped required source job blocks it. Repository configuration and live
+dependency release evidence are publication checks, so they do not prevent source repair
+PRs from passing CI. The Version 2 state `package-implemented` describes a complete green
+implementation PR; `release-verified` requires a published artifact and separate
+independent verification. Merge readiness and release verification remain distinct.
 
 The required check names a job, not a source commit. The release workflow repeats
 the complete gate on the new default-branch commit created by rebase, and tags that
 tested commit. No PR head SHA belongs in the ruleset or release configuration.
-Changing repository settings does not rerun an earlier failed check automatically;
-rerun the failed checks or dispatch the release workflow on the default branch.
+Changing repository settings does not rerun an earlier failed workflow automatically;
+rerun that workflow or use `--apply --dispatch` to request a fresh default-branch run.
 
-The workflow's Contents permission can verify branch protection and effective
-required checks, but cannot read the immutable-release administration setting.
-The administrator `--check` is therefore required even when Release prerequisites
-succeeds. A green prerequisite check does not establish that every package is
-ready to publish. Exact dependency releases and independent evidence must also
-pass where required, and actual publication must succeed before declaring a
-release complete.
+The workflow's Contents permission can verify live branch protection but cannot read
+the immutable-release administration setting. The administrator audit verifies that
+setting. Access Control and Business Definition additionally verify exact upstream
+releases and independent evidence before publication. Confirm each publication run
+succeeded and its immutable release exists before declaring that package released.
 
 Enabling immutable releases affects future publications. Existing mutable releases
 remain mutable; their tags and releases are not deleted or moved. Publish a new
