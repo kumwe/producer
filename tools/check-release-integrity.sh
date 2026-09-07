@@ -26,17 +26,21 @@ case "${1:-}" in
       refuse_protection
     fi
     ;;
-  published)
+  published|stable-release)
     if [[ "$#" -ne 2 || ! "$2" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
       echo 'Release verification requires one exact stable SemVer version.' >&2
       exit 1
     fi
-    if ! jq -es --arg tag "v$2" '
+    if ! jq -es --arg tag "v$2" --arg mode "$1" '
       length == 1 and (.[0] | type == "object" and .tag_name == $tag and .draft == false
-      and .prerelease == false and .immutable == true
+      and .prerelease == false and ($mode == "stable-release" or .immutable == true)
       and (.published_at | type == "string" and length > 0))
     ' >/dev/null; then
-      echo 'Release refused: exact version must be published, stable and immutable.' >&2
+      if [[ "$1" == published ]]; then
+        echo 'Release refused: exact version must be published, stable and immutable.' >&2
+      else
+        echo 'Release refused: exact version must be published and stable.' >&2
+      fi
       exit 1
     fi
     ;;
@@ -45,6 +49,7 @@ case "${1:-}" in
     echo '       check-release-integrity.sh branch [BRANCH] < branch.json' >&2
     echo '       check-release-integrity.sh protected-branch BRANCH < branch.json' >&2
     echo '       check-release-integrity.sh published VERSION < release.json' >&2
+    echo '       check-release-integrity.sh stable-release VERSION < release.json' >&2
     exit 2
     ;;
 esac

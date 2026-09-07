@@ -49,14 +49,6 @@ api_read() {
     || fail "Invalid JSON metadata returned for $endpoint."
 }
 
-require_protection() {
-  local branch_path
-  branch_path="$(jq -rn --arg branch "$DEFAULT_BRANCH" '$branch | @uri')"
-  api_read "repos/$GITHUB_REPOSITORY/branches/$branch_path" \
-    || fail 'The default branch cannot be read.'
-  bash "$tools_dir/check-release-integrity.sh" protected-branch "$DEFAULT_BRANCH" < "$api_body"
-}
-
 resolve_tag_commit() {
   local depth=0 object_type
   while :; do
@@ -71,12 +63,11 @@ resolve_tag_commit() {
   done
 }
 
-require_protection
 release_exists=false
 probe_status=0
 api_read "repos/$GITHUB_REPOSITORY/releases/tags/v$version" || probe_status=$?
 if [[ "$probe_status" -eq 0 ]]; then
-  bash "$tools_dir/check-release-integrity.sh" published "$version" < "$api_body"
+  bash "$tools_dir/check-release-integrity.sh" stable-release "$version" < "$api_body"
   release_exists=true
 elif [[ "$probe_status" -ne 4 ]]; then
   fail "Cannot determine whether release v$version exists."
@@ -99,7 +90,6 @@ if [[ "$probe_status" -eq 0 ]]; then
   echo "Verified tag v$version at $tag_sha."
 elif [[ "$probe_status" -eq 4 ]]; then
   [[ "$release_exists" != true ]] || fail 'The published release has no matching version tag.'
-  require_protection
   gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" \
     --field ref="refs/tags/v$version" --field sha="$GITHUB_SHA" > "$scratch_dir/created-tag.json"
   jq -es --arg ref "refs/tags/v$version" --arg sha "$GITHUB_SHA" '
@@ -110,20 +100,19 @@ else
 fi
 
 if [[ "$release_exists" != true ]]; then
-  require_protection
   gh release create "v$version" --repo "$GITHUB_REPOSITORY" --verify-tag --title "v$version" \
     --notes "${RELEASE_NOTES:-See CHANGELOG.md section $version for this package release.}"
 fi
 api_read "repos/$GITHUB_REPOSITORY/releases/tags/v$version" || fail 'Published release cannot be read.'
-bash "$tools_dir/check-release-integrity.sh" published "$version" < "$api_body"
-# Publication locks the tag. Verify its final target after that lock has taken effect,
-# since the unsealed tag could have changed after our pre-publication inspection.
-api_read "repos/$GITHUB_REPOSITORY/git/ref/tags/v$version" || fail 'The immutable release tag cannot be read.'
+bash "$tools_dir/check-release-integrity.sh" stable-release "$version" < "$api_body"
+# Recheck the tag after publication, since it could have changed after inspection.
+# This verifies the observed target regardless of the optional immutability setting.
+api_read "repos/$GITHUB_REPOSITORY/git/ref/tags/v$version" || fail 'The release tag cannot be read.'
 resolve_tag_commit
-[[ "$tag_sha" == "$release_sha" ]] || fail 'The immutable release tag differs from the verified source commit.'
+[[ "$tag_sha" == "$release_sha" ]] || fail 'The release tag differs from the verified source commit.'
 if [[ "$release_exists" == true ]]; then
   output release_status verified
 else
   output release_status published
 fi
-echo "Verified immutable release v$version."
+echo "Verified release v$version."

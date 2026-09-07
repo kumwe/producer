@@ -1,100 +1,112 @@
-# Repository release setup
+# Optional repository release hardening
 
-The repository release configuration requires a protected default branch, the GitHub
-Actions **Package gate** check, and immutable publication. A GitHub administrator
-establishes these settings once; merging workflow code does not create them. Source CI
-tests package code and release automation independently of these live settings.
+Normal package publication runs the full source gate and verifies stable version, tag
+and source identity. It does not require branch protection, GitHub's immutable-release
+flag or this administrator helper. Existing GitHub rules and permissions still apply.
+Publication workflows never change repository settings automatically.
 
-Run this from any package checkout containing the common tools. The default audit
-covers conversion, producer, extension-sdk, business-definition, access-control,
+Administrators may opt into a policy requiring PRs, **Package gate**, protected default
+branches and immutable future releases. `tools/configure-release-repositories.sh` audits
+or applies that policy independently of normal source CI and publication.
+
+## Audit or apply the optional policy
+
+Run from a package checkout containing the common tools. With no repository arguments,
+the helper covers conversion, producer, extension-sdk, business-definition, access-control,
 access-context, transaction, sequence, contribution, localization, canonical-json,
-computation and secret-envelope. Explicit `OWNER/REPO` arguments select a subset
-or add future packages without editing the script.
+computation and secret-envelope. Explicit `OWNER/REPO` arguments select a subset or add
+future packages without changing the script.
+
+Read-only audit:
 
 ```bash
 bash tools/configure-release-repositories.sh --check
-bash tools/configure-release-repositories.sh --apply
-bash tools/configure-release-repositories.sh --check
 ```
 
-The script needs Bash 4 or newer, `jq`, and an authenticated GitHub CLI (`gh auth
-login`) acting as a repository administrator. Use credentials with repository
-Administration read permission for auditing, or Administration write for applying.
-Credentials remain managed by `gh`; do not put a token in this script or workflow.
-The default audit and `--check` are read-only. Exit status 0 means setup was verified,
-1 means changes are needed, and 2 means a request or validation failed. A failure
-does not hide results for subsequent repositories. Applying is idempotent, and
-each mutation is followed by a read that verifies the result.
+Apply the policy when an administrator chooses to enable it:
 
-To apply setup and then request release runs with the verified settings:
-The new `--dispatch` option requires this updated PR checkout until the repair is merged.
+```bash
+bash tools/configure-release-repositories.sh --apply
+```
+
+The helper needs Bash 4 or newer, `jq`, and GitHub CLI authenticated as a repository
+administrator. Audit needs Administration read permission; applying needs Administration
+write. Credentials remain managed by `gh`; do not put an administration token in the
+script or publication workflow. The default mode and `--check` are read-only.
+
+Exit status 0 means this optional policy was verified, 1 means policy differences exist,
+and 2 means a request or validation failed. Policy differences do not themselves block
+normal publication. A failure does not hide results for later repositories. Applying is
+idempotent, and each mutation is followed by a read that verifies the result.
+
+## Managed settings
+
+The ruleset is named **Kumwe package release standard**. Its `~DEFAULT_BRANCH` selector
+follows default-branch renames. It requires PRs, rebase merging, linear history and the
+aggregate **Package gate** status from GitHub Actions. It blocks default-branch force
+pushes and deletion, without bypass actors or an added mandatory review count. Feature
+branches can still rebase. The helper enables repository rebase merging if necessary
+and preserves other merge settings.
+
+Unrelated rulesets remain intact. Within the managed ruleset, stricter review settings,
+extra required checks and additional rule types are retained. Duplicate managed names
+or a matching inherited ruleset are reported instead of overwritten. A checked-in ruleset
+file does not activate settings; Packagist registration does not configure them either.
+
+**Package gate** requires package checks and release automation regressions. A failed or
+skipped required source job blocks it. Release runs repeat the same gate on the actual
+default-branch commit after rebase. No PR head SHA belongs in the ruleset or release
+configuration. Independent attestations remain separate `release-verified` evidence.
+
+Enabling GitHub immutable releases affects future publications; historical mutable
+releases remain mutable. Never move a released tag or replace its artifact. If a
+platform-immutable successor is desired, record an unused version and publish it through
+the complete gate. Upload intended assets while the release is a draft; an immutable
+published release locks its tag and assets. Report that state only after GitHub confirms it.
+
+## Optional dispatch and ordinary retries
+
+Administrators who also want to request release runs after applying and verifying the
+optional policy can use:
 
 ```bash
 bash tools/configure-release-repositories.sh --apply --dispatch
 ```
 
-Dispatch also requires Actions write permission. The script discovers each repository's
-current default branch and dispatches `release-on-record.yml` after verifying its setup.
-A successful dispatch means GitHub accepted a run request, not that a release completed.
-Follow the runs and logs in Actions. From an individual repository checkout, use:
+This mode needs Actions write permission. It discovers each current default branch and
+dispatches `release-on-record.yml` after verifying the selected policy. Dispatch means
+GitHub accepted a run request; inspect that run and its logs to establish publication.
+Changing settings alone does not rerun earlier workflows.
+
+For an ordinary publication retry, use **Run workflow** for `release-on-record.yml` on
+the repository's current default branch. No administrator setup is required by the
+publisher. From an individual checkout, inspect the resulting runs with:
 
 ```bash
 gh run list --workflow release-on-record.yml
 gh run watch --exit-status
 ```
 
-The managed ruleset is named **Kumwe package release standard**. Its
-`~DEFAULT_BRANCH` selector follows a default-branch rename automatically. It
-requires pull requests, rebase merging, linear history, and the aggregate
-**Package gate** status from GitHub Actions. It blocks default-branch force pushes
-and deletion, with no bypass actors and no mandatory review count added by this
-baseline. Feature branches remain free to rebase. The repository rebase-merge
-setting is enabled if necessary; other repository merge settings are preserved.
-Unrelated rulesets are left intact. Inside the managed ruleset, stricter existing
-reviews, extra required checks, and additional rule types are retained. A duplicate
-managed name or a matching inherited ruleset is reported for administrator review
-instead of overwritten.
+Access Control and Business Definition also verify their selected upstream package
+release and Composer identities before publication. Their separate strict evidence audit
+supports independent verification and downstream adoption; normal publication does not
+require an attestation. Confirm the actual release and tag before reporting publication.
 
-The aggregate **Package gate** requires package tests and release automation regressions.
-A failed or skipped required source job blocks it. Repository configuration and live
-dependency release evidence are publication checks, so they do not prevent source repair
-PRs from passing CI. The Version 2 state `package-implemented` describes a complete green
-implementation PR; `release-verified` requires a published artifact and separate
-independent verification. Merge readiness and release verification remain distinct.
+## Helper references and fixtures
 
-The required check names a job, not a source commit. The release workflow repeats
-the complete gate on the new default-branch commit created by rebase, and tags that
-tested commit. No PR head SHA belongs in the ruleset or release configuration.
-Changing repository settings does not rerun an earlier failed workflow automatically;
-rerun that workflow or use `--apply --dispatch` to request a fresh default-branch run.
-
-The workflow's Contents permission can verify live branch protection but cannot read
-the immutable-release administration setting. The administrator audit verifies that
-setting. Access Control and Business Definition additionally verify exact upstream
-releases and independent evidence before publication. Confirm each publication run
-succeeded and its immutable release exists before declaring that package released.
-
-Enabling immutable releases affects future publications. Existing mutable releases
-remain mutable; their tags and releases are not deleted or moved. Publish a new
-successor version for a historical mutable release that needs an immutable
-replacement. Upload every intended asset while the new release is still a draft,
-then publish it. Once a release is immutable, its assets and tag cannot be changed.
-
-The implementation uses GitHub's documented repository endpoints:
-
-- [Immutable release settings: GET to inspect and PUT to enable][immutable].
-- [Repository rulesets and the dynamic default-branch selector][rulesets].
+The optional helper uses GitHub's documented [immutable-release settings][immutable]
+and [repository rulesets][rulesets] endpoints.
 
 [immutable]: https://docs.github.com/en/rest/repos/repos#enable-immutable-releases
 [rulesets]: https://docs.github.com/en/rest/repos/rules#create-a-repository-ruleset
 
-Run the isolated fixtures with:
+Run the isolated helper fixtures with:
 
 ```bash
 bash tools/test-configure-release-repositories.sh
 ```
 
-The fixtures replace `gh` locally and never contact GitHub. They cover read-only
-audits, creation, idempotency, updates, preservation of stricter policies,
-default-branch renames, denied requests, pagination, duplicate/inherited names,
-input validation, administrator access, and the complete default repository list.
+The fixtures replace `gh` locally and never contact GitHub. They cover audits, creation,
+idempotency, updates, stricter-policy preservation, default-branch renames, denied
+requests, pagination, duplicate/inherited names, input validation, administrator access,
+the complete default repository list and optional dispatch behavior.
