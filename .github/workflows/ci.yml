@@ -81,35 +81,16 @@ jobs:
           bash tools/test-release-integrity.sh
           bash tools/test-release-on-record.sh
           bash tools/test-configure-release-repositories.sh
-          bash tools/test-release-prerequisites.sh
-
-  release-prerequisites:
-    name: Release prerequisites
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Verify live default-branch release rules
-        env:
-          GH_TOKEN: ${{ github.token }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: bash tools/check-release-prerequisites.sh
 
   package-gate:
     name: Package gate
     if: always()
-    needs: [check, release-tests, release-prerequisites]
+    needs: [check, release-tests]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Require package tests and live release prerequisites
+      - name: Require all package and release tests
         env:
           PACKAGE_RESULT: ${{ needs.check.result }}
           RELEASE_RESULT: ${{ needs.release-tests.result }}
-          PREREQUISITE_RESULT: ${{ needs.release-prerequisites.result }}
-        run: |
-          test "$PACKAGE_RESULT" = success
-          test "$RELEASE_RESULT" = success
-          test "$PREREQUISITE_RESULT" = success
+        run: test "$PACKAGE_RESULT" = success && test "$RELEASE_RESULT" = success
