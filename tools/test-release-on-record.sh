@@ -61,8 +61,10 @@ if [[ "$1" == api && "$2" == --include ]]; then
       ;;
     release)
       if [[ "$(read_state '.published')" != true ]]; then respond 404 '{"message":"Not Found"}'; exit; fi
-      respond 200 "$(jq '{tag_name:(.release_tag // "v0.1.0"),draft:(.draft // false),
-        prerelease:(.prerelease // false),immutable:.immutable,published_at:"2026-01-01T00:00:00Z"}' "$state")"
+      respond 200 "$(jq '. as $state | {tag_name:(.release_tag // "v0.1.0"),draft:(.draft // false),
+        prerelease:(.prerelease // false),immutable:.immutable,
+        published_at:(if has("published_at") then .published_at else "2026-01-01T00:00:00Z" end)}
+        | if ($state | has("immutable")) then . else del(.immutable) end' "$state")"
       ;;
     tag|annotated)
       if [[ "$kind" == tag ]]; then
@@ -164,8 +166,7 @@ new_case
 git -C "$case_dir/repo" branch -m 'stable/release'
 default_branch=stable/release
 event_ref=refs/heads/stable/release
-check pass 2 'default branch with slash is encoded for the API'
-grep -q '/branches/stable%2Frelease$' "$case_dir/calls"
+check pass 2 'default branch with slash publishes the exact tested commit'
 
 new_case
 git -C "$case_dir/repo" checkout -qb feature
@@ -215,12 +216,14 @@ state '.fail_publish = false'
 : > "$case_dir/calls"
 check pass 1 'retry finishes publication without moving the tag'
 
-new_case
-wrong_sha="$(printf 'Untested concurrent commit\n' | git -C "$case_dir/repo" commit-tree HEAD^{tree} -p HEAD)"
-[[ "$wrong_sha" != "$tested_sha" ]]
-state ".move_tag_before_publish = \"$wrong_sha\""
-check fail 2 'publication detects a concurrent tag move before the immutable lock'
-[[ "$(git -C "$case_dir/repo" rev-parse refs/tags/v0.1.0)" == "$wrong_sha" ]]
+for immutable in true false; do
+  new_case
+  wrong_sha="$(printf 'Untested concurrent commit\n' | git -C "$case_dir/repo" commit-tree HEAD^{tree} -p HEAD)"
+  [[ "$wrong_sha" != "$tested_sha" ]]
+  state ".move_tag_before_publish = \"$wrong_sha\" | .immutable = $immutable"
+  check fail 2 "publication detects a concurrent tag move with immutable=$immutable"
+  [[ "$(git -C "$case_dir/repo" rev-parse refs/tags/v0.1.0)" == "$wrong_sha" ]]
+done
 
 new_case
 commit_file CHANGELOG.md $'# Changelog\n\n## Unreleased\n\nPending changes.'
@@ -263,13 +266,15 @@ check fail 0 'tracked local edits cannot be published as tested source'
 
 new_case
 state '.protected = false'
-check fail 0 'unprotected default branch fails closed'
+check pass 2 'unprotected default branch can publish the exact tested source'
+! grep -q '/branches/' "$case_dir/calls"
 
 new_case
-state '.unprotect_after_tag = true'
-check fail 1 'protection is rechecked immediately before publication'
+state '.error_endpoint = "branch" | .error_http = 403'
+check pass 2 'branch administration access is not a publication prerequisite'
+! grep -q '/branches/' "$case_dir/calls"
 
-for endpoint in branch release tag; do
+for endpoint in release tag; do
   for http in 403 500; do
     new_case
     state ".error_endpoint = \"$endpoint\" | .error_http = $http"
@@ -285,20 +290,45 @@ state '.malformed_http = true'
 check fail 0 'error text containing HTTP 404 is not a confirmed missing resource'
 
 new_case
-state '.error_endpoint = "branch" | .error_http = 404'
-check fail 0 'missing default branch cannot publish'
+default_branch='invalid..branch'
+check fail 0 'invalid default branch name cannot publish'
 
-for field in immutable draft prerelease; do
+for field in draft prerelease; do
   new_case
   git -C "$case_dir/repo" tag v0.1.0
   state '.published = true'
-  if [[ "$field" == immutable ]]; then state '.immutable = false'; else state ".$field = true"; fi
+  state ".$field = true"
   check fail 0 "existing publication with invalid $field is refused"
 done
 
 new_case
 state '.immutable = false'
-check fail 2 'new publication must actually become immutable'
+check pass 2 'new stable publication does not require optional immutable releases'
+grep -q '^Verified release v0.1.0\.$' "$case_dir/result"
+! grep -q 'Verified immutable release' "$case_dir/result"
+: > "$case_dir/calls"
+check pass 0 'existing mutable stable release verifies without mutations'
+
+new_case
+state 'del(.immutable)'
+check pass 2 'omitted immutable-release metadata does not block stable publication'
+
+for field in draft prerelease; do
+  new_case
+  state ".$field = true"
+  check fail 2 "new publication must not be a $field release"
+done
+
+for timestamp in '""' null; do
+  new_case
+  state ".published_at = $timestamp"
+  check fail 2 'publication requires a nonempty publication timestamp'
+done
+
+new_case
+git -C "$case_dir/repo" tag v0.1.0
+state '.published = true | .release_tag = "v0.2.0"'
+check fail 0 'existing release metadata must match the requested version'
 
 new_case
 state '.published = true'
