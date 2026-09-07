@@ -78,7 +78,7 @@ $optional = ['Kumwe\Extension\Toolchain\ExtensionConformanceTestCase',
 $loaded = 0;
 foreach ($names as $name) {
     if (in_array($name, $optional, true)) {
-        if (!is_file($package . '/src/Toolchain/' . substr($name, strrpos($name, '\') + 1) . '.php')) {
+        if (!is_file($package . '/src/Toolchain/' . substr($name, strrpos($name, chr(92)) + 1) . '.php')) {
             throw new RuntimeException('Optional consumer-PHPUnit bridge is missing.');
         }
         continue;
