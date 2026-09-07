@@ -101,8 +101,11 @@ final class TestOwnership
         if (preg_match('~^(?:[a-zA-Z0-9_.-]+/)*[a-zA-Z0-9_.-]+$~D', $path) !== 1) {
             throw new RuntimeException('Invalid evidence path: ' . $path);
         }
-        if (in_array('..', explode('/', $path), true) || !is_file($path) || is_link($path)) {
+        if (array_intersect(['.', '..'], explode('/', $path)) !== [] || !is_file($path)) {
             throw new RuntimeException('Missing or nonlocal evidence: ' . $path);
+        }
+        if (realpath($path) !== getcwd() . '/' . $path) {
+            throw new RuntimeException('Evidence may not traverse a symlink: ' . $path);
         }
     }
 
@@ -123,7 +126,7 @@ final class TestOwnership
                 throw new RuntimeException('Evidence is not discovered by the package suite: ' . $test);
             }
             $file = self::text($inventory[$test]);
-            if (!str_starts_with($file, 'tests/')) {
+            if (!str_starts_with($file, 'tests/') || !str_ends_with($file, '.php')) {
                 throw new RuntimeException('Behavior evidence must belong to this package: ' . $test);
             }
             self::file($file);
@@ -229,6 +232,17 @@ try {
     if ($command === []) {
         throw new RuntimeException('Real test-runner discovery command is required.');
     }
+    $scripts = TestOwnership::object($composer['scripts'] ?? null);
+    if (
+        !(
+        $command === ['php', 'tests/run.php', '--list-json']
+        && ($scripts['test'] ?? 'php tests/run.php') === 'php tests/run.php'
+        ) && !(
+        $command === ['php', 'tools/test-inventory.php'] && ($scripts['test'] ?? null) === 'phpunit'
+        )
+    ) {
+        throw new RuntimeException('Ownership inventory must use the package Composer test runner.');
+    }
     $lines = [];
     $status = 0;
     exec(implode(' ', array_map(escapeshellarg(...), $command)), $lines, $status);
@@ -249,6 +263,7 @@ try {
             [['conformance', 'rationale'], ''],
             [['conformance', 'status'], 'later'],
             [['architecture'], ['tools/missing-boundary-gate.php']],
+            [['architecture'], ['tools/../tools/verify-architecture.php']],
             [['host', 'baseline'], 'master'],
             [['host', 'retained_responsibilities'], []],
         ];

@@ -22,6 +22,8 @@ if (!is_file($phpstan) || !is_file($phpcs)) {
 
 $commands = [
     [$php, $root . '/tools/lint.php'],
+    ['bash', $root . '/tools/test-release-record.sh'],
+    ['bash', $root . '/tools/test-release-integrity.sh'],
     [$php, $root . '/tools/verify-test-ownership.php', '--self-test'],
     [$php, $root . '/tools/check-style.php'],
     [$php, $root . '/tools/check-docblocks.php'],
