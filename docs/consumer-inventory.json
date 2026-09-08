@@ -1,0 +1,381 @@
+{
+  "schema": "kumwe-existing-package-consumer-inventory/v1",
+  "package": "kumwe/producer",
+  "app_repository": "https://github.com/kumwe/app",
+  "app_baseline_commit": "24ecf956423c18933e824b43cea1bfb9127a79a9",
+  "source_references": [
+    {
+      "path": "src/Administrator/Http/Handler/AdministratorStudioHostHandler.php",
+      "sha256": "cb715bf5734537e6ca64cc6b0df98f1f12eda6a48453c0ac59dc1c92e6b31a3c"
+    },
+    {
+      "path": "src/Administrator/Http/Handler/AdministratorStudioPreviewDocumentHandler.php",
+      "sha256": "a67704a5743cb040784e497180eb77c72740a93697454a3aef84117e6218ccae"
+    },
+    {
+      "path": "src/Administrator/Http/Handler/AdministratorStudioSessionHandler.php",
+      "sha256": "855ed21c9a316719bcf41c14bb60dcf4dd52f374b0269d35db0e266fa3773b5d"
+    },
+    {
+      "path": "src/Extension/Contribution/CoreStudioCompositionContributions.php",
+      "sha256": "02df7a131b92ea346c9ed83daaa9bfcabff12fcd8452d635807a8ace319b13e1"
+    },
+    {
+      "path": "src/Extension/Contribution/StudioPreviewRendererContribution.php",
+      "sha256": "8b198ca3aa231f23778647a44ed0ab1f507f49401ac83349c70dd20585f42f45"
+    },
+    {
+      "path": "src/Kernel/ContainerFactory.php",
+      "sha256": "a6a80726c6b408103a75945225994556957bc7361b52583466bab5a28899b787"
+    },
+    {
+      "path": "src/Studio/Application/Composition/CanonicalStudioPublishedContentRenderer.php",
+      "sha256": "6c7b44f520f79fa52afb27811fb6046a67e2fcc3c5864fc0bfbaf129574b8cd3"
+    },
+    {
+      "path": "src/Studio/Application/Composition/StudioCompositionContributionCatalog.php",
+      "sha256": "a977daa5e884bd1261484e0e112bf0db80102e8337200dbf93e4b7a251d1150c"
+    },
+    {
+      "path": "src/Studio/Application/Composition/StudioPublishedCompositionGuard.php",
+      "sha256": "cb6cba80a6456e2845c04ed378315445f1f073ef29701347f6eae5c4232d1992"
+    },
+    {
+      "path": "src/Studio/Application/Composition/StudioPublishedContentRenderer.php",
+      "sha256": "bf2b50cdd5df7878016fc48ff136c545cbdb30b21c0c0285bb84874ee21d1b1b"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioArtifactAdmission.php",
+      "sha256": "e1e7a095f8599aac397326d0276943eba6e28d7e04b753d4b464c3ff781588e5"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioArtifactHostPort.php",
+      "sha256": "d428a6a11675230adac2412d52c21bb36610abee400f0224ae90159d831c5ca0"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioArtifactPublicationGuard.php",
+      "sha256": "595e2fde83ed95d51975a8305c9f5c077fef579f56b9df8476876f86b234dc09"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioLocalizationHostPort.php",
+      "sha256": "2bc1c50da912bee000b04086a7071f52670cc9a34bd945656e0a6e0b6bba5f63"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioModelHostPort.php",
+      "sha256": "84d6f744c9d3524bef83658152220986af88c043e4f83482062301b4f1b11621"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioMutationOutcomeCodec.php",
+      "sha256": "3bdb66ca7e5fdeda49dc25f0ee819af198858e5b0bcbc4149b1cecaaa3375a68"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioMutationReplayRepository.php",
+      "sha256": "09f06edd2ab79d793921b2d3ceeedbdab229f3535ea03a72443a031d0fce49f2"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioPermissionHostPort.php",
+      "sha256": "5e63bb0c3fb35ad8aa58cbcb8cf6d7c3ac2fe3e6e1766579ef9efe9eb4d990e8"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioProducerError.php",
+      "sha256": "46dd8ad22c50b1eea3f9f537bac0b83ad5ab8435448849c6394684cc4719c180"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioProducerHost.php",
+      "sha256": "c650b17faf868dccc6266f6a2c6a1693cc90f52f96a4cf98310859fa2bbd171a"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioProducerMutationBoundary.php",
+      "sha256": "59cb015af3758377714613644457fc6e3803edbe25cecafc4faa795f7cba337e"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioProducerRequestAuthority.php",
+      "sha256": "391a2b9532af39a84a6de4194a3fd316b478a239059586feb3689abb22fecc12"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioRecoveryHostPort.php",
+      "sha256": "06c2086129c8f4eaf470f48e2a9722655fa8d1e632e14c6f7f56dbff3e368f1a"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioResourceHostPort.php",
+      "sha256": "3c3c6270e531f200a939421fad628bb6e1144305a9a73f242378da65f2f58c4c"
+    },
+    {
+      "path": "src/Studio/Application/Host/StudioTelemetryHostPort.php",
+      "sha256": "0328d9d6f7ca8151dd8c90319c3f697d8d573eb973e9b8ab47560ec97ce85603"
+    },
+    {
+      "path": "src/Studio/Application/Media/StudioMediaHostPort.php",
+      "sha256": "dccaca52ae28db7cadde1fae1b08c1407b15fd211b1f5b985d733fca5f63cb05"
+    },
+    {
+      "path": "src/Studio/Application/Preview/ContributedStudioPreviewBlock.php",
+      "sha256": "66bd99ad56d71f16e0368f06ddca99e08e085239e3ac50a28ce7f575f51c006f"
+    },
+    {
+      "path": "src/Studio/Application/Preview/StudioPreviewBindingResolver.php",
+      "sha256": "d372b8a1272da0d683d3e527d148e34acf52c9dcf6c3dcffabe2a621e1fae006"
+    },
+    {
+      "path": "src/Studio/Application/Preview/StudioPreviewBindingValues.php",
+      "sha256": "0a0c363a3044262367a934835b40c609ef62229ec1f993810b283baea4197a2f"
+    },
+    {
+      "path": "src/Studio/Application/Preview/StudioPreviewHostPort.php",
+      "sha256": "aab4aa29dcc19d0f5b91a46ebefd484b9bcf0392d59e4dcf99975fb001a73b78"
+    },
+    {
+      "path": "src/Studio/Application/Projection/ContentStudioProjector.php",
+      "sha256": "edce4993eb807c9072e89db862b29b10c49b7deb24ec336a70372aa2e2b78a43"
+    },
+    {
+      "path": "src/Studio/Application/Rendering/FragmentStudioPreviewBlockRenderer.php",
+      "sha256": "1906ab22cf376a7502d41241cadecb8246580a1f9449f450cd9fed1cedd9dfaa"
+    },
+    {
+      "path": "src/Studio/Application/Rendering/StudioBlockRendererRuntime.php",
+      "sha256": "e683850a22b3c5ccaa6690202d2faa8f6822ebf684a55bdb42c5b71133b96041"
+    },
+    {
+      "path": "src/Studio/Application/Rendering/StudioContentFieldBlockRenderer.php",
+      "sha256": "4f719c01095fc6f12c1cd0fd059ab117114f3e854f86da295652bcb6f568d241"
+    },
+    {
+      "path": "src/Studio/Application/Rendering/StudioLayoutBlockRenderer.php",
+      "sha256": "30818f5d146fa9126ab6d7e528042c6fe8f701465dca6f195faecb1c2c4674ad"
+    },
+    {
+      "path": "src/Studio/Application/Rendering/StudioRenderResultAdmission.php",
+      "sha256": "fc8488083788a0cd16fe6363cd468ed9fce7c62f9444feb1109f96ae256c49c8"
+    },
+    {
+      "path": "src/Studio/Domain/Artifact/StoredStudioArtifact.php",
+      "sha256": "6a6e8dc3a690afccc604368fb90c592c03bdb0d84426d14f6337a5ff28b20dfb"
+    },
+    {
+      "path": "src/Studio/Domain/Preview/StudioPreviewDraft.php",
+      "sha256": "df80b8a806e763679d12a2218878552098a5c25bf4606fa22a377aabd27c52d0"
+    },
+    {
+      "path": "src/Studio/Domain/Preview/StudioPreviewIdentity.php",
+      "sha256": "714f1a60fc67a5b4ff8d80b55c9d85003cc37c2d6e2e910047b4d894283bf3a0"
+    },
+    {
+      "path": "src/Studio/Domain/Projection/EntryCompositionOverrides.php",
+      "sha256": "9fb9dabc589c58cd439f6dccb644a86a09243f01fa1a05e0b072bc181b703ce2"
+    },
+    {
+      "path": "src/Studio/Infrastructure/Host/SodiumStudioMutationOutcomeCodec.php",
+      "sha256": "98c6f5764cd562896a56e8707683fedda520d9b645f7bba6b1927321e5c3e17f"
+    },
+    {
+      "path": "src/Studio/Infrastructure/Persistence/DoctrineContentProjectionBindingRepository.php",
+      "sha256": "9b4bd43ce2ca0ece3bb20486543a1cb9f9d36a01a83c980d3a36c812bca5f2bc"
+    },
+    {
+      "path": "src/Studio/Infrastructure/Persistence/DoctrineStudioHostStorage.php",
+      "sha256": "3906bda94ee07a5b94f46c7f788fe4e8afaaafd69e918f12699b3cf17dbcb7e3"
+    },
+    {
+      "path": "src/Studio/Infrastructure/Persistence/DoctrineStudioPreviewDraftSource.php",
+      "sha256": "571c31d9f0258f84d06ed9b76903e2f24d67d56724fa8f607cfb728739e227ef"
+    },
+    {
+      "path": "src/Studio/Infrastructure/Persistence/DoctrineStudioPreviewRepository.php",
+      "sha256": "858039523a0691395ee8714ab24e3706c5c5f3f8800293b6a79fef0bd2cb9ae1"
+    },
+    {
+      "path": "src/Studio/Infrastructure/Release/PinnedStudioContextualAuthoringAvailability.php",
+      "sha256": "589d48d694a96e3d13df75a9608b8cdf59b66a4f8422c446a2c90a97c274638e"
+    },
+    {
+      "path": "src/Studio/Presentation/Preview/CanonicalStudioPreviewRenderer.php",
+      "sha256": "303355f5f91f1df3e34725fb8b27888f29149f2500fda07236d54bb699719d13"
+    }
+  ],
+  "test_references": [
+    {
+      "path": "tests/Architecture/StudioMediaBoundaryTest.php",
+      "sha256": "c83f7073165f6246e42b8705912c419ae3d14d0ffd73ff242fed191cb0b2122e"
+    },
+    {
+      "path": "tests/Integration/Studio/ExtensionStudioPreviewRendererIntegrationTest.php",
+      "sha256": "d522c4f780ffeab6fa7764febb285497ddac14c3d567ff8323e1c9bf5251d286"
+    },
+    {
+      "path": "tests/Integration/Studio/StudioArtifactRecoveryPersistenceTest.php",
+      "sha256": "f5179672b88e5febcf62e93f7c59059c06adb69149848a1ad1b47f2a1d96c8f8"
+    },
+    {
+      "path": "tests/Integration/Studio/StudioArtifactRecoveryProducerIntegrationTest.php",
+      "sha256": "82a6be0cc6109a9daece8fd09bb472381e9823f66bb89ab84bc1e9bbb12571f4"
+    },
+    {
+      "path": "tests/Integration/Studio/StudioArtifactRecoveryVectorReplayIntegrationTest.php",
+      "sha256": "8949e76c314506d8e1d728a8de2e255e3c6069f3f20005edb2f3589c4ee41142"
+    },
+    {
+      "path": "tests/Integration/Studio/StudioPreviewDraftSourceTest.php",
+      "sha256": "ca0aa99dd3a1910a0e58c842e01ffb5636d182a9ba20ae433ec6b15e4f66ab8c"
+    },
+    {
+      "path": "tests/Integration/Studio/StudioPreviewPersistenceTest.php",
+      "sha256": "928bfec3d8054416427557b680d634c2f29230f5a336c95a5ea2284ca10194b6"
+    },
+    {
+      "path": "tests/Support/StudioProducerRequest.php",
+      "sha256": "84df3db3b08520710eeb2503d14f03e1c575c607a864e867cf374b372e5baa20"
+    },
+    {
+      "path": "tests/Unit/Administrator/Http/Handler/AdministratorStudioHostHandlerTest.php",
+      "sha256": "cc7009d807e3f4e6c695686cea8729de44aa13ff872c854d974daef57d67fce4"
+    },
+    {
+      "path": "tests/Unit/Extension/Contribution/StudioPreviewRendererContributionTest.php",
+      "sha256": "b521fad0e7e606db62a4fcb7fe47f1aecba0f686e238ea6c664697c14fefc35c"
+    },
+    {
+      "path": "tests/Unit/Http/Handler/HomePageHandlerTest.php",
+      "sha256": "db011b09b31f41f36363551d553f6865debac9b32f7d8b67142430810a08293e"
+    },
+    {
+      "path": "tests/Unit/Http/Handler/PublishedContentHandlerTest.php",
+      "sha256": "4ca7b042944cae8b944b31f3c2c211b862d249141d6c00f147696c83d78a42fa"
+    },
+    {
+      "path": "tests/Unit/Site/Application/PublicPageLocatorTest.php",
+      "sha256": "49df09bad6337cc62dac2b8fb666c06485c9d9f0357c4686743cbe772925ea60"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Composition/StudioCompositionContributionCatalogTest.php",
+      "sha256": "68f0c9a48ff08e8adb669bfa12e5484b42b632e3d054386a5cd0eb5714fc71bc"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Composition/StudioPublishedContentRendererTest.php",
+      "sha256": "995039737b3da2cdfb0732baadf9798422b70867f82085ef32e2016200926aba"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioArtifactAdmissionTest.php",
+      "sha256": "2d9438908397e24c53ab29525fe961669fe170b4eaf9a1e4e0ba9d3890c70256"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioArtifactHostPortTest.php",
+      "sha256": "8fac8e04a737d1c9e47bcbc78a4c15d9354e557caf46fd92abe267ccef37cf61"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioLocalizationTelemetryHostPortTest.php",
+      "sha256": "d08080f895ca3e05ab48856e95b02e98f97942eba573951b4fdf4db8b163bbfe"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioModelHostPortTest.php",
+      "sha256": "2d5aead78add0f04f0f0253cf13a801c3078c30f4cc386d79ac1ffaa9d73925d"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioPermissionHostPortTest.php",
+      "sha256": "fa040c03429973c805cc8c93ca0adbfebb5e6b71818e4408efed1e615d29573e"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioProducerErrorTest.php",
+      "sha256": "11617785cdab60a2b4340bb87809d177832ef26e3e785afe42ebf4c765485040"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioProducerHostTest.php",
+      "sha256": "5b3037589e5e9fd55d2412e4e56701630a6119958aea87ba54ceba6468a5ae1e"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioProducerMutationBoundaryTest.php",
+      "sha256": "77bd2e4a581f7b8ea7eb9aafbcf373d718e20e8fe853277ea89e7b04c6d99574"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioProducerRequestAuthorityTest.php",
+      "sha256": "4a275cf123073edb449e656c4174d252192420dcee16bea083396753ecb99f40"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioRecoveryHostPortTest.php",
+      "sha256": "969267aa392ad79e3e71c2c08fdb2294deaf2f56e025d5620e38d9b59a3b844d"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioResourceHostPortTest.php",
+      "sha256": "e4c82cd132f57731f58e8784fb6101c1315dba08e30ee08d6020081ec12c070e"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Host/StudioTelemetryHostPortTest.php",
+      "sha256": "90bb86dae4c713f17ce3e82a4c8720f6eba62a7567185eaf5b5c61c8c828f48b"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Media/StudioMediaHostPortTest.php",
+      "sha256": "3d1dffacb4c66d9b6cc6df00516935afbd602db15d10636046514580ffb59efa"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Media/StudioMediaProducerPortTest.php",
+      "sha256": "219751f92d8fc513da1aaf1ce30a561a6ed15d01676ddf0d64c833f4e96b9d3f"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Preview/ContentStudioPreviewBindingSourceTest.php",
+      "sha256": "b751611f569ba2a0f734188048e2d336073e811c1cb2e02e6d20e97fab1e1092"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Preview/StudioPreviewBindingRendererTest.php",
+      "sha256": "f113095e2892bd997a81b51ab28d6cbb54503fe6e7867df966a8064e75122175"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Preview/StudioPreviewHostPortTest.php",
+      "sha256": "2ae6f211e0d94a5d1fca4b2c00ab6a7cb215946fa2767d2a78c46d554276eb16"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Preview/StudioPreviewProducerPortTest.php",
+      "sha256": "46b97bcda2a4b749ec778d9967e5b094a724a20ea4db52c4bc1c0bc193cb9668"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Projection/ContentStudioProjectorTest.php",
+      "sha256": "7f670c69b636f581e998882e6bd0af456de9857679e3ae7319dd5dcebf11c299"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Projection/StudioContentProjectionServiceTest.php",
+      "sha256": "68e3747681956ecae4739c39af1352287f892ef139ebc53950d73f674aebc238"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Rendering/FragmentStudioPreviewBlockRendererTest.php",
+      "sha256": "31cc15ee88356fa8f8f29f82c23293b8f1bdbea1469486d32377703164540523"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Rendering/StudioBlockRendererRuntimeTest.php",
+      "sha256": "71830a32a8a611514ca4ecb952eaac094892f87cbeef1aaa7a5a36912763b8a3"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Rendering/StudioContentFieldBlockRendererTest.php",
+      "sha256": "8e26dabbcf9eedc364ebc8b8d1c0c52f72df24f2e66c7670c4b5ac9abfefa4fc"
+    },
+    {
+      "path": "tests/Unit/Studio/Application/Rendering/StudioLayoutBlockRendererTest.php",
+      "sha256": "69cb7129db46cdcb19c8d5655ca122fe5b62d28923a6eecb6c39ad6459a6c5e7"
+    },
+    {
+      "path": "tests/Unit/Studio/Domain/Media/StudioMediaPolicyVectorTest.php",
+      "sha256": "b8720b29e45ca4197e73eb8ec37f228bad8279b287ae8ed35ccccb5f0eba69e8"
+    },
+    {
+      "path": "tests/Unit/Studio/Domain/Preview/StudioPreviewIdentityTest.php",
+      "sha256": "087fb2811dbba7d78d699db8537788128cb6bd508ec9ae37f58042973c77de12"
+    },
+    {
+      "path": "tests/Unit/Studio/Domain/Projection/EntryCompositionOverridesTest.php",
+      "sha256": "2f18cff8ad03e05262b326002f178a1600a98906ae39630e5a42d574af2b3382"
+    },
+    {
+      "path": "tests/Unit/Studio/Infrastructure/Host/SodiumStudioMutationOutcomeCodecTest.php",
+      "sha256": "18031a0e1520c4f1bf91356780bab07d562e005bb3838720bc946b4b4b6a2db1"
+    },
+    {
+      "path": "tests/Unit/Studio/Infrastructure/Release/PinnedStudioContextualAuthoringAvailabilityTest.php",
+      "sha256": "0581250679d4e852997eb691a250a4567ede2400486a6764cb1b4405dd83b2fc"
+    }
+  ],
+  "existing_namespace": "Kumwe\\Producer\\",
+  "namespace_replacements": [],
+  "immediate_source_removals": [],
+  "later_dependency_updates": [
+    "composer.json",
+    "composer.lock"
+  ]
+}

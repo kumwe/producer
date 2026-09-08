@@ -1,0 +1,158 @@
+{
+    "schema": "kumwe-package-capabilities/v1",
+    "package": "kumwe/producer",
+    "release": "0.2.2",
+    "namespace": "Kumwe\\Producer\\",
+    "responsibility": "Implement the pinned Studio contract through portable PHP wire handling and rendering.",
+    "non_responsibilities": [
+        "Host authentication, authorization and final authority.",
+        "Persistence, revisions, replay storage, transport and application lifecycle.",
+        "JavaScript compilation, dynamic script generation and runtime Composer dependencies."
+    ],
+    "capabilities": [
+        {
+            "id": "producer.canonical",
+            "title": "Producer Canonical",
+            "description": "Deterministic Studio wire serialization and explicit canonical refusals.",
+            "symbols": [
+                "Kumwe\\Producer\\Canonical\\CanonicalEncodingException",
+                "Kumwe\\Producer\\Canonical\\CanonicalJson"
+            ],
+            "documentation": [
+                "docs/public-api.md",
+                "docs/host-agreement.md",
+                "docs/host-guide.md"
+            ]
+        },
+        {
+            "id": "producer.css",
+            "title": "Producer Css",
+            "description": "Validated design-token values and deterministic stylesheet emission.",
+            "symbols": [
+                "Kumwe\\Producer\\Css\\BaseStylesheet",
+                "Kumwe\\Producer\\Css\\CssException",
+                "Kumwe\\Producer\\Css\\ScopedStylesheet",
+                "Kumwe\\Producer\\Css\\ThemeStylesheet"
+            ],
+            "documentation": [
+                "docs/public-api.md",
+                "docs/host-agreement.md",
+                "docs/host-guide.md"
+            ]
+        },
+        {
+            "id": "producer.error",
+            "title": "Producer Error",
+            "description": "Typed diagnostics, stable error taxonomy and explicit contract refusals.",
+            "symbols": [
+                "Kumwe\\Producer\\Error\\ContractGrammar",
+                "Kumwe\\Producer\\Error\\Diagnostic",
+                "Kumwe\\Producer\\Error\\DiagnosticLocation",
+                "Kumwe\\Producer\\Error\\HostError",
+                "Kumwe\\Producer\\Error\\HostRefusal",
+                "Kumwe\\Producer\\Error\\MessageReference"
+            ],
+            "documentation": [
+                "docs/public-api.md",
+                "docs/host-agreement.md",
+                "docs/host-guide.md"
+            ]
+        },
+        {
+            "id": "producer.render",
+            "title": "Producer Render",
+            "description": "Bounded semantic HTML and CSS results from validated published compositions.",
+            "symbols": [
+                "Kumwe\\Producer\\Render\\BindingResolution",
+                "Kumwe\\Producer\\Render\\BlockCoordinate",
+                "Kumwe\\Producer\\Render\\BlockRenderer",
+                "Kumwe\\Producer\\Render\\BlockRendererRegistry",
+                "Kumwe\\Producer\\Render\\BlockTypes",
+                "Kumwe\\Producer\\Render\\Block\\DataBlocks",
+                "Kumwe\\Producer\\Render\\Block\\InteractiveBlocks",
+                "Kumwe\\Producer\\Render\\Block\\LayoutBlocks",
+                "Kumwe\\Producer\\Render\\Block\\MediaBlocks",
+                "Kumwe\\Producer\\Render\\Block\\TextBlocks",
+                "Kumwe\\Producer\\Render\\CompositionRenderer",
+                "Kumwe\\Producer\\Render\\Enhancement",
+                "Kumwe\\Producer\\Render\\ProductionValues",
+                "Kumwe\\Producer\\Render\\Properties",
+                "Kumwe\\Producer\\Render\\RenderContext",
+                "Kumwe\\Producer\\Render\\RenderException",
+                "Kumwe\\Producer\\Render\\RenderPolicy",
+                "Kumwe\\Producer\\Render\\RenderResult",
+                "Kumwe\\Producer\\Render\\RenderState",
+                "Kumwe\\Producer\\Render\\ResolvedMedia",
+                "Kumwe\\Producer\\Render\\ResolvedResource",
+                "Kumwe\\Producer\\Render\\RichText",
+                "Kumwe\\Producer\\Render\\SafeMarkup"
+            ],
+            "documentation": [
+                "docs/public-api.md",
+                "docs/host-agreement.md",
+                "docs/host-guide.md"
+            ]
+        },
+        {
+            "id": "producer.schema",
+            "title": "Producer Schema",
+            "description": "Pinned schema admission and bounded Studio document validation.",
+            "symbols": [
+                "Kumwe\\Producer\\Schema\\CodeUnitOrder",
+                "Kumwe\\Producer\\Schema\\SchemaAdmissionException",
+                "Kumwe\\Producer\\Schema\\SchemaInstanceDiagnostic",
+                "Kumwe\\Producer\\Schema\\SchemaPropertyProfile",
+                "Kumwe\\Producer\\Schema\\SchemaPropertyValidator",
+                "Kumwe\\Producer\\Schema\\StudioBrowserArtifacts",
+                "Kumwe\\Producer\\Schema\\StudioBrowserAsset",
+                "Kumwe\\Producer\\Schema\\StudioContractRelease",
+                "Kumwe\\Producer\\Schema\\StudioContractResources",
+                "Kumwe\\Producer\\Schema\\StudioDocumentSchemaRegistry",
+                "Kumwe\\Producer\\Schema\\StudioDocumentValidation"
+            ],
+            "documentation": [
+                "docs/public-api.md",
+                "docs/host-agreement.md",
+                "docs/host-guide.md"
+            ]
+        },
+        {
+            "id": "producer.wire",
+            "title": "Producer Wire",
+            "description": "Typed authoring transport, validation and explicit host authority and persistence ports.",
+            "symbols": [
+                "Kumwe\\Producer\\Wire\\Dispatcher",
+                "Kumwe\\Producer\\Wire\\HostResult",
+                "Kumwe\\Producer\\Wire\\JsonShapeViolation",
+                "Kumwe\\Producer\\Wire\\JsonValueGuard",
+                "Kumwe\\Producer\\Wire\\MutationOutcome",
+                "Kumwe\\Producer\\Wire\\Operation",
+                "Kumwe\\Producer\\Wire\\OperationRegistry",
+                "Kumwe\\Producer\\Wire\\Port\\ArtifactPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\AuthoringPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\AuthorizationInterface",
+                "Kumwe\\Producer\\Wire\\Port\\HostAdapterInterface",
+                "Kumwe\\Producer\\Wire\\Port\\LocalizationPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\MediaPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\ModelPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\MutationBoundaryInterface",
+                "Kumwe\\Producer\\Wire\\Port\\PermissionPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\PreviewPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\RecoveryPortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\ResourcePortInterface",
+                "Kumwe\\Producer\\Wire\\Port\\TelemetryPortInterface",
+                "Kumwe\\Producer\\Wire\\RequestContext",
+                "Kumwe\\Producer\\Wire\\RequestEnvelope",
+                "Kumwe\\Producer\\Wire\\Response",
+                "Kumwe\\Producer\\Wire\\StrictResponder"
+            ],
+            "documentation": [
+                "docs/public-api.md",
+                "docs/host-agreement.md",
+                "docs/host-guide.md"
+            ]
+        }
+    ],
+    "native_requirements": null,
+    "deprecations": []
+}

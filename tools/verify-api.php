@@ -18,14 +18,16 @@ const PRODUCER_API_SOURCE = PRODUCER_API_ROOT . '/src';
 const PRODUCER_API_PREFIX = 'Kumwe\\Producer\\';
 const PRODUCER_API_MANIFEST = PRODUCER_API_ROOT . '/resources/public-api.json';
 
-/** @var list<string> $arguments */
-$arguments = $_SERVER['argv'] ?? [];
+if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
+    /** @var list<string> $arguments */
+    $arguments = $_SERVER['argv'] ?? [];
 
-try {
-    exit(producerApiMain($arguments));
-} catch (Throwable $error) {
-    fwrite(STDERR, "Producer public API verification failed: {$error->getMessage()}\n");
-    exit(1);
+    try {
+        exit(producerApiMain($arguments));
+    } catch (Throwable $error) {
+        fwrite(STDERR, "Producer public API verification failed: {$error->getMessage()}\n");
+        exit(1);
+    }
 }
 
 /**
