@@ -324,6 +324,13 @@ Class; source: src/Render/RenderException.php.
 
 Enum; source: src/Render/RenderPolicy.php.
 
+- cases(): array
+- from(string|int $value): static
+- tryFrom(string|int $value): ?static
+- Property $name: string.
+- Property $value: string.
+- Constant Fallback: Kumwe\Producer\Render\RenderPolicy.
+- Constant RequireRegistered: Kumwe\Producer\Render\RenderPolicy.
 - Enum cases and backed values: {"backing_type":"string","cases":[{"name":"Fallback","value":"fallback"},{"name":"RequireRegistered","value":"require-registered"}]}.
 
 ## Kumwe\Producer\Render\RenderResult

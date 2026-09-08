@@ -134,7 +134,7 @@ ownership:
   next_consumer: kumwe/extension-sdk
   public_manifests:
   - path: resources/public-api/v1.json
-    sha256: 7d9bb2b403e65f48217242110a72e699e84756944572528d3698a7be2381d3fd
+    sha256: f6c031833a1ecf066486c939052c8452398e001939cb9e41269ba93c2148e269
   - path: resources/capabilities/v1.json
     sha256: d62056117c2c8b02a28b79753013d2a6dc1e6c13f807c9350ca42acc1cbd8071
   - path: resources/service-map/v1.json

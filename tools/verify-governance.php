@@ -31,6 +31,35 @@ function producerGovernanceDocuments(): array
     $docs .= "Construct services explicitly with the host ports described in docs/host-agreement.md.\n";
     $docs .= "Producer supplies no authority, storage, ambient service container or runtime Composer dependencies.\n\n";
     foreach ($legacy['types'] as $name => $type) {
+        // Legacy enum metadata stores cases separately and omits PHP's public
+        // enum members. The canonical surface must expose those members too.
+        if ($type['kind'] === 'enum') {
+            $reflection = new ReflectionEnum($name);
+            foreach ($reflection->getCases() as $case) {
+                $type['constants'][$case->getName()] = ['type' => $name];
+            }
+            foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+                $propertyType = $property->getType();
+                $type['properties'][$property->getName()] = [
+                    'type' => $propertyType === null ? null : producerApiReflectionType($propertyType, $name),
+                    'static' => $property->isStatic(), 'readonly' => $property->isReadOnly(),
+                ];
+            }
+            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+                $returnType = $method->getReturnType();
+                $type['methods'][$method->getName()] = [
+                    'visibility' => 'public', 'static' => $method->isStatic(),
+                    'parameters' => array_map(
+                        static fn (ReflectionParameter $parameter): array => producerApiParameter($parameter, $name),
+                        $method->getParameters(),
+                    ),
+                    'return_type' => $returnType === null ? null : producerApiReflectionType($returnType, $name),
+                ];
+            }
+            foreach (['constants', 'properties', 'methods'] as $memberGroup) {
+                ksort($type[$memberGroup], SORT_STRING);
+            }
+        }
         $constants = [];
         foreach ($type['constants'] as $key => $constant) {
             $constants[$key] = ['type' => $constant['type'] ?? null];
