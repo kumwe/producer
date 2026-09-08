@@ -118,6 +118,33 @@ $expected = array_fill_keys([
     'smoke.php',
 ], true);
 
+// Version 2 discovery and integration documents form part of the governed archive.
+$governanceFiles = [
+    'CHANGELOG.md',
+    'CHARTER.md',
+    'MIGRATION-HANDOFF.md',
+    'resources/public-api/v1.json',
+    'resources/capabilities/v1.json',
+    'resources/service-map/v1.json',
+    'docs/consumer-inventory.json',
+    'docs/engineering-standard.md',
+    'docs/host-agreement.md',
+    'docs/host-guide.md',
+    'docs/package-release-standard.md',
+    'docs/porting-guide.md',
+    'docs/public-api.md',
+    'docs/releasing.md',
+    'docs/repository-release-setup.md',
+    'docs/roadmap.md',
+    'docs/test-ownership.md',
+    'examples/minimal-host/MinimalHost.php',
+    'examples/minimal-host/README.md',
+    'examples/minimal-host/public/index.php',
+];
+foreach ($governanceFiles as $path) {
+    $expected[$path] = true;
+}
+
 $types = is_array($snapshot['types'] ?? null) ? $snapshot['types'] : [];
 if (($snapshot['schema'] ?? null) !== 2 || count($types) !== 70) {
     $errors[] = 'resources/public-api.json must name exactly 70 reviewed public types.';
@@ -402,12 +429,13 @@ foreach (array_keys($actual) as $relative) {
 }
 $actualRoots = array_keys($roots);
 sort($actualRoots);
-$expectedRoots = ['LICENSE', 'README.md', 'composer.json', 'resources', 'smoke.php', 'src'];
+$expectedRoots = ['CHANGELOG.md', 'CHARTER.md', 'LICENSE', 'MIGRATION-HANDOFF.md', 'README.md',
+    'composer.json', 'docs', 'examples', 'resources', 'smoke.php', 'src'];
 if ($actualRoots !== $expectedRoots) {
     $errors[] = 'Archive roots differ: ' . implode(', ', $actualRoots);
 }
-if (count($expected) !== 454) {
-    $errors[] = 'The reviewed package file set no longer totals exactly 454 files.';
+if (count($expected) !== 454 + count($governanceFiles)) {
+    $errors[] = 'The reviewed package file set no longer matches the reviewed runtime plus governance inventory.';
 }
 foreach (array_diff_key($expected, $actual) as $relative => $_) {
     $errors[] = 'Required archive file is missing: ' . $relative;
@@ -421,5 +449,5 @@ if ($errors !== []) {
     exit(1);
 }
 
-echo "Composer archive verified: 454 files, 70 public types, 55 Studio schemas, 301 corpus files, "
+echo "Composer archive verified: " . count($expected) . " files, 70 public types, 55 Studio schemas, 301 corpus files, "
     . "14 redistribution files, and a non-vendored 74-member outer-archive proof.\n";
