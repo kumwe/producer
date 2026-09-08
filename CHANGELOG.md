@@ -3,7 +3,12 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
-## Unreleased
+## 0.2.2 — 2026-09-08
+
+- Ship canonical version 2 API, capability and construction manifests, complete public API documentation,
+  and the migration handoff in source and Composer archives. Preserve the existing 70-type API pin,
+  exact Studio contract and host-owned authority boundary.
+- Verify generated governance metadata against the reflected public API and declared archive boundary.
 
 - Remove delivered runtime, browser-artifact and publication work from the forward roadmap;
   retain the separate deployment-emitter and Twig-bridge objectives and published release evidence.
