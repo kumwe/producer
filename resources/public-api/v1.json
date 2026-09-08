@@ -2413,9 +2413,62 @@
                 "BackedEnum",
                 "UnitEnum"
             ],
-            "constants": {},
-            "properties": {},
-            "methods": {},
+            "constants": {
+                "Fallback": {
+                    "type": "Kumwe\\Producer\\Render\\RenderPolicy"
+                },
+                "RequireRegistered": {
+                    "type": "Kumwe\\Producer\\Render\\RenderPolicy"
+                }
+            },
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "static": false,
+                    "readonly": true
+                },
+                "value": {
+                    "type": "string",
+                    "static": false,
+                    "readonly": true
+                }
+            },
+            "methods": {
+                "cases": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [],
+                    "return": "array"
+                },
+                "from": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [
+                        {
+                            "name": "value",
+                            "type": "string|int",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "static"
+                },
+                "tryFrom": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [
+                        {
+                            "name": "value",
+                            "type": "string|int",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "?static"
+                }
+            },
             "deprecated": null
         },
         "Kumwe\\Producer\\Render\\RenderResult": {

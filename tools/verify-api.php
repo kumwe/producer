@@ -18,7 +18,8 @@ const PRODUCER_API_SOURCE = PRODUCER_API_ROOT . '/src';
 const PRODUCER_API_PREFIX = 'Kumwe\\Producer\\';
 const PRODUCER_API_MANIFEST = PRODUCER_API_ROOT . '/resources/public-api.json';
 
-if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
+$scriptFilename = $_SERVER['SCRIPT_FILENAME'] ?? null;
+if (is_string($scriptFilename) && realpath($scriptFilename) === __FILE__) {
     /** @var list<string> $arguments */
     $arguments = $_SERVER['argv'] ?? [];
 
