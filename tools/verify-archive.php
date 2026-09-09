@@ -146,8 +146,8 @@ foreach ($governanceFiles as $path) {
 }
 
 $types = is_array($snapshot['types'] ?? null) ? $snapshot['types'] : [];
-if (($snapshot['schema'] ?? null) !== 2 || count($types) !== 70) {
-    $errors[] = 'resources/public-api.json must name exactly 70 reviewed public types.';
+if (($snapshot['schema'] ?? null) !== 2 || count($types) !== 76) {
+    $errors[] = 'resources/public-api.json must name exactly 76 reviewed public types.';
 }
 foreach ($types as $type => $entry) {
     $prefix = 'Kumwe\\Producer\\';
@@ -449,5 +449,5 @@ if ($errors !== []) {
     exit(1);
 }
 
-echo "Composer archive verified: " . count($expected) . " files, 70 public types, 55 Studio schemas, 301 corpus files, "
+echo "Composer archive verified: " . count($expected) . " files, 76 public types, 55 Studio schemas, 301 corpus files, "
     . "14 redistribution files, and a non-vendored 74-member outer-archive proof.\n";

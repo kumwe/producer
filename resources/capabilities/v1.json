@@ -1,7 +1,7 @@
 {
     "schema": "kumwe-package-capabilities/v1",
     "package": "kumwe/producer",
-    "release": "0.2.2",
+    "release": "0.3.0",
     "namespace": "Kumwe\\Producer\\",
     "responsibility": "Implement the pinned Studio contract through portable PHP wire handling and rendering.",
     "non_responsibilities": [
@@ -33,6 +33,24 @@
                 "Kumwe\\Producer\\Css\\CssException",
                 "Kumwe\\Producer\\Css\\ScopedStylesheet",
                 "Kumwe\\Producer\\Css\\ThemeStylesheet"
+            ],
+            "documentation": [
+                "docs/public-api.md",
+                "docs/host-agreement.md",
+                "docs/host-guide.md"
+            ]
+        },
+        {
+            "id": "producer.deployment",
+            "title": "Producer Deployment",
+            "description": "Pinned Studio browser-asset location, deployment-document emission and transport admission.",
+            "symbols": [
+                "Kumwe\\Producer\\Deployment\\DeploymentException",
+                "Kumwe\\Producer\\Deployment\\SameOriginFetchMetadataPolicy",
+                "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocation",
+                "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocator",
+                "Kumwe\\Producer\\Deployment\\StudioContentSecurityPolicy",
+                "Kumwe\\Producer\\Deployment\\StudioDeploymentEmitter"
             ],
             "documentation": [
                 "docs/public-api.md",

@@ -80,6 +80,95 @@ final class StudioDocumentSchemaRegistryTest extends TestCase
         $this->assertTrue($result->valid(), 'A canonical host result must pass its common-schema references.');
     }
 
+    public function testContextualAuthoringDocumentsValidateThroughTheirPinnedDefinitions(): void
+    {
+        $registry = StudioDocumentSchemaRegistry::fromVendoredCorpus();
+        $this->assertSame(
+            [
+                'authoring-target', 'authoring-session', 'authoring-save', 'reusable-content-type',
+                'studio-config', 'studio-deployment', 'host-capabilities',
+            ],
+            StudioDocumentSchemaRegistry::CONTEXTUAL_DOCUMENT_KINDS,
+            'The contextual document set must remain explicit and closed.'
+        );
+        $this->assertSame(
+            ['authoring-target', 'authoring-session', 'authoring-save'],
+            StudioDocumentSchemaRegistry::DEFINITION_ONLY_KINDS,
+            'The definition-only schemas must remain explicit.'
+        );
+
+        $valid = [
+            ['authoring-target', 'declaration', 'authoring-target.example.json'],
+            ['authoring-session', 'snapshot', 'authoring-session.example.json'],
+            ['authoring-save', 'savePlan', 'authoring-save.plan.example.json'],
+            ['reusable-content-type', null, 'reusable-content-type.example.json'],
+            ['studio-config', null, 'studio-config.example.json'],
+            ['studio-deployment', null, 'studio-deployment.hosted.example.json'],
+            ['studio-deployment', null, 'studio-deployment.standalone.example.json'],
+        ];
+        foreach ($valid as [$kind, $definition, $file]) {
+            $document = CanonicalJson::decode((string) file_get_contents(self::testkitRoot() . '/fixtures/' . $file));
+            $result = $definition === null
+                ? $registry->validate($kind, $document)
+                : $registry->validateDefinition($kind, $definition, $document);
+            $this->assertTrue($result->valid(), $file . ' must satisfy its pinned contextual schema.');
+            $this->assertSame([], $result->diagnostics(), 'A passing contextual document carries no diagnostics.');
+        }
+        $configuration = CanonicalJson::decode(
+            (string) file_get_contents(self::testkitRoot() . '/fixtures/studio-config.example.json')
+        );
+        if (!$configuration instanceof \stdClass) {
+            throw new \RuntimeException('The session configuration fixture is not an object.');
+        }
+        $this->assertTrue(
+            $registry->validate('host-capabilities', $configuration->hostCapabilities)->valid(),
+            'A host-capabilities advertisement validates as its own document.'
+        );
+
+        $invalid = [
+            ['authoring-save', 'savePlan', 'authoring-save.plan-missing-coordinates.json'],
+            ['authoring-save', 'savePlan', 'authoring-save.plan-missing-successor-context.json'],
+            ['authoring-save', 'saveItemRequest', 'authoring-save.request-plan-missing-successor-context.json'],
+            ['authoring-session', 'snapshot', 'authoring-session.missing-entry-state.json'],
+            ['authoring-target', 'declaration', 'authoring-target.missing-resource-types.json'],
+            ['reusable-content-type', null, 'reusable-content-type.entry-values.json'],
+            ['studio-deployment', null, 'studio-deployment.long-lived-token.json'],
+            ['studio-deployment', null, 'studio-deployment.missing-required.json'],
+            ['studio-deployment', null, 'studio-deployment.unknown-member.json'],
+        ];
+        foreach ($invalid as [$kind, $definition, $file]) {
+            $document = CanonicalJson::decode((string) file_get_contents(self::testkitRoot() . '/invalid/' . $file));
+            $result = $definition === null
+                ? $registry->validate($kind, $document)
+                : $registry->validateDefinition($kind, $definition, $document);
+            $this->assertTrue(!$result->valid(), $file . ' must be refused by its pinned contextual schema.');
+            $this->assertTrue($result->diagnostics() !== [], $file . ' must explain its refusal.');
+        }
+
+        foreach (StudioDocumentSchemaRegistry::DEFINITION_ONLY_KINDS as $kind) {
+            $this->assertThrows(
+                static fn () => $registry->validate($kind, new \stdClass()),
+                \LogicException::class,
+                $kind . ' has no root shape and must not validate as a whole document.'
+            );
+        }
+        $this->assertThrows(
+            static fn () => $registry->validateDefinition('authoring-save', 'missing', new \stdClass()),
+            \LogicException::class,
+            'An unknown definition is outside the pinned corpus.'
+        );
+        $this->assertThrows(
+            static fn () => $registry->validateDefinition('unknown-kind', 'savePlan', new \stdClass()),
+            \LogicException::class,
+            'An unknown kind is outside the pinned corpus.'
+        );
+        $this->assertThrows(
+            static fn () => $registry->validateDefinition('authoring-save', '../savePlan', new \stdClass()),
+            \LogicException::class,
+            'A definition name is a plain member name, never a path.'
+        );
+    }
+
     public function testTheCompleteRelevantHostileCorpusIsRefusedDeterministically(): void
     {
         $registry = StudioDocumentSchemaRegistry::fromVendoredCorpus();

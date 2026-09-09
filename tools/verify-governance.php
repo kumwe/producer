@@ -25,7 +25,7 @@ function producerGovernanceDocuments(): array
     $extensionPoints = [];
     $groups = [];
     $docs = "# Producer public API\n\n";
-    $docs .= "The 70 exported types below are generated from the existing reflection contract.\n";
+    $docs .= "The " . count($legacy['types']) . " exported types below are generated from the existing reflection contract.\n";
     $docs .= "resources/public-api.json retains the complete legacy signature and default-value pin.\n";
     $docs .= "The canonical version 2 projection is resources/public-api/v1.json.\n\n";
     $docs .= "Construct services explicitly with the host ports described in docs/host-agreement.md.\n";
@@ -120,6 +120,7 @@ function producerGovernanceDocuments(): array
         'Error' => 'Typed diagnostics, stable error taxonomy and explicit contract refusals.',
         'Schema' => 'Pinned schema admission and bounded Studio document validation.',
         'Css' => 'Validated design-token values and deterministic stylesheet emission.',
+        'Deployment' => 'Pinned Studio browser-asset location, deployment-document emission and transport admission.',
         'Drawing' => 'Bounded typed drawing values with deterministic rendering.',
         'Render' => 'Bounded semantic HTML and CSS results from validated published compositions.',
         'Renderer' => 'Bounded semantic HTML and CSS results from validated published compositions.',

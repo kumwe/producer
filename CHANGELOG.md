@@ -3,6 +3,28 @@
 Delivered, repository-verified behaviour only; roadmap position and claims live in
 [`docs/roadmap.md`](docs/roadmap.md).
 
+## 0.3.0 — 2026-09-09
+
+- Added the `Kumwe\Producer\Deployment` layer, adopting the Studio reference host's deployment
+  emitter and transport verifiers at the pinned `0.1.0-beta.3` release. `StudioBrowserAssetLocator`
+  resolves the pinned browser module and enhancement runtime to integrity-bound URLs in the npm
+  package layout (a public registry CDN such as `https://cdn.jsdelivr.net/npm`, or a mirror) or the
+  extracted release-directory layout, and renders the exact integrity-checked script elements.
+  `StudioDeploymentEmitter` proves a `studio-deployment` document against the pinned schema, binds
+  it to the exact release, bounds it to the browser bootstrap's 2 MiB / depth-16 allocation, checks
+  that it selects its own target and that a hosted launch, session, protocol and operation map
+  agree, then emits the inert `data-kumwe-studio` target and `application/json` block with
+  markup-safe escaping. `StudioContentSecurityPolicy` publishes the manifest's authoring and
+  enhancement policies with a fresh style nonce and only exact extra script origins.
+  `SameOriginFetchMetadataPolicy` admits the same-origin `fetch()` tuple before any body is read.
+- `StudioDocumentSchemaRegistry` now compiles and validates the contextual authoring documents:
+  `reusable-content-type`, `studio-config`, `studio-deployment` and `host-capabilities` as whole
+  documents, and every named definition of `authoring-target`, `authoring-session` and
+  `authoring-save` (and of any other pinned schema) through `validateDefinition()`, so a host proves
+  each authoring-port argument and result against exactly the definition the wire names.
+- `StudioBrowserAsset::packagePath()` exposes the pin-bound `dist/browser/…` path inside the owning
+  npm package.
+
 ## 0.2.2 — 2026-09-08
 
 - Ship canonical version 2 API, capability and construction manifests, complete public API documentation,

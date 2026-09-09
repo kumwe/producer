@@ -55,8 +55,10 @@ nothing else.
 ## Exact document admission
 
 Hosts and extension tooling can validate decoded Studio documents through the one sealed,
-release-pinned authority. The registry accepts only the thirteen published document kinds and
-loads only Producer's digest-verified Composer resources; callers cannot inject schemas, roots,
+release-pinned authority. The registry accepts the thirteen published runtime document kinds,
+validates the seven contextual authoring, session-configuration, deployment and host-capabilities
+documents through their pinned root or named definitions, and loads only Producer's
+digest-verified Composer resources; callers cannot inject schemas, roots,
 references, patterns, directories, or alternate schema paths.
 
 ```php
@@ -99,8 +101,14 @@ that accompany those bytes.
 This work is **release-ready**: the governed Studio prerelease publishes the exact deterministic
 74-member outer browser archive and its detached checksum, and the PIN was regenerated from those
 public downloads, binding their live URLs, bytes, and digests as one fail-closed contract proof.
-Deployment emitters and optional template bridges remain roadmap work and are not claimed. See
-[the roadmap](https://github.com/kumwe/producer/blob/main/docs/roadmap.md) for the precise boundary.
+The `Kumwe\Producer\Deployment` layer additionally locates the pinned browser module and
+enhancement runtime wherever a host serves them (its own origin, a mirror, or a public npm CDN such
+as `https://cdn.jsdelivr.net/npm`) with the manifest SRI value, emits the inert per-mount
+deployment pair after pinned-schema and release-binding proof, publishes the two manifest
+Content-Security-Policy values widened only by exact origins, and admits the same-origin fetch
+tuple before a request body is read. The optional Twig bridge remains roadmap work and is not
+claimed. See [the roadmap](https://github.com/kumwe/producer/blob/main/docs/roadmap.md) for the
+precise boundary.
 
 ## Requirements
 

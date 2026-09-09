@@ -372,6 +372,86 @@ vocabulary, and raw HTML strings have no representation at all. The host must no
   carries: they exist so port responses (which can hold private resource data) are never sniffed
   or cached.
 
+## Mounting the authoring surface
+
+The editor a page hosts is Studio's prebuilt, versioned browser module — the same bytes for every
+host, actor and resource. Producer never serves them, but it knows exactly which bytes the pin
+names, so the `Kumwe\Producer\Deployment` layer does three things for the page that mounts an
+editor: it locates the assets with their SRI values, it emits the inert per-mount deployment pair,
+and it publishes the policies that page must carry.
+
+### Locating the assets
+
+Choose where the browser loads the pinned module from. The npm package layout is what a public
+registry CDN exposes (`https://cdn.jsdelivr.net/npm/@kumwe/studio@<version>/dist/browser/…`) and
+what a self-hosted package mirror preserves; the release-directory layout is the extracted governed
+archive, or a package's `dist/browser` directory, served as static files:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Kumwe\Producer\Deployment\StudioBrowserAssetLocator;
+
+$locator = StudioBrowserAssetLocator::npmPackages('https://cdn.jsdelivr.net/npm');
+// or: StudioBrowserAssetLocator::releaseDirectory('/immutable-studio');
+
+$module = $locator->locate('browser-module');
+echo $module->scriptElement();
+// <script type="module" src="https://cdn.jsdelivr.net/npm/@kumwe/studio@0.1.0-beta.3/dist/browser/assets/studio-browser-….min.js"
+//         integrity="sha256-…" crossorigin="anonymous"></script>
+```
+
+Every location carries the manifest SRI value, so a CDN or mirror that serves different bytes
+fails in the browser instead of running. Plain HTTP is admitted only for loopback development
+hosts; user information, queries, fragments, traversing segments and wildcards are refused. The
+published-page enhancement runtime is located the same way (`locate('enhancement-runtime')`) and
+renders as a deferred, integrity-checked classic script.
+
+### Emitting the deployment pair
+
+PHP resolves one `studio-deployment` document per mount — the exact launch target, resource
+context, resolved session (`studio-config`), exact operation URLs and the CSRF transport — from its
+own authentication and policy, then hands it to the emitter:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+use Kumwe\Producer\Deployment\StudioDeploymentEmitter;
+use Kumwe\Producer\Schema\StudioContractResources;
+use Kumwe\Producer\Schema\StudioDocumentSchemaRegistry;
+
+$emitter = new StudioDeploymentEmitter(
+    StudioDocumentSchemaRegistry::fromVendoredCorpus(),
+    StudioContractResources::releaseRecord(),
+);
+$configuration->release = $emitter->releaseBinding();
+echo $emitter->render('article-studio', 'article-studio-config', $configuration);
+// <div id="article-studio" data-kumwe-studio="article-studio-config"></div>
+// <script id="article-studio-config" type="application/json">{…}</script>
+```
+
+The emitter refuses, with a stable `DeploymentException` code, a document that is not a
+deployment, binds another release, fails the pinned schema, exceeds the browser bound, selects
+another target, or — when hosted — whose launch and session contexts disagree, whose protocol is
+not advertised, or whose operation map does not equal the advertised operations. `document()`
+returns only the escaped JSON for a host that renders the target element itself. The block is
+data read through `textContent`; it needs no script nonce, and the module (loaded once through the
+script element above) mounts every `[data-kumwe-studio]` target after it loads.
+
+### The policies the page carries
+
+`StudioContentSecurityPolicy::authoring($styleNonce, [$module->origin()])` is the manifest's
+authoring policy with a fresh per-response style nonce and, when the module is served from another
+origin, exactly that origin appended to `script-src`. `StudioContentSecurityPolicy::enhancement()`
+is the published-page baseline. Neither admits a wildcard, a scheme-wide source or `unsafe-*`.
+Before a same-origin authoring request is parsed, `SameOriginFetchMetadataPolicy` admits only the
+browser's same-origin `fetch()` tuple; your session and CSRF verification still run after it, and
+every operation is still authorized by your adapter.
+
 ## The pin
 
 Alignment across the three parties is exact, never floating:

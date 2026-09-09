@@ -1,7 +1,7 @@
 {
     "schema": "kumwe-package-service-map/v1",
     "package": "kumwe/producer",
-    "release": "0.2.2",
+    "release": "0.3.0",
     "config_provider": null,
     "provider_absence_reason": "The host explicitly constructs portable services with its own ports; the charter forbids runtime Composer dependencies, authority and ambient container discovery.",
     "factories": [],
