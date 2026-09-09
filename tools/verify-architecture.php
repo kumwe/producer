@@ -29,6 +29,7 @@ $allowed = [
     'Wire' => ['Canonical', 'Error', 'Wire'],
     'Css' => ['Css'],
     'Render' => ['Css', 'Error', 'Render'],
+    'Deployment' => ['Canonical', 'Deployment', 'Schema', 'Wire'],
 ];
 
 foreach ($files as $path) {

@@ -1,6 +1,6 @@
 # Producer public API
 
-The 70 exported types below are generated from the existing reflection contract.
+The 76 exported types below are generated from the existing reflection contract.
 resources/public-api.json retains the complete legacy signature and default-value pin.
 The canonical version 2 projection is resources/public-api/v1.json.
 
@@ -49,6 +49,60 @@ Class; source: src/Css/ThemeStylesheet.php.
 
 - compile(array $tokens): string
 - document(array $tokens (optional)): string
+
+## Kumwe\Producer\Deployment\DeploymentException
+
+Class; source: src/Deployment/DeploymentException.php.
+
+- __construct(string $rejection, string $message): no declared return type
+- rejection(): string
+
+## Kumwe\Producer\Deployment\SameOriginFetchMetadataPolicy
+
+Class; source: src/Deployment/SameOriginFetchMetadataPolicy.php.
+
+- __construct(string $allowedOrigin): no declared return type
+- admit(array $headers): ?string
+
+## Kumwe\Producer\Deployment\StudioBrowserAssetLocation
+
+Class; source: src/Deployment/StudioBrowserAssetLocation.php.
+
+- __construct(string $role, string $url, string $integrity, ?string $origin): no declared return type
+- integrity(): string
+- origin(): ?string
+- role(): string
+- scriptElement(): string
+- url(): string
+
+## Kumwe\Producer\Deployment\StudioBrowserAssetLocator
+
+Class; source: src/Deployment/StudioBrowserAssetLocator.php.
+
+- baseUrl(): string
+- locate(string $role): Kumwe\Producer\Deployment\StudioBrowserAssetLocation
+- npmPackages(string $baseUrl): Kumwe\Producer\Deployment\StudioBrowserAssetLocator
+- origin(): ?string
+- releaseDirectory(string $baseUrl): Kumwe\Producer\Deployment\StudioBrowserAssetLocator
+
+## Kumwe\Producer\Deployment\StudioContentSecurityPolicy
+
+Class; source: src/Deployment/StudioContentSecurityPolicy.php.
+
+- assertOrigin(string $origin): void
+- authoring(string $styleNonce, array $scriptOrigins (optional)): string
+- enhancement(array $scriptOrigins (optional)): string
+
+## Kumwe\Producer\Deployment\StudioDeploymentEmitter
+
+Class; source: src/Deployment/StudioDeploymentEmitter.php.
+
+- __construct(Kumwe\Producer\Schema\StudioDocumentSchemaRegistry $schemas, Kumwe\Producer\Schema\StudioContractRelease $release): no declared return type
+- document(string $mountId, stdClass $configuration): string
+- releaseBinding(): stdClass
+- render(string $mountId, string $configurationId, stdClass $configuration): string
+- Constant MAXIMUM_BYTES: untyped.
+- Constant MAXIMUM_DEPTH: untyped.
 
 ## Kumwe\Producer\Error\ContractGrammar
 
@@ -473,6 +527,7 @@ Class; source: src/Schema/StudioBrowserAsset.php.
 - integrity(): string
 - minified(): bool
 - package(): string
+- packagePath(): string
 - path(): string
 - role(): string
 
@@ -511,7 +566,10 @@ Class; source: src/Schema/StudioDocumentSchemaRegistry.php.
 
 - fromVendoredCorpus(): Kumwe\Producer\Schema\StudioDocumentSchemaRegistry
 - validate(string $kind, mixed $document): Kumwe\Producer\Schema\StudioDocumentValidation
+- validateDefinition(string $kind, string $definition, mixed $document): Kumwe\Producer\Schema\StudioDocumentValidation
+- Constant CONTEXTUAL_DOCUMENT_KINDS: untyped.
 - Constant CONTRIBUTION_KINDS: untyped.
+- Constant DEFINITION_ONLY_KINDS: untyped.
 - Constant DOCUMENT_KINDS: untyped.
 
 ## Kumwe\Producer\Schema\StudioDocumentValidation

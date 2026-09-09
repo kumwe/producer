@@ -33,7 +33,10 @@ additional wire ports.
   `0.1.0-beta.3`'s deterministic 74-member outer archive and detached checksum to the exact assets
   the governed GitHub prerelease publishes at the recorded URLs. A host downloads that governed
   archive; it must not relabel an npm tarball or reconstruct its own archive as that governed
-  release artifact.
+  release artifact. A host may instead let pages load the same bytes from a public npm registry
+  CDN or a mirror that preserves the package layout: `Kumwe\Producer\Deployment` resolves the
+  exact package, version, path and SRI value for either layout, so the browser refuses any bytes
+  that differ from the pin, and the host admits only that exact origin in its `script-src`.
 
 ## What Producer promises the host
 

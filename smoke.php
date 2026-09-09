@@ -50,9 +50,9 @@ declare(strict_types=1);
         !is_array($snapshot)
         || ($snapshot['schema'] ?? null) !== 2
         || !is_array($snapshot['types'] ?? null)
-        || count($snapshot['types']) !== 70
+        || count($snapshot['types']) !== 76
     ) {
-        fwrite(STDERR, "The package must expose exactly 70 reviewed public types.\n");
+        fwrite(STDERR, "The package must expose exactly 76 reviewed public types.\n");
         exit(1);
     }
 
@@ -168,5 +168,5 @@ declare(strict_types=1);
     }
 
     $mode = $noDev ? 'authoritative no-dev' : 'development';
-    echo "Package smoke verified ({$mode}): 70 public types, 55 Studio schemas, 301 corpus files.\n";
+    echo "Package smoke verified ({$mode}): 76 public types, 55 Studio schemas, 301 corpus files.\n";
 })();

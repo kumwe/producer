@@ -17,6 +17,7 @@ in this table and never the ones below:
 | Wire | `Kumwe\Producer\Wire` | Envelopes, the operation registry, dispatch, port interfaces | rendering internals, any concrete host |
 | Render | `Kumwe\Producer\Render` | Composition to semantic HTML, escaping, fallbacks; reuses the Error layer's contract string grammar | HTTP, storage, any concrete host |
 | Css | `Kumwe\Producer\Css` | Design tokens and layout vocabulary to static stylesheets | HTTP, storage |
+| Deployment | `Kumwe\Producer\Deployment` | Pinned browser-asset location, the inert deployment-document pair, the published policies and same-origin transport admission; reuses Canonical, Schema and the Wire registry | HTTP frameworks, storage, any concrete host, serving bytes |
 
 Rules that keep the layers honest:
 

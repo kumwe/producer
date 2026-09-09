@@ -66,6 +66,18 @@ final class StudioBrowserAsset
         return $this->path;
     }
 
+    /**
+     * The asset's path inside its published npm package, as the pin binds it:
+     * every released browser asset lives under `dist/browser/` of its owning
+     * package, so a host that serves the package (or a registry CDN that
+     * mirrors it) resolves the asset at `<package root>/<packagePath()>`.
+     * @since 0.3.0
+     */
+    public function packagePath(): string
+    {
+        return 'dist/browser/' . $this->path;
+    }
+
     /** @since 0.2.0 */
     public function package(): string
     {

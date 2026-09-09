@@ -1,7 +1,7 @@
 {
     "schema": "kumwe-package-public-api/v1",
     "package": "kumwe/producer",
-    "release": "0.2.2",
+    "release": "0.3.0",
     "namespace": "Kumwe\\Producer\\",
     "symbols": {
         "Kumwe\\Producer\\Canonical\\CanonicalEncodingException": {
@@ -262,6 +262,405 @@
                             "by_reference": false,
                             "variadic": false,
                             "optional": true
+                        }
+                    ],
+                    "return": "string"
+                }
+            },
+            "deprecated": null
+        },
+        "Kumwe\\Producer\\Deployment\\DeploymentException": {
+            "kind": "class",
+            "stability": "stable",
+            "file": "src/Deployment/DeploymentException.php",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": "RuntimeException",
+            "interfaces": [
+                "Stringable",
+                "Throwable"
+            ],
+            "constants": {},
+            "properties": {},
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "rejection",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "message",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": null
+                },
+                "rejection": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "string"
+                }
+            },
+            "deprecated": null
+        },
+        "Kumwe\\Producer\\Deployment\\SameOriginFetchMetadataPolicy": {
+            "kind": "class",
+            "stability": "stable",
+            "file": "src/Deployment/SameOriginFetchMetadataPolicy.php",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": {},
+            "properties": {},
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "allowedOrigin",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": null
+                },
+                "admit": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "headers",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "?string"
+                }
+            },
+            "deprecated": null
+        },
+        "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocation": {
+            "kind": "class",
+            "stability": "stable",
+            "file": "src/Deployment/StudioBrowserAssetLocation.php",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": {},
+            "properties": {},
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "role",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "url",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "integrity",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "origin",
+                            "type": "?string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": null
+                },
+                "integrity": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "string"
+                },
+                "origin": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "?string"
+                },
+                "role": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "string"
+                },
+                "scriptElement": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "string"
+                },
+                "url": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "string"
+                }
+            },
+            "deprecated": null
+        },
+        "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocator": {
+            "kind": "class",
+            "stability": "stable",
+            "file": "src/Deployment/StudioBrowserAssetLocator.php",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": {},
+            "properties": {},
+            "methods": {
+                "baseUrl": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "string"
+                },
+                "locate": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "role",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocation"
+                },
+                "npmPackages": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [
+                        {
+                            "name": "baseUrl",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocator"
+                },
+                "origin": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "?string"
+                },
+                "releaseDirectory": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [
+                        {
+                            "name": "baseUrl",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocator"
+                }
+            },
+            "deprecated": null
+        },
+        "Kumwe\\Producer\\Deployment\\StudioContentSecurityPolicy": {
+            "kind": "class",
+            "stability": "stable",
+            "file": "src/Deployment/StudioContentSecurityPolicy.php",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": {},
+            "properties": {},
+            "methods": {
+                "assertOrigin": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [
+                        {
+                            "name": "origin",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "void"
+                },
+                "authoring": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [
+                        {
+                            "name": "styleNonce",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "scriptOrigins",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true
+                        }
+                    ],
+                    "return": "string"
+                },
+                "enhancement": {
+                    "visibility": "public",
+                    "static": true,
+                    "parameters": [
+                        {
+                            "name": "scriptOrigins",
+                            "type": "array",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": true
+                        }
+                    ],
+                    "return": "string"
+                }
+            },
+            "deprecated": null
+        },
+        "Kumwe\\Producer\\Deployment\\StudioDeploymentEmitter": {
+            "kind": "class",
+            "stability": "stable",
+            "file": "src/Deployment/StudioDeploymentEmitter.php",
+            "abstract": false,
+            "final": true,
+            "readonly": false,
+            "parent": null,
+            "interfaces": [],
+            "constants": {
+                "MAXIMUM_BYTES": {
+                    "type": null
+                },
+                "MAXIMUM_DEPTH": {
+                    "type": null
+                }
+            },
+            "properties": {},
+            "methods": {
+                "__construct": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "schemas",
+                            "type": "Kumwe\\Producer\\Schema\\StudioDocumentSchemaRegistry",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "release",
+                            "type": "Kumwe\\Producer\\Schema\\StudioContractRelease",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": null
+                },
+                "document": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "mountId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "configuration",
+                            "type": "stdClass",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "string"
+                },
+                "releaseBinding": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "stdClass"
+                },
+                "render": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "mountId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "configurationId",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "configuration",
+                            "type": "stdClass",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
                         }
                     ],
                     "return": "string"
@@ -3670,6 +4069,12 @@
                     "parameters": [],
                     "return": "string"
                 },
+                "packagePath": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [],
+                    "return": "string"
+                },
                 "path": {
                     "visibility": "public",
                     "static": false,
@@ -3948,7 +4353,13 @@
             "parent": null,
             "interfaces": [],
             "constants": {
+                "CONTEXTUAL_DOCUMENT_KINDS": {
+                    "type": null
+                },
                 "CONTRIBUTION_KINDS": {
+                    "type": null
+                },
+                "DEFINITION_ONLY_KINDS": {
                     "type": null
                 },
                 "DOCUMENT_KINDS": {
@@ -3969,6 +4380,34 @@
                     "parameters": [
                         {
                             "name": "kind",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "document",
+                            "type": "mixed",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        }
+                    ],
+                    "return": "Kumwe\\Producer\\Schema\\StudioDocumentValidation"
+                },
+                "validateDefinition": {
+                    "visibility": "public",
+                    "static": false,
+                    "parameters": [
+                        {
+                            "name": "kind",
+                            "type": "string",
+                            "by_reference": false,
+                            "variadic": false,
+                            "optional": false
+                        },
+                        {
+                            "name": "definition",
                             "type": "string",
                             "by_reference": false,
                             "variadic": false,

@@ -74,6 +74,66 @@
       ],
       "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
     },
+    "Kumwe\\Producer\\Deployment\\DeploymentException": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\DeploymentEmitterTest::testEveryDeploymentRefusalIsTypedAndFailsClosed",
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testInadmissibleBasesAndRolesAreRefused"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ContentSecurityPolicyTest::testWeakNoncesAndInadmissibleOriginsAreRefused",
+        "Kumwe\\Producer\\Tests\\Case\\FetchMetadataPolicyTest::testEveryOtherRequestShapeIsRefusedWithAStableCode"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Deployment\\SameOriginFetchMetadataPolicy": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\FetchMetadataPolicyTest::testTheExactSameOriginFetchTupleIsAdmitted"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\FetchMetadataPolicyTest::testEveryOtherRequestShapeIsRefusedWithAStableCode"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocation": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testTheNpmPackageLayoutBindsPackageVersionPathAndIntegrity",
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testTheReleaseDirectoryLayoutServesSameOriginWithoutAnOrigin"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testInadmissibleBasesAndRolesAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Deployment\\StudioBrowserAssetLocator": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testTheNpmPackageLayoutBindsPackageVersionPathAndIntegrity",
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testTheReleaseDirectoryLayoutServesSameOriginWithoutAnOrigin"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testInadmissibleBasesAndRolesAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Deployment\\StudioContentSecurityPolicy": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\ContentSecurityPolicyTest::testTheAuthoringPolicyIsTheManifestTemplateWithANonceAndExactOrigins",
+        "Kumwe\\Producer\\Tests\\Case\\ContentSecurityPolicyTest::testTheEnhancementPolicyIsTheManifestBaselineWithExactOrigins"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\ContentSecurityPolicyTest::testWeakNoncesAndInadmissibleOriginsAreRefused"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
+    "Kumwe\\Producer\\Deployment\\StudioDeploymentEmitter": {
+      "behavior": [
+        "Kumwe\\Producer\\Tests\\Case\\DeploymentEmitterTest::testAHostedDeploymentRendersAnInertEscapedDiscoveryPair",
+        "Kumwe\\Producer\\Tests\\Case\\DeploymentEmitterTest::testAStandaloneDeploymentNeedsOnlyItsReleaseBinding"
+      ],
+      "boundary": [
+        "Kumwe\\Producer\\Tests\\Case\\DeploymentEmitterTest::testEveryDeploymentRefusalIsTypedAndFailsClosed"
+      ],
+      "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
+    },
     "Kumwe\\Producer\\Error\\ContractGrammar": {
       "behavior": [
         "Kumwe\\Producer\\Tests\\Case\\ErrorTaxonomyTest::testCanonicalBytesMatchThePinnedConflictExample",
@@ -462,7 +522,8 @@
     "Kumwe\\Producer\\Schema\\StudioBrowserAsset": {
       "behavior": [
         "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
-        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testManifestBytesAndManifestedFixtureAreAvailableWithoutARoot"
+        "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testManifestBytesAndManifestedFixtureAreAvailableWithoutARoot",
+        "Kumwe\\Producer\\Tests\\Case\\BrowserAssetLocatorTest::testTheNpmPackageLayoutBindsPackageVersionPathAndIntegrity"
       ],
       "boundary": [
         "Kumwe\\Producer\\Tests\\Case\\StudioContractResourcesTest::testBrowserArtifactsAreManifestAndDigestBound",
@@ -495,11 +556,13 @@
     "Kumwe\\Producer\\Schema\\StudioDocumentSchemaRegistry": {
       "behavior": [
         "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testLargeJsonNumbersRemainExactlyDistinct",
-        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testLongStringsValidateWithoutBecomingMemoKeys"
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testLongStringsValidateWithoutBecomingMemoKeys",
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testContextualAuthoringDocumentsValidateThroughTheirPinnedDefinitions"
       ],
       "boundary": [
         "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testNonCanonicalPhpShapesFailAsValidationResults",
-        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testOversizedScalarsAndContainersFailInBoundedPreflight"
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testOversizedScalarsAndContainersFailInBoundedPreflight",
+        "Kumwe\\Producer\\Tests\\Case\\StudioDocumentSchemaRegistryTest::testContextualAuthoringDocumentsValidateThroughTheirPinnedDefinitions"
       ],
       "note": "Package-owned behavior and refusal cases; these references identify evidence, not percentage coverage."
     },

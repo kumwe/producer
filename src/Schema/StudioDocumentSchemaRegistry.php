@@ -71,6 +71,47 @@ final class StudioDocumentSchemaRegistry
     ];
 
     /**
+     * The contextual authoring document kinds the pinned corpus publishes for
+     * hosts that serve `studio.port/authoring` and emit the browser
+     * deployment document: the seven authoring-port exchange documents, the
+     * reusable-content-type projection, the resolved session configuration,
+     * the deployment document and the host-capabilities advertisement.
+     *
+     * Three of these schemas (`authoring-target`, `authoring-session`,
+     * `authoring-save`) carry no root shape and are validated only through
+     * their named definitions ({@see validateDefinition()}); the other four
+     * have a document root and validate through {@see validate()} as well.
+     *
+     * @var list<string>
+     *
+     * @since   0.3.0
+     */
+    public const CONTEXTUAL_DOCUMENT_KINDS = [
+        'authoring-target',
+        'authoring-session',
+        'authoring-save',
+        'reusable-content-type',
+        'studio-config',
+        'studio-deployment',
+        'host-capabilities',
+    ];
+
+    /**
+     * Contextual schemas whose root is a bare `$defs` container: validating
+     * a document against the root would accept anything, so {@see validate()}
+     * refuses them and only {@see validateDefinition()} applies.
+     *
+     * @var list<string>
+     *
+     * @since   0.3.0
+     */
+    public const DEFINITION_ONLY_KINDS = [
+        'authoring-target',
+        'authoring-session',
+        'authoring-save',
+    ];
+
+    /**
      * The only JSON Schema dialect carried by the pinned corpus.
      *
      * @since   0.2.0
@@ -253,11 +294,14 @@ final class StudioDocumentSchemaRegistry
                 throw new \LogicException('A checked Studio schema identity lost its string shape.');
             }
             $this->walkDocument($document, $baseUri, $pointers[$baseUri], $sites);
-            if (in_array($name, self::DOCUMENT_KINDS, true)) {
+            if (
+                in_array($name, self::DOCUMENT_KINDS, true)
+                || in_array($name, self::CONTEXTUAL_DOCUMENT_KINDS, true)
+            ) {
                 $this->roots[$name] = $document;
             }
         }
-        foreach (self::DOCUMENT_KINDS as $kind) {
+        foreach ([...self::DOCUMENT_KINDS, ...self::CONTEXTUAL_DOCUMENT_KINDS] as $kind) {
             if (!isset($this->roots[$kind])) {
                 throw new \RuntimeException(sprintf(
                     'The pinned Studio schema registry has no %s document.',
@@ -320,13 +364,66 @@ final class StudioDocumentSchemaRegistry
     public function validate(string $kind, mixed $document): StudioDocumentValidation
     {
         $root = $this->roots[$kind] ?? null;
-        if ($root === null) {
+        if ($root === null || in_array($kind, self::DEFINITION_ONLY_KINDS, true)) {
             throw new \LogicException(sprintf(
                 '"%s" is not a supported canonical Studio document kind.',
                 $kind
             ));
         }
 
+        return $this->evaluate($root, $document);
+    }
+
+    /**
+     * Validate one decoded canonical document against a named definition of
+     * a pinned schema, e.g. `authoring-save` / `saveIntent`.
+     * Contextual authoring exchanges are typed by the `$defs` members of the
+     * authoring schemas rather than by a document root, so a host proves a
+     * request argument or a result value against exactly the definition the
+     * wire names. The definition is resolved in the compiled, digest-verified
+     * corpus; cross-document references inside it are already bound.
+     * @param string $kind       One of {@see self::DOCUMENT_KINDS} or
+     *                           {@see self::CONTEXTUAL_DOCUMENT_KINDS}.
+     * @param string $definition The `$defs` member name inside that schema.
+     * @param mixed  $document   Decoded canonical document.
+     * @throws \LogicException When the kind or the definition is outside the pinned corpus.
+     * @since   0.3.0
+     */
+    public function validateDefinition(string $kind, string $definition, mixed $document): StudioDocumentValidation
+    {
+        $root = $this->roots[$kind] ?? null;
+        if ($root === null) {
+            throw new \LogicException(sprintf(
+                '"%s" is not a supported canonical Studio document kind.',
+                $kind
+            ));
+        }
+        $definitions = $root->{'$defs'} ?? null;
+        $schema = $definitions instanceof \stdClass && $definition !== ''
+            && preg_match('/^[A-Za-z][A-Za-z0-9-]*$/', $definition) === 1
+            && property_exists($definitions, $definition)
+            ? $definitions->{$definition}
+            : null;
+        if (!$schema instanceof \stdClass && !is_bool($schema)) {
+            throw new \LogicException(sprintf(
+                '"%s" has no pinned "%s" definition.',
+                $kind,
+                $definition
+            ));
+        }
+
+        return $this->evaluate($schema, $document);
+    }
+
+    /**
+     * Run the bounded preflight and the interpreter against one schema node.
+     * @param \stdClass|bool $schema   Compiled document root or named definition.
+     * @param mixed          $document Decoded canonical document.
+     * @throws \LogicException When interpreter invariants are violated.
+     * @since   0.3.0
+     */
+    private function evaluate(\stdClass|bool $schema, mixed $document): StudioDocumentValidation
+    {
         $preflight = self::preflightCanonicalInput($document);
         if ($preflight !== null) {
             return new StudioDocumentValidation(false, [
@@ -355,7 +452,7 @@ final class StudioDocumentSchemaRegistry
         $errors = [];
         /** @var \SplObjectStorage<object, mixed> $active */
         $active = new \SplObjectStorage();
-        $valid = $this->subschema($root, $document, '', $errors, $active);
+        $valid = $this->subschema($schema, $document, '', $errors, $active);
         $diagnostics = self::uniqueDiagnostics($errors);
         if ($valid === ($diagnostics !== [])) {
             throw new \LogicException('Studio document verdict and diagnostics disagree.');
