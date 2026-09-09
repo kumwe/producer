@@ -434,7 +434,7 @@ $expectedRoots = ['CHANGELOG.md', 'CHARTER.md', 'LICENSE', 'MIGRATION-HANDOFF.md
 if ($actualRoots !== $expectedRoots) {
     $errors[] = 'Archive roots differ: ' . implode(', ', $actualRoots);
 }
-if (count($expected) !== 454 + count($governanceFiles)) {
+if (count($expected) !== 460 + count($governanceFiles)) {
     $errors[] = 'The reviewed package file set no longer matches the reviewed runtime plus governance inventory.';
 }
 foreach (array_diff_key($expected, $actual) as $relative => $_) {
