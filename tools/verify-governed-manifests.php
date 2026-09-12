@@ -13,7 +13,7 @@ $read = static fn (string $path): array => json_decode(
 );
 $composer = $read('composer.json');
 $api = $read('resources/public-api/v1.json');
-$handoff = file_get_contents($root . '/MIGRATION-HANDOFF.md');
+$releaseRecord = file_get_contents($root . '/docs/release-record.md');
 $apiSchema = $read('tools/schemas/package-public-api.v1.schema.json');
 contractSchema(json_decode(file_get_contents($root . '/resources/public-api/v1.json')), $apiSchema, $apiSchema, 'public API');
 foreach (['capabilities', 'service-map'] as $name) {
@@ -78,20 +78,23 @@ foreach (['capabilities', 'service-map', 'public-api'] as $name) {
     $path = 'resources/' . $name . '/v1.json';
     $pattern = '~path: "?' . preg_quote($path, '~') . '"?\s+sha256: "?'
         . hash_file('sha256', $root . '/' . $path) . '"?(?:\s|$)~';
-    if (preg_match($pattern, $handoff) !== 1) {
-        throw new RuntimeException('Handoff manifest digest is absent or stale: ' . $path);
+    if (preg_match($pattern, $releaseRecord) !== 1) {
+        throw new RuntimeException('Release record manifest digest is absent or stale: ' . $path);
     }
 }
 $sections = [
-    'Migration/implementation summary', 'Public API and responsibility',
-    'Capability reuse/semantic input review', 'Consumer inventory', 'Test ownership',
-    'Next-task execution notes', 'Drift check', 'Validation recipe and observed local results',
+    'Package contract', 'Public API and responsibility',
+    'Dependencies and semantic inputs', 'Consumer contract', 'Test ownership',
+    'Consumer verification', 'Compatibility and drift', 'Validation',
 ];
-preg_match_all('/^## (.+)$/m', $handoff, $matches);
-if ($matches[1] !== $sections || !str_starts_with($handoff, "---\n")) {
-    throw new RuntimeException('Handoff must retain v2 front matter and the eight ordered narrative sections.');
+preg_match_all('/^## (.+)$/m', $releaseRecord, $matches);
+if (
+    $matches[1] !== $sections
+    || !str_starts_with($releaseRecord, "---\nschema: kumwe-package-release-record/v1\n")
+) {
+    throw new RuntimeException('Release record must retain its schema and the eight ordered contract sections.');
 }
-echo "Governed manifest schemas, exports, documentation, provider and handoff digests verified.\n";
+echo "Governed manifest schemas, exports, documentation, provider and release record digests verified.\n";
 
 /** Execute the keywords in the two shipped authoritative schema snapshots; reject unsupported schema changes. */
 function contractSchema(mixed $value, array $schema, array $root, string $path): void

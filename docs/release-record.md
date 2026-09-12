@@ -1,9 +1,8 @@
 ---
-schema: kumwe-migration-handoff/v2
+schema: kumwe-package-release-record/v1
 artifact_kind: framework_php
 migration_id: KUMWE-MIG-2026-032
 change_set: KUMWE-CS-2026-032
-state: draft_pr_open
 source:
   app:
     repository: https://github.com/kumwe/app
@@ -110,21 +109,16 @@ source:
     - PHP >=8.1, ext-json and ext-mbstring; no runtime Composer dependency.
     - Existing Producer0.2.1 at e8b2def866b95981b8e7ac521c16420a0f7955c8 owns the unchanged70-type API and Studio contract.
     - Studio0.1.0-beta.3 source42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a remains pinned in resources/studio-contract/PIN.json.
-  active_related_pull_requests:
-    - https://github.com/kumwe/producer/pull/11
-    - https://github.com/kumwe/extension-sdk/pull/15
 target:
   repository: https://github.com/kumwe/producer
   artifact_identity: kumwe/producer
   canonical_namespace_or_abi: Kumwe\Producer\
-  branch: codex/v2-release-handoff
-  pull_request: https://github.com/kumwe/producer/pull/11
 ownership:
   responsibility: Portable PHP implementation of the pinned Studio wire, schema, rendering and design-token contract.
   non_responsibilities:
     - Host authentication, authorization, persistence, revisions, lifecycle and delivery.
     - JavaScript compilation, dynamic script generation and runtime Composer dependency discovery.
-    - Optional deployment emitters and Twig bridge remain separate roadmap work.
+    - The optional Twig bridge is not part of the current public API.
   allowed_dependency_ceiling:
     - PHP
     - ext-json
@@ -147,8 +141,8 @@ ownership:
     - path: resources/studio-contract/testkit/corpus-manifest.json
       sha256: 3eea5d655bfe86d234c1dedb9c5b7055d173858541ec3c535e1faf8a204294d3
   intentionally_excluded:
-    - No App implementation is moved in this existing-package governance successor.
-    - All Studio assets, original API profiles and existing runtime source retain their current ownership and bytes.
+    - Core application implementations retain authority, persistence and lifecycle ownership.
+    - Studio owns its semantic contract; the exact imported API, corpus and browser asset pins remain authoritative.
 framework_php:
   composer_package: kumwe/producer
   canonical_namespace: Kumwe\Producer\
@@ -330,9 +324,9 @@ documentation:
   integration_or_consumer: docs/host-guide.md
   examples:
     - examples/minimal-host/README.md
-  changelog_record: CHANGELOG.md / 0.2.2
+  changelog_record: CHANGELOG.md / 0.3.0
 release_expectations:
-  version_policy: Backward-compatible0.2.2 governance successor; preserve original API/Studio pins and every published release.
+  version_policy: Use semantic versioning and the Studio pin compatibility policy in docs/releasing.md; preserve published releases.
   expected_artifact_types:
     - Composer package archive
     - GitHub source archive
@@ -344,14 +338,22 @@ release_expectations:
     - Independent post-publication source/archive/registry verification
   required_registry_or_installer: Composer
   required_external_attestation: true
-next_task:
-  phase_name: Verify released Producer0.2.2 and consume it in the compatible extraction package graph
+governance:
+  completion_claim: false
+decisions:
+  - Keep the complete 76-type public API and exact Studio source, browser asset and corpus pins.
+  - Ship canonical discovery metadata, current public documentation and the release record in source and Composer archives.
+  - The Deployment layer implements pinned browser location, schema-bound deployment emission and transport admission.
+  - Host applications retain authorization, persistence, delivery and lifecycle responsibilities.
+  - The optional Twig bridge remains a development objective.
+blockers: []
+consumer_contract:
   permitted_only_when:
     - Actual release and exact immutable source/archive/registry identities are independently verified.
     - Final complete Package gate passes on the merged release source.
     - The consuming SDK or App resolves a compatible exact dependency graph.
   consumer_repository: https://github.com/kumwe/extension-sdk
-  dependency_or_native_change: Select the independently verified Producer0.2.2 coordinate; App integration is a later separate task.
+  dependency_or_native_change: Select an independently verified, compatible exact Producer version in the SDK and Core dependency graphs.
   namespace_or_api_replacements: []
   files_to_update:
     - composer.json
@@ -364,68 +366,67 @@ next_task:
   di_or_provisioning_changes:
     - Retain explicit host port construction; no new provider or runtime dependency is introduced.
   capability_index_changes:
-    - Record Producer package ownership from canonical manifests during later App adoption.
+    - Record Producer package ownership from its canonical manifests when the consumer dependency changes.
   changelog_and_evidence_changes:
     - Attach the independent release attestation outside the immutable Producer artifact.
   verification_commands:
     - php tools/check.php
     - php tools/verify-clean-consumer.php
-    - Affected SDK generated project and existing App host integration suites at their respective later adoption stages
-concurrency:
-  likely_conflict_files:
-    - composer.json
-    - composer.lock
-    - MIGRATION-HANDOFF.md
-    - resources/public-api/v1.json
-  related_migrations: []
-  ownership_conflicts: []
-  integration_train: null
-  resolution_rule: semantic-preservation
-governance:
-  roadmap_source_sha256: a202155ef1a65f5ab293d4f8397ebf4ac430db7f1e877c776bbe7851e6fe18d8
-  roadmap_refs: []
-  non_roadmap_refs: []
-  completion_claim: false
-decisions:
-  - Keep all70public runtime types and original detailed API manifest byte-identical.
-  - Add canonical discovery metadata and complete source-derived public documentation without new runtime behavior.
-  - Ship governance documents and the handoff in source and Composer archives.
-  - Studio remains the semantic owner; no new Studio contract import or browser artifact is performed.
-  - Core/App integration and future deployment-emitter/Twig features are excluded from this readiness release.
-blockers:
-  - Final reviewed-head CI, actual publication and external independent release verification remain pending.
+    - Affected SDK generated project and Core host integration suites for the selected dependency version
 ---
 
-# Producer version 2 package handoff
+# Producer package release record
 
-## Migration/implementation summary
+## Package contract
 
-Producer already owns its PHP implementation and is already a canonical App dependency. This successor adds the version 2 release contract and archive evidence; it moves no App class and changes no runtime algorithm. The 0.3.0 record adds the Deployment layer (browser-asset location for CDN, mirror or same-origin serving with SRI, the inert per-mount deployment pair, the manifest policies and same-origin fetch admission) and contextual-document validation in the schema registry; the original70-type API pin grows additively to76types, and the existing Studio source/resource tuple stays intact.
+Producer implements the pinned Studio contract through portable PHP wire handling, document admission,
+rendering, stylesheets and deployment helpers. The [host agreement](host-agreement.md) defines the
+boundary with Core and other applications. This record preserves source baselines, consumer ownership
+and digest evidence; current package versions are published on
+[Packagist](https://packagist.org/packages/kumwe/producer) and in the [changelog](../CHANGELOG.md).
 
 ## Public API and responsibility
 
-The canonical manifests describe portable wire handling, schema admission, typed diagnostics, deterministic rendering and CSS. docs/public-api.md is generated from the same complete reflection metadata as the existing API pin. The original resources/public-api.json preserves signature defaults, constant values and enum detail. Explicit host ports retain authority and storage.
+The three canonical manifests describe the 76 exported types. The [public API](public-api.md) is
+produced from the same reflection metadata as the complete signature pin in
+[resources/public-api.json](../resources/public-api.json). Host ports supply authority and storage.
 
-## Capability reuse/semantic input review
+## Dependencies and semantic inputs
 
-Studio0.1.0-beta.3 at42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a remains the exact imported semantic source recorded in resources/studio-contract/PIN.json. Existing checks bind55protocol schemas,301corpus files, browser/SRI and14redistribution notices. This change imports no new corpus or implementation and preserves the empty claimed-profile list.
+Studio `0.1.0-beta.3` at `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a` is the exact semantic source in
+[PIN.json](../resources/studio-contract/PIN.json). Checks bind 55 schemas, 301 corpus members, browser
+assets, SRI and 14 redistribution notices. Producer claims zero Studio conformance profiles.
+A Studio update requires its own reviewed pin change and package release.
 
-## Consumer inventory
+## Consumer contract
 
-docs/consumer-inventory.json records every observed direct Producer reference in the App source and tests at24ecf956423c18933e824b43cea1bfb9127a79a9. Existing names are already canonical, so there are no namespace replacements or deletion instructions. A later App dependency update must first repeat the drift scan and preserve its host-owned integration coverage.
+The [consumer inventory](consumer-inventory.json) records the Core code and tests examined at the
+baseline above. Existing names are canonical. Rescan the current consumer before changing its
+exact dependency; preserve host authorization, persistence, lifecycle, recovery and delivery tests.
+The [host guide](host-guide.md) documents construction, operations and browser deployment.
 
 ## Test ownership
 
-Producer keeps its runtime, boundary, schema and renderer corpus tests. App authorization, persistence, recovery, lifecycle and host adapter tests remain in the App and are explicitly inventoried. The new metadata gate verifies all76exported types and all generated signatures against actual reflection; archive verification requires the complete governed package boundary.
+Producer owns runtime, boundary, schema and renderer corpus tests. Core owns application adapters,
+authorization, persistence, lifecycle and browser integration. The [test ownership policy](test-ownership.md)
+records the division; package CI binds all 76 types and generated signatures to actual reflection.
 
-## Next-task execution notes
+## Consumer verification
 
-Review PR11 and require the complete PHP8.1–8.5 gate before release through the existing default-branch workflow. Independently verify the resulting source/archive/registry identity and attach external evidence. Only then select0.2.2 in the compatible SDK dependency graph. App integration remains a separate next stage.
+Require the complete supported PHP gate and exact archive consumer checks. For independent adoption
+evidence, bind the published tag, source, archive, manifests and registry coordinate outside the
+immutable artifact. Run affected SDK generated projects and Core host suites against that version.
 
-## Drift check
+## Compatibility and drift
 
-Producer source input is current main88c43ebb93b39e51407e415d97108cf1c6e1f677, whose delivered runtime is the0.2.1sourcee8b2def866b95981b8e7ac521c16420a0f7955c8. The original70-type API pin and Studio pin/corpus bytes remain unchanged. The referenced App scan is historical evidence; re-scan before later App edits.
+The source and consumer baselines above are immutable comparison inputs. They do not identify a
+future release commit or assert that a current consumer has been qualified. Preserve the exact
+Studio tuple, original API profile and ownership digests; review API and host compatibility before
+any dependency or Studio pin change.
 
-## Validation recipe and observed local results
+## Validation
 
-Required validation is the complete php tools/check.php lane, Composer security audit, all five supported PHP CI lanes, exact archive verification and fresh no-dev authoritative consumer. This handoff records the required recipe; it never invents its own final commit/archive digest or an external release attestation. Final results belong to the exact-head CI and independent evidence.
+From a source checkout, run `composer validate --strict`, `composer install`, `composer audit`,
+`php tools/check.php` and `php tools/verify-clean-consumer.php`. The reusable CI runs PHP 8.1–8.5,
+archive verification and release automation regressions. CI and independent evidence report their
+own observed results; see the [release policy](releasing.md).

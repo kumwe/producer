@@ -60,14 +60,14 @@ Version policy:
 
 ## Publication evidence and recovery
 
-The maintainer performs the initial Packagist submission. Its GitHub integration
-then follows tags without a registry credential in CI. Confirm `package-released`
+[Packagist](https://packagist.org/packages/kumwe/producer) follows release tags through
+its GitHub integration without a registry credential in CI. Confirm `package-released`
 from the successful default-branch publication run and matching published stable
 release, tag and source identity. Publication does not establish `release-verified`.
 Before declaring that state or SDK/App adoption, a fresh independent verifier must
 bind the exact published source/tag, archive digest, manifests, registry coordinate,
 license/security and clean-consumer results in an external RELEASE-ATTESTATION.yaml.
-The artifact and handoff must not invent their own final commit, checksum or
+The artifact and release record must not invent their own final commit, checksum or
 publication evidence. This attestation is separate from normal publication.
 
 Use the current release workflow on the default branch to retry after correcting

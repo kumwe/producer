@@ -4,6 +4,6 @@ The package's `tests/ownership.json` maps every published type to the actual pac
 
 Evidence references identify responsibility; they are not a claim of 100% line, branch or input coverage. Ports with no runtime implementation own their signatures and vocabulary here; concrete host implementations retain their execution tests. Package tests use neutral fixtures and adapters, and never bootstrap Kumwe App.
 
-The legacy extraction is already adopted in App at baseline 960ce8ec00cf724a7cae03e5ba09c4852c9ab54e. The current App tests inspected exercise host composition, authority, persistence, delivery, lifecycle or recovery. No whole current App test file is identified for removal by this patch. Future extraction handoffs must list exact pure tests to remove or mixed tests to split on adoption. A dependency bump alone is not authorization to delete host acceptance tests.
+Core owns host composition, authority, persistence, delivery, lifecycle and recovery tests. The release record and consumer inventory preserve the examined baseline and exact test paths. Before changing ownership, identify any pure package tests to remove or mixed tests to split explicitly. A dependency update does not authorize deleting host acceptance coverage.
 
 Producer retains its pinned Studio canonical, schema, renderer and error corpora; App retains real host authority, storage and browser integration.

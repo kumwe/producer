@@ -1,7 +1,13 @@
 # Changelog
 
-Delivered, repository-verified behaviour only; roadmap position and claims live in
-[`docs/roadmap.md`](docs/roadmap.md).
+Delivered, repository-verified behaviour. Current development priorities are in
+[docs/roadmap.md](docs/roadmap.md).
+
+## Unreleased
+
+- Document current package installation, live version/build badges and the Core host contract.
+- Replace completed handoff instructions with a durable release record; preserve all API, Studio
+  pin, corpus and archive checks and the ongoing Twig integration objective.
 
 ## 0.3.0 — 2026-09-09
 

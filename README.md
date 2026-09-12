@@ -1,5 +1,10 @@
 # Kumwe Producer
 
+[![Packagist version][version-badge]][package]
+[![Build][build-badge]][build]
+[![PHP][php-badge]][package]
+[![License][license-badge]][license]
+
 **Studio designs it. Producer makes it real. Your application owns it.**
 
 Producer is the PHP realization layer for [Kumwe Studio](https://github.com/kumwe/studio), the
@@ -88,7 +93,7 @@ shape (`stdClass` objects and list arrays) and the interoperable ECMAScript safe
 
 ## Status
 
-The 0.2 release line is aligned to the provenance-backed eight-package Studio
+Producer is aligned to the provenance-backed eight-package Studio
 `0.1.0-beta.3` npm publication at commit
 `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a`. It vendors 55 schemas and 301 corpus files, reproduces
 the released thirty-one-operation wire across ten operational ports (including the seven authoring
@@ -98,7 +103,7 @@ corpus-proven. The Studio asset manifest also proves the exact browser module an
 runtime bytes carried by the npm packages and all fourteen redistribution notice/license members
 that accompany those bytes.
 
-This work is **release-ready**: the governed Studio prerelease publishes the exact deterministic
+The governed Studio prerelease publishes the exact deterministic
 74-member outer browser archive and its detached checksum, and the PIN was regenerated from those
 public downloads, binding their live URLs, bytes, and digests as one fail-closed contract proof.
 The `Kumwe\Producer\Deployment` layer additionally locates the pinned browser module and
@@ -110,9 +115,24 @@ tuple before a request body is read. The optional Twig bridge remains roadmap wo
 claimed. See [the roadmap](https://github.com/kumwe/producer/blob/main/docs/roadmap.md) for the
 precise boundary.
 
-## Requirements
+## Installation
+
+```sh
+composer require kumwe/producer:0.3.0
+```
 
 PHP 8.1 or newer with `ext-json` and `ext-mbstring`. No runtime Composer dependencies.
+Hosts pin Producer exactly while Studio's contract is a prerelease; qualify a new version against
+their integration tests before changing that pin. See [published versions][package] for updates.
+
+## Core integration and support
+
+Core supplies the host ports described in the [host guide](docs/host-guide.md) and retains
+authorization, persistence, revisions, lifecycle and delivery. The [release record](docs/release-record.md)
+binds the API and Studio resources to the consumer contract.
+
+Use [GitHub issues](https://github.com/kumwe/producer/issues) for reproducible bugs and feature requests.
+See the [public API](docs/public-api.md), [release history](CHANGELOG.md) and [license][license].
 
 ## Development
 
@@ -123,3 +143,11 @@ composer validate --strict
 composer install --no-interaction
 php tools/check.php   # lint, API/architecture gates, contract proof, suite
 ```
+
+[version-badge]: https://img.shields.io/packagist/v/kumwe/producer
+[package]: https://packagist.org/packages/kumwe/producer
+[build-badge]: https://github.com/kumwe/producer/actions/workflows/ci.yml/badge.svg?branch=main
+[build]: https://github.com/kumwe/producer/actions/workflows/ci.yml?query=branch%3Amain
+[php-badge]: https://img.shields.io/packagist/dependency-v/kumwe/producer/php
+[license-badge]: https://img.shields.io/github/license/kumwe/producer
+[license]: LICENSE
