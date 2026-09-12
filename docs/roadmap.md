@@ -1,20 +1,14 @@
-# Producer roadmap
+# Producer development priorities
 
-Forward work only; delivered work moves to [`CHANGELOG.md`](../CHANGELOG.md) in the change that
-completes it. A step is claimed only when `php tools/check.php` proves it on a clean clone.
+The current runtime is documented in the [README](../README.md), [public API](public-api.md) and
+[changelog](../CHANGELOG.md). Development must preserve the [host agreement](host-agreement.md)
+and the exact published Studio contract.
 
-## Remaining work
+## Optional Twig integration
 
-The implemented runtime and published Studio resource boundary are documented in
-[`README.md`](../README.md) and [`CHANGELOG.md`](../CHANGELOG.md). The latest observed package
-release is [`v0.2.1`](https://github.com/kumwe/producer/releases/tag/v0.2.1), at commit
-`e8b2def866b95981b8e7ac521c16420a0f7955c8`. The completed P-1 through P-10 and P-12 work is
-removed from this forward-work list. Source publication does not prove a consuming App's
-deployment or integration gates.
+A thin Twig extension may embed the render result: fragment, stylesheet reference, enhancement
+flag and preload hints. It must preserve host-owned templates and authority, and include a bridge
+suite proving the published render contract. This bridge is not part of the current API.
 
-| # | Step | Proof |
-| --- | --- | --- |
-| P-11 | Twig bridge: embed the render result (fragment, stylesheet reference, enhancement flag, preload hints) as a thin extension | bridge suite |
-
-Deferred by design: anything the charter forbids, and any shape outside the published pin —
-Producer implements the exact provenance-backed Studio contract only.
+Changes outside the pinned Studio contract must first be expressed and released by Studio, then
+adopted through the [pin and release policy](releasing.md). Source CI does not qualify a host deployment.

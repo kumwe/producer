@@ -122,7 +122,7 @@ $expected = array_fill_keys([
 $governanceFiles = [
     'CHANGELOG.md',
     'CHARTER.md',
-    'MIGRATION-HANDOFF.md',
+    'docs/release-record.md',
     'resources/public-api/v1.json',
     'resources/capabilities/v1.json',
     'resources/service-map/v1.json',
@@ -429,7 +429,7 @@ foreach (array_keys($actual) as $relative) {
 }
 $actualRoots = array_keys($roots);
 sort($actualRoots);
-$expectedRoots = ['CHANGELOG.md', 'CHARTER.md', 'LICENSE', 'MIGRATION-HANDOFF.md', 'README.md',
+$expectedRoots = ['CHANGELOG.md', 'CHARTER.md', 'LICENSE', 'README.md',
     'composer.json', 'docs', 'examples', 'resources', 'smoke.php', 'src'];
 if ($actualRoots !== $expectedRoots) {
     $errors[] = 'Archive roots differ: ' . implode(', ', $actualRoots);

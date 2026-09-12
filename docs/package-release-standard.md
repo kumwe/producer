@@ -1,6 +1,6 @@
 # Package release standard
 
-This is the common Kumwe package release contract. Apply it to every new extraction.
+This is the common Kumwe package release contract. Apply it to every package release.
 
 ## One quality gate
 
@@ -21,7 +21,7 @@ own independent attestation, and an attestation is not a normal publication prer
 Maintainers rebase reviewed PRs into the repository's current default branch. Release
 automation discovers that branch dynamically, reruns the complete gate on the resulting
 commit, checks out the event's exact `github.sha`, and verifies local HEAD matches it.
-A PR commit SHA is never embedded as the future release identity. Historical extraction
+A PR commit SHA is never embedded as the future release identity. Historical source
 baselines, third-party action pins and verified dependency SHAs retain their own purpose.
 
 The newest stable changelog record selects the version. An Unreleased-only changelog
@@ -66,7 +66,7 @@ external attestations. Dependency identity fixtures remain part of source CI.
 `tools/check-release-dependencies.sh` remains a separate, optional strict audit in those
 packages. It additionally requires platform-immutable releases and independent evidence,
 including released-commit workflow and clean-consumer observations. Use that evidence for
-`release-verified` and downstream adoption decisions under the extraction handoff protocol.
+`release-verified` and downstream adoption decisions under the package release verification contract.
 Normal publication does not clear unresolved evidence or change those adoption states.
 
 ## Optional repository hardening
