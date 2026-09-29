@@ -127,15 +127,15 @@ ownership:
   next_consumer: kumwe/extension-sdk
   public_manifests:
     - path: resources/public-api/v1.json
-      sha256: d048b18cdaa7997db532ae4df2975fffdc758ec276dcceb0e896fd93658f38c1
+      sha256: eb0420a9844374b7a34ed4b85efbcdf9a0d1e4afe2e02ea8f6a2b0eb47405c9c
     - path: resources/capabilities/v1.json
-      sha256: 3c7761ab57b243fcf170defadab6a43531ad0dd5ad21c754f83e3836fe90295d
+      sha256: b7fd300302ffe5696d238c42d0d5bb5cd0ebdfcf516a18a6f51477a8f607ba0c
     - path: resources/service-map/v1.json
-      sha256: 1794d2e0c0b21e62e6d4b4f931f3ea2f26c733960242b26d82689df842b9b18b
+      sha256: 2e4702cbbfdec643a68030242f33fe72c9e0d7b10b82da7ac4ac7639ff1dbdd3
     - path: resources/public-api.json
       sha256: 4318cc2465787f56dec78f831ed7b9b45c8d0edd6f94657e789917e5ba4e22f7
     - path: resources/studio-contract/PIN.json
-      sha256: 40e6db40ea6b7e24cf5c1d00f8dc1ffe4309b4f76573917065a3830f198dfa27
+      sha256: 3bfba9463c8ab4f7eb0e4ecedd69dc295e844bfcb8d425d0575ddd080afc37c4
     - path: resources/studio-contract/protocol/schemas/manifest.json
       sha256: b7d41d6cbe71a770f433ddce12bdcd5582a2be0249191f4845ad5278079ff6e9
     - path: resources/studio-contract/testkit/corpus-manifest.json
@@ -324,7 +324,7 @@ documentation:
   integration_or_consumer: docs/host-guide.md
   examples:
     - examples/minimal-host/README.md
-  changelog_record: CHANGELOG.md / 0.4.0
+  changelog_record: CHANGELOG.md / 0.5.0
 release_expectations:
   version_policy: Use semantic versioning and the Studio pin compatibility policy in docs/releasing.md; preserve published releases.
   expected_artifact_types:
@@ -393,7 +393,7 @@ produced from the same reflection metadata as the complete signature pin in
 
 ## Dependencies and semantic inputs
 
-Studio `0.1.0-beta.7` at `616afb76684fbfa2b68f9be3aace9ca19bd6ad2e` is the exact semantic source in
+Studio `0.1.0-beta.8` at `9b9c292781cc611396d22207aefd68d106459878` is the exact semantic source in
 [PIN.json](../resources/studio-contract/PIN.json). Checks bind 55 schemas, 301 corpus members, browser
 assets, SRI and 14 redistribution notices. Producer claims zero Studio conformance profiles.
 A Studio update requires its own reviewed pin change and package release.

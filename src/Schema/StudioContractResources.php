@@ -54,7 +54,7 @@ final class StudioContractResources
      * @since 0.2.0
      */
     private const BROWSER_ARCHIVE_SHA256 =
-        '15b8e014dc461d4fec610190c83c7d1bed1e63cc8dcc8b9067699e4b40471fcf';
+        '0d525b0eb3b6acf8319a880d21c0c97788528a731bd35be2c177736aef3baefc';
 
     /**
      * Exact published Studio outer-archive SHA-512.
@@ -62,8 +62,8 @@ final class StudioContractResources
      * @since 0.2.0
      */
     private const BROWSER_ARCHIVE_SHA512 =
-        'c9205e1ab9cdcf475b83d0a41f2084e210cb7201889642600a7143cf34a41c5e'
-        . '058ef87d7de45ccc7b88a35ccc8b54465fe1e8a734e52bdd89eb157dc9abec8f';
+        'b1883feaafa2c0f84b85a69826721b5669d5b12f5f3a2d3e19028fe32ef57ebe'
+        . 'db8773a261862bbea1db74a78785f3e0c16244c3f37449495bec2e7cac6bd4dc';
 
     /**
      * Exact reviewed detached-checksum byte count.
@@ -78,7 +78,7 @@ final class StudioContractResources
      * @since 0.2.0
      */
     private const BROWSER_CHECKSUM_SHA256 =
-        '4b32e1f08b9fe7497f69bab9c19fe6945153aa3245b01ff721da9554e6718c13';
+        '91015afeec14273634fc04d6604c6816759d69258edaa4a07dc979ea0dcf4f0f';
 
     /**
      * Static utility; never instantiated.
