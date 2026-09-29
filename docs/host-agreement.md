@@ -30,7 +30,7 @@ additional wire ports.
 - Studio's approved prebuilt browser artifacts, served as immutable static files under the host's
   cache and Content-Security-Policy discipline. Producer's current pin verifies the browser module
   and public enhancement runtime from their published npm package paths, and binds Studio
-  `0.1.0-beta.3`'s deterministic 74-member outer archive and detached checksum to the exact assets
+  `0.1.0-beta.7`'s deterministic 74-member outer archive and detached checksum to the exact assets
   the governed GitHub prerelease publishes at the recorded URLs. A host downloads that governed
   archive; it must not relabel an npm tarball or reconstruct its own archive as that governed
   release artifact. A host may instead let pages load the same bytes from a public npm registry
@@ -67,7 +67,7 @@ additional wire ports.
 4. A Studio contract change reaches a host only as: Studio release → Producer re-pin (one change,
    its own review) → Producer release → host pin bump. No stage may be skipped; nothing floats.
 
-The current Studio `0.1.0-beta.3` pin proves its source commit, eight npm packages, 55 schemas, 301
+The current Studio `0.1.0-beta.7` pin proves its source commit, eight npm packages, 55 schemas, 301
 corpus members, browser module, and enhancement runtime, and claims zero conformance profiles. Its
 outer archive is byte- and manifest-verified against the governed GitHub prerelease downloads and
 deliberately not vendored. Its release-readiness state is ready: Studio publishes the exact archive

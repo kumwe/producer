@@ -399,7 +399,7 @@ $locator = StudioBrowserAssetLocator::npmPackages('https://cdn.jsdelivr.net/npm'
 
 $module = $locator->locate('browser-module');
 echo $module->scriptElement();
-// <script type="module" src="https://cdn.jsdelivr.net/npm/@kumwe/studio@0.1.0-beta.3/dist/browser/assets/studio-browser-….min.js"
+// <script type="module" src="https://cdn.jsdelivr.net/npm/@kumwe/studio@0.1.0-beta.7/dist/browser/assets/studio-browser-….min.js"
 //         integrity="sha256-…" crossorigin="anonymous"></script>
 ```
 
