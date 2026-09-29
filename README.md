@@ -18,8 +18,8 @@ reality on a PHP host:
   no-JavaScript fallbacks for the complete Studio block catalog.
 - **Stylesheets** — generates the static CSS a design's tokens and layout vocabulary imply; nothing
   is computed per request and nothing is inlined.
-- **Contract proof** — vendors Studio `0.1.0-beta.3` at source commit
-  `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a`, digest-verifies all 55 protocol schemas and all
+- **Contract proof** — vendors Studio `0.1.0-beta.7` at source commit
+  `616afb76684fbfa2b68f9be3aace9ca19bd6ad2e`, digest-verifies all 55 protocol schemas and all
   301 testkit corpus members, and replays the published conformance vectors, so what this library
   claims is what it proves.
 
@@ -85,7 +85,7 @@ to exact package paths, byte counts, SHA-256 content hashes, and SRI values. The
 also carries the manifest's complete fourteen-file redistribution notice/license closure, with
 every member package-path and digest bound by the same proof. Its private import gate additionally
 proves the deterministic 74-member outer ustar archive, detached checksum, and byte equality with
-the npm browser distribution. The 1.4 MB archive and checksum are provenance inputs, not Composer
+the npm browser distribution. The outer archive and checksum are provenance inputs, not Composer
 payload. `testkitBytes()` reads only
 digest-verified corpus-manifest members for consumer conformance tests. None of these APIs exposes
 the package root or a generalized filesystem reader. Decoded inputs must use the canonical JSON
@@ -94,8 +94,8 @@ shape (`stdClass` objects and list arrays) and the interoperable ECMAScript safe
 ## Status
 
 Producer is aligned to the provenance-backed eight-package Studio
-`0.1.0-beta.3` npm publication at commit
-`42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a`. It vendors 55 schemas and 301 corpus files, reproduces
+`0.1.0-beta.7` npm publication at commit
+`616afb76684fbfa2b68f9be3aace9ca19bd6ad2e`. It vendors 55 schemas and 301 corpus files, reproduces
 the released thirty-one-operation wire across ten operational ports (including the seven authoring
 operations), and claims zero Studio conformance profiles. Canonical JSON, exact document-schema
 admission, host-atomic mutation and protected replay, rendering, rich text, and stylesheets are
@@ -118,7 +118,7 @@ precise boundary.
 ## Installation
 
 ```sh
-composer require kumwe/producer:0.3.0
+composer require kumwe/producer:0.4.0
 ```
 
 PHP 8.1 or newer with `ext-json` and `ext-mbstring`. No runtime Composer dependencies.

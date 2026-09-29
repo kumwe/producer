@@ -9,6 +9,15 @@ Delivered, repository-verified behaviour. Current development priorities are in
 - Replace completed handoff instructions with a durable release record; preserve all API, Studio
   pin, corpus and archive checks and the ongoing Twig integration objective.
 
+## 0.4.0 — 2026-09-29
+
+- Re-pin to the coordinated Studio `0.1.0-beta.7` release at source commit
+  `616afb76684fbfa2b68f9be3aace9ca19bd6ad2e`. The browser runtime preserves unsaved entry values
+  and presentation across consecutive saves, and applies per-mount message overrides to the
+  hosted chooser, editor and save confirmation.
+- Import the published npm browser assets and governed GitHub archive/checksum with their exact
+  digests. The PHP API, wire version, 55 schemas and 301-member corpus remain compatible.
+
 ## 0.3.0 — 2026-09-09
 
 - Added the `Kumwe\Producer\Deployment` layer, adopting the Studio reference host's deployment

@@ -1,13 +1,13 @@
 {
   "assets": [
     {
-      "bytes": 940524,
-      "contentHash": "6d02cb9ee621429ac26ee0752d7e586f4f7f9fe2954bac41f8cecc761dbf0f7e",
-      "integrity": "sha256-bQLLnuYhQprCbuB1LX5Yb09/n+KVS6xB+M7Mdh2/D34=",
+      "bytes": 1020235,
+      "contentHash": "29b609ea650698b8804a5107c0b7c21a9d4f6e34a7756b8d4d2691b281078ab9",
+      "integrity": "sha256-KbYJ6mUGmLiASlEHwLfCGp1PbjSndWuNTSaRsoEHirk=",
       "budgetBytes": 1048576,
       "mediaType": "text/javascript",
       "minified": true,
-      "path": "assets/studio-browser-6d02cb9ee621429a.min.js",
+      "path": "assets/studio-browser-29b609ea650698b8.min.js",
       "role": "browser-module"
     },
     {
@@ -21,8 +21,8 @@
       "role": "enhancement-runtime"
     },
     {
-      "bytes": 20611,
-      "integrity": "sha256-Z28RDrZn7/DDe0aa6eRdI44yH/Knu9nmpNbynJBmMGU=",
+      "bytes": 22630,
+      "integrity": "sha256-iVIzc0d6iCHA7bGiKkb3+3BGByxA6CWmwWDhOjZ9dVI=",
       "mediaType": "text/markdown",
       "path": "docs/contracts/studio-deployment.md",
       "role": "documentation"
@@ -421,7 +421,7 @@
     },
     {
       "bytes": 1129,
-      "integrity": "sha256-wYYMZNGkzh5tm5bqlKLWPfQujrqvQj7VtPpN2EHtOaQ=",
+      "integrity": "sha256-E2oTk5BRUH8mXgtrHDGZWDC0bKeE4OKFaOnVA3GognA=",
       "mediaType": "application/json",
       "path": "studio-release.json",
       "role": "release-record"
@@ -558,7 +558,7 @@
   },
   "kind": "studio-browser-assets",
   "module": {
-    "entryPoint": "assets/studio-browser-6d02cb9ee621429a.min.js",
+    "entryPoint": "assets/studio-browser-29b609ea650698b8.min.js",
     "exports": [
       "mountStudio",
       "mountStudioFromConfigElement",
@@ -604,8 +604,8 @@
     }
   },
   "release": {
-    "corpusManifestDigest": "sha256-PupdZVv+htI0wd7bnFtwVdFzhYVB7DxTXh+viiBClNM=",
-    "version": "0.1.0-beta.3"
+    "corpusManifestDigest": "sha256-l5TJ0MFYM3eGqZ++pkhN4V8GCUzNcFwPG6ogEW/o8Yw=",
+    "version": "0.1.0-beta.7"
   },
   "schemaVersion": 1
 }

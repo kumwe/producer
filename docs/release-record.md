@@ -108,7 +108,7 @@ source:
   examined_dependencies:
     - PHP >=8.1, ext-json and ext-mbstring; no runtime Composer dependency.
     - Existing Producer0.2.1 at e8b2def866b95981b8e7ac521c16420a0f7955c8 owns the unchanged70-type API and Studio contract.
-    - Studio0.1.0-beta.3 source42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a remains pinned in resources/studio-contract/PIN.json.
+    - Studio0.1.0-beta.3 source42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a was pinned in resources/studio-contract/PIN.json at the examined baseline.
 target:
   repository: https://github.com/kumwe/producer
   artifact_identity: kumwe/producer
@@ -127,19 +127,19 @@ ownership:
   next_consumer: kumwe/extension-sdk
   public_manifests:
     - path: resources/public-api/v1.json
-      sha256: 5fe7efb49a29799fcc3c3bbdba9ba4138d63688669ba933a2be6996f13f12cc2
+      sha256: d048b18cdaa7997db532ae4df2975fffdc758ec276dcceb0e896fd93658f38c1
     - path: resources/capabilities/v1.json
-      sha256: a7e4b69f5b5612272584b187ae9ee9afe34ea85499dca91b35260ab3b66ee8a5
+      sha256: 3c7761ab57b243fcf170defadab6a43531ad0dd5ad21c754f83e3836fe90295d
     - path: resources/service-map/v1.json
-      sha256: 7173160cd25ff40ff5002a8c5c63ae769ce8b8df6fcd1138f1d9e949acad7fd3
+      sha256: 1794d2e0c0b21e62e6d4b4f931f3ea2f26c733960242b26d82689df842b9b18b
     - path: resources/public-api.json
       sha256: 4318cc2465787f56dec78f831ed7b9b45c8d0edd6f94657e789917e5ba4e22f7
     - path: resources/studio-contract/PIN.json
-      sha256: 3c1b094e59c5bbdeb867b2f12df0b8a88a4855ae61003913444dda8222b4ee77
+      sha256: 40e6db40ea6b7e24cf5c1d00f8dc1ffe4309b4f76573917065a3830f198dfa27
     - path: resources/studio-contract/protocol/schemas/manifest.json
       sha256: b7d41d6cbe71a770f433ddce12bdcd5582a2be0249191f4845ad5278079ff6e9
     - path: resources/studio-contract/testkit/corpus-manifest.json
-      sha256: 3eea5d655bfe86d234c1dedb9c5b7055d173858541ec3c535e1faf8a204294d3
+      sha256: 9794c9d0c158337786a99fbea6484de15f06094ccd705c0f1baa20116fe8f18c
   intentionally_excluded:
     - Core application implementations retain authority, persistence and lifecycle ownership.
     - Studio owns its semantic contract; the exact imported API, corpus and browser asset pins remain authoritative.
@@ -324,7 +324,7 @@ documentation:
   integration_or_consumer: docs/host-guide.md
   examples:
     - examples/minimal-host/README.md
-  changelog_record: CHANGELOG.md / 0.3.0
+  changelog_record: CHANGELOG.md / 0.4.0
 release_expectations:
   version_policy: Use semantic versioning and the Studio pin compatibility policy in docs/releasing.md; preserve published releases.
   expected_artifact_types:
@@ -393,7 +393,7 @@ produced from the same reflection metadata as the complete signature pin in
 
 ## Dependencies and semantic inputs
 
-Studio `0.1.0-beta.3` at `42b149251a9f17a2ef8f32db0d9dd1ac2fcfec8a` is the exact semantic source in
+Studio `0.1.0-beta.7` at `616afb76684fbfa2b68f9be3aace9ca19bd6ad2e` is the exact semantic source in
 [PIN.json](../resources/studio-contract/PIN.json). Checks bind 55 schemas, 301 corpus members, browser
 assets, SRI and 14 redistribution notices. Producer claims zero Studio conformance profiles.
 A Studio update requires its own reviewed pin change and package release.

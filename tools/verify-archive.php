@@ -234,26 +234,26 @@ if (
 ) {
     $errors[] = 'The Studio PIN does not carry the exact browser proof members.';
 }
-$archiveSha256 = 'f56b3d70e7bd44eb490693add611420dbfe9ae9f98a39468e232437f906c4ea0';
-$archiveFile = 'studio-browser-0.1.0-beta.3-' . substr($archiveSha256, 0, 16) . '.tar';
-$archiveTag = 'studio-v0.1.0-beta.3';
+$archiveSha256 = '15b8e014dc461d4fec610190c83c7d1bed1e63cc8dcc8b9067699e4b40471fcf';
+$archiveFile = 'studio-browser-0.1.0-beta.7-' . substr($archiveSha256, 0, 16) . '.tar';
+$archiveTag = 'studio-v0.1.0-beta.7';
 $downloadRoot = 'https://github.com/kumwe/studio/releases/download/' . $archiveTag . '/';
 $expectedArchivePin = [
-    'archive_stem' => 'studio-browser-0.1.0-beta.3',
+    'archive_stem' => 'studio-browser-0.1.0-beta.7',
     'status' => 'verified-publication',
     'archive_file' => $archiveFile,
-    'archive_bytes' => 1401344,
+    'archive_bytes' => 1483264,
     'archive_budget_bytes' => 2097152,
     'archive_sha256' => $archiveSha256,
-    'archive_sha512' => '03ad304ffe58fa7081e6baed0fa7522b9aa044ed97e707be0ef6e5d848523a6e'
-        . 'f15fb8134b59adb012f4f97335faa63c8b639abc6a91f5e2e17708d8af0fc329',
-    'archive_integrity' => 'sha512-A60wT/5Y+nCB5rrtD6dSK5qgRO2X5we+Dvbl2EhSOm7xX7gTS1mtsBL0+'
-        . 'XM1+qY8i2OavGqR9eLhdwjYrw/DKQ==',
-    'manifest_sha256' => 'c4e1c5438db99279405d14fe291f5460a0ea6b86b8c744138c5d2e0a3aeb567d',
+    'archive_sha512' => 'c9205e1ab9cdcf475b83d0a41f2084e210cb7201889642600a7143cf34a41c5e'
+        . '058ef87d7de45ccc7b88a35ccc8b54465fe1e8a734e52bdd89eb157dc9abec8f',
+    'archive_integrity' => 'sha512-ySBeGrnNz0dbg9CkHyCE4hDLcgGIlkJgCnFDzzSkHF4Fjvh9feRczHuIo'
+        . '1zMi1RGX+HopzTlK92J6xV9yavsjw==',
+    'manifest_sha256' => 'a67a573cf18923aa0642d953cab6476d8e1c8e301bf5b4f1f387bc00d651f3d2',
     'member_count' => 74,
     'checksum_file' => $archiveFile . '.sha256',
     'checksum_bytes' => 115,
-    'checksum_sha256' => 'f3b7a75f53f39edca913317eb4035f4cb74b250b26bbe461b106b49fe98f215f',
+    'checksum_sha256' => '4b32e1f08b9fe7497f69bab9c19fe6945153aa3245b01ff721da9554e6718c13',
     'publication_status' => 'available',
     'tag' => $archiveTag,
     'release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,
@@ -299,9 +299,9 @@ foreach ($resolvedAssets as $entry) {
 $browserRelease = is_array($browser['release'] ?? null) ? $browser['release'] : [];
 if (
     array_keys($assetRoles) !== ['browser-module', 'enhancement-runtime']
-    || ($browserRelease['version'] ?? null) !== '0.1.0-beta.3'
+    || ($browserRelease['version'] ?? null) !== '0.1.0-beta.7'
 ) {
-    $errors[] = 'The package must contain both exact Studio beta.3 browser runtime assets.';
+    $errors[] = 'The package must contain both exact Studio beta.7 browser runtime assets.';
 }
 
 $manifestAssets = is_array($browser['assets'] ?? null) ? $browser['assets'] : [];
