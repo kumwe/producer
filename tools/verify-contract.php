@@ -141,13 +141,13 @@ $source = is_array($pin['source'] ?? null) ? $pin['source'] : [];
 if (
     ($source['repository'] ?? null) !== 'https://github.com/kumwe/studio'
     || ($source['kind'] ?? null) !== 'provenance-backed-npm-release'
-    || ($source['release'] ?? null) !== '0.1.0-beta.7'
+    || ($source['release'] ?? null) !== '0.1.0-beta.8'
     || ($source['release'] ?? null) !== ($release['release'] ?? null)
-    || ($source['commit'] ?? null) !== '616afb76684fbfa2b68f9be3aace9ca19bd6ad2e'
+    || ($source['commit'] ?? null) !== '9b9c292781cc611396d22207aefd68d106459878'
     || ($source['workflow'] ?? null)
-        !== 'https://github.com/kumwe/studio/actions/runs/36584767494/attempts/1'
+        !== 'https://github.com/kumwe/studio/actions/runs/36598582123/attempts/1'
 ) {
-    $errors[] = 'PIN.json does not name the exact provenance-backed Studio beta.7 publication.';
+    $errors[] = 'PIN.json does not name the exact provenance-backed Studio beta.8 publication.';
 }
 if (
     ($releasePin['release'] ?? null) !== ($release['release'] ?? null)
@@ -187,7 +187,7 @@ if ($actualPackageNames !== $packageNames) {
 }
 foreach ($packageMap as $name => $version) {
     if (!is_string($name) || $version !== ($release['release'] ?? null)) {
-        $errors[] = 'Every Studio package must use the exact coordinated beta.7 version.';
+        $errors[] = 'Every Studio package must use the exact coordinated beta.8 version.';
     }
 }
 
@@ -279,26 +279,26 @@ if (
 
 $readiness = is_array($pin['release_readiness'] ?? null) ? $pin['release_readiness'] : [];
 $blockers = is_array($readiness['blockers'] ?? null) ? $readiness['blockers'] : [];
-$archiveSha256 = '15b8e014dc461d4fec610190c83c7d1bed1e63cc8dcc8b9067699e4b40471fcf';
-$archiveFile = 'studio-browser-0.1.0-beta.7-' . substr($archiveSha256, 0, 16) . '.tar';
-$archiveTag = 'studio-v0.1.0-beta.7';
+$archiveSha256 = '0d525b0eb3b6acf8319a880d21c0c97788528a731bd35be2c177736aef3baefc';
+$archiveFile = 'studio-browser-0.1.0-beta.8-' . substr($archiveSha256, 0, 16) . '.tar';
+$archiveTag = 'studio-v0.1.0-beta.8';
 $downloadRoot = 'https://github.com/kumwe/studio/releases/download/' . $archiveTag . '/';
 $expectedArchivePin = [
-    'archive_stem' => 'studio-browser-0.1.0-beta.7',
+    'archive_stem' => 'studio-browser-0.1.0-beta.8',
     'status' => 'verified-publication',
     'archive_file' => $archiveFile,
     'archive_bytes' => 1483264,
     'archive_budget_bytes' => 2097152,
     'archive_sha256' => $archiveSha256,
-    'archive_sha512' => 'c9205e1ab9cdcf475b83d0a41f2084e210cb7201889642600a7143cf34a41c5e'
-        . '058ef87d7de45ccc7b88a35ccc8b54465fe1e8a734e52bdd89eb157dc9abec8f',
-    'archive_integrity' => 'sha512-ySBeGrnNz0dbg9CkHyCE4hDLcgGIlkJgCnFDzzSkHF4Fjvh9feRczHuIo'
-        . '1zMi1RGX+HopzTlK92J6xV9yavsjw==',
-    'manifest_sha256' => 'a67a573cf18923aa0642d953cab6476d8e1c8e301bf5b4f1f387bc00d651f3d2',
+    'archive_sha512' => 'b1883feaafa2c0f84b85a69826721b5669d5b12f5f3a2d3e19028fe32ef57ebe'
+        . 'db8773a261862bbea1db74a78785f3e0c16244c3f37449495bec2e7cac6bd4dc',
+    'archive_integrity' => 'sha512-sYg/6q+iwPhLhaaYJnIbVmnVsS9fOi0+GQKP4y71fr7bh3OiYYYrvqHbd'
+        . 'KeHhfPgwWJEw/N0SUlb7C58rGvU3A==',
+    'manifest_sha256' => '6bbb5fd194a3bdbd6f91d26664323dbf9522eddafe288283d5360f0cd58d6102',
     'member_count' => 74,
     'checksum_file' => $archiveFile . '.sha256',
     'checksum_bytes' => 115,
-    'checksum_sha256' => '4b32e1f08b9fe7497f69bab9c19fe6945153aa3245b01ff721da9554e6718c13',
+    'checksum_sha256' => '91015afeec14273634fc04d6604c6816759d69258edaa4a07dc979ea0dcf4f0f',
     'publication_status' => 'available',
     'tag' => $archiveTag,
     'release_url' => 'https://github.com/kumwe/studio/releases/tag/' . $archiveTag,

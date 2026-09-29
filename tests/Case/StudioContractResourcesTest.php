@@ -22,7 +22,7 @@ final class StudioContractResourcesTest extends TestCase
         $release = StudioContractResources::releaseRecord();
         $this->assertSame($release, StudioContractResources::releaseRecord(), 'Release parsing must be shared.');
         $this->assertSame('0.1-draft', $release->contractVersion(), 'The release-record version must match.');
-        $this->assertSame('0.1.0-beta.7', $release->release(), 'The coordinated release must match.');
+        $this->assertSame('0.1.0-beta.8', $release->release(), 'The coordinated release must match.');
         $this->assertSame('0.1.0-draft.2', $release->protocolVersion(), 'The protocol version must match.');
         $this->assertSame(
             'sha256-l5TJ0MFYM3eGqZ++pkhN4V8GCUzNcFwPG6ogEW/o8Yw=',
@@ -32,13 +32,13 @@ final class StudioContractResourcesTest extends TestCase
         $this->assertSame([], $release->claimedProfiles(), 'Beta must not invent conformance-profile claims.');
         $this->assertSame(8, count($release->packages()), 'Every coordinated package must remain pinned.');
         $this->assertSame(
-            '616afb76684fbfa2b68f9be3aace9ca19bd6ad2e',
+            '9b9c292781cc611396d22207aefd68d106459878',
             $release->sourceCommit(),
             'The npm-provenance-authenticated source commit must remain exact.'
         );
         $this->assertSame(8, count($release->packageIntegrities()), 'Every npm package must retain its integrity.');
         $this->assertSame(
-            '136a13939051507f265e0b6b1c31995830b46ca784e0e28568e9d50371a88270',
+            '7fac8e604839b539ab932a413785e5d82bd7f2ab9497deab351f21240b9d2135',
             $release->recordSha256(),
             'The exact release-record bytes must stay pinned.'
         );
@@ -63,7 +63,7 @@ final class StudioContractResourcesTest extends TestCase
         $locators = $release->browserArtifacts();
         $this->assertSame('studio-assets.json', $locators->manifestName(), 'The manifest locator must be exact.');
         $this->assertSame(
-            'studio-browser-0.1.0-beta.7',
+            'studio-browser-0.1.0-beta.8',
             $locators->authoringArchiveStem(),
             'The published archive must retain its release-derived identity.'
         );
@@ -75,7 +75,7 @@ final class StudioContractResourcesTest extends TestCase
 
         $manifest = StudioContractResources::browserManifestBytes();
         $this->assertSame(
-            'a67a573cf18923aa0642d953cab6476d8e1c8e301bf5b4f1f387bc00d651f3d2',
+            '6bbb5fd194a3bdbd6f91d26664323dbf9522eddafe288283d5360f0cd58d6102',
             hash('sha256', $manifest),
             'The public browser manifest bytes must match their package proof.'
         );
@@ -145,7 +145,7 @@ final class StudioContractResourcesTest extends TestCase
             'The redistributed notice/license byte envelope must remain exact.'
         );
         $browser = StudioContractResources::browserAsset('browser-module');
-        $this->assertSame(1020235, $browser->bytes(), 'The Studio authoring module byte count must be exact.');
+        $this->assertSame(1020403, $browser->bytes(), 'The Studio authoring module byte count must be exact.');
         $this->assertSame(
             $browser->contentHash(),
             hash('sha256', StudioContractResources::browserAssetBytes('browser-module')),

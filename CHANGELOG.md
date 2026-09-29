@@ -9,6 +9,14 @@ Delivered, repository-verified behaviour. Current development priorities are in
 - Replace completed handoff instructions with a durable release record; preserve all API, Studio
   pin, corpus and archive checks and the ongoing Twig integration objective.
 
+## 0.5.0 — 2026-09-29
+
+- Re-pin to Studio `0.1.0-beta.8` at source commit
+  `9b9c292781cc611396d22207aefd68d106459878`. The scrolling Outline remains keyboard-accessible
+  even when empty.
+- Import the published npm browser assets and governed GitHub archive/checksum with their exact
+  digests. The PHP API, wire version, 55 schemas and 301-member corpus remain compatible.
+
 ## 0.4.0 — 2026-09-29
 
 - Re-pin to the coordinated Studio `0.1.0-beta.7` release at source commit
