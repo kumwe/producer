@@ -32,7 +32,7 @@ final class StudioContractResources
      *
      * @since 0.2.0
      */
-    private const BROWSER_ARCHIVE_BYTES = 1483264;
+    private const BROWSER_ARCHIVE_BYTES = 1483776;
 
     /**
      * Studio's fixed outer-archive publication budget.
@@ -54,7 +54,7 @@ final class StudioContractResources
      * @since 0.2.0
      */
     private const BROWSER_ARCHIVE_SHA256 =
-        '0d525b0eb3b6acf8319a880d21c0c97788528a731bd35be2c177736aef3baefc';
+        '1554b8495c93fc6f209ccb1e56c4a58a49c66532618eca40737e6999d827eecb';
 
     /**
      * Exact published Studio outer-archive SHA-512.
@@ -62,8 +62,8 @@ final class StudioContractResources
      * @since 0.2.0
      */
     private const BROWSER_ARCHIVE_SHA512 =
-        'b1883feaafa2c0f84b85a69826721b5669d5b12f5f3a2d3e19028fe32ef57ebe'
-        . 'db8773a261862bbea1db74a78785f3e0c16244c3f37449495bec2e7cac6bd4dc';
+        '529126b2f33eeffd0543926e07279980b77d93852466063f93b4d0c12c6c3fcc'
+        . 'bedf9a4152dcd1c1906f44f1bc10414c482a1e031660650eceb7c89c36a956a5';
 
     /**
      * Exact reviewed detached-checksum byte count.
@@ -78,7 +78,7 @@ final class StudioContractResources
      * @since 0.2.0
      */
     private const BROWSER_CHECKSUM_SHA256 =
-        '91015afeec14273634fc04d6604c6816759d69258edaa4a07dc979ea0dcf4f0f';
+        'dd29a83b8e86f7889bda21387c68fdd47929f25f52d20331504d1988c9d9c478';
 
     /**
      * Static utility; never instantiated.
