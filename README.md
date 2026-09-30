@@ -18,8 +18,8 @@ reality on a PHP host:
   no-JavaScript fallbacks for the complete Studio block catalog.
 - **Stylesheets** — generates the static CSS a design's tokens and layout vocabulary imply; nothing
   is computed per request and nothing is inlined.
-- **Contract proof** — vendors Studio `0.1.0-beta.8` at source commit
-  `9b9c292781cc611396d22207aefd68d106459878`, digest-verifies all 55 protocol schemas and all
+- **Contract proof** — vendors Studio `0.1.0-beta.9` at source commit
+  `883f00ce1dd797e0d4b772660fe0d61e25a71d33`, digest-verifies all 55 protocol schemas and all
   301 testkit corpus members, and replays the published conformance vectors, so what this library
   claims is what it proves.
 
@@ -94,8 +94,8 @@ shape (`stdClass` objects and list arrays) and the interoperable ECMAScript safe
 ## Status
 
 Producer is aligned to the provenance-backed eight-package Studio
-`0.1.0-beta.8` npm publication at commit
-`9b9c292781cc611396d22207aefd68d106459878`. It vendors 55 schemas and 301 corpus files, reproduces
+`0.1.0-beta.9` npm publication at commit
+`883f00ce1dd797e0d4b772660fe0d61e25a71d33`. It vendors 55 schemas and 301 corpus files, reproduces
 the released thirty-one-operation wire across ten operational ports (including the seven authoring
 operations), and claims zero Studio conformance profiles. Canonical JSON, exact document-schema
 admission, host-atomic mutation and protected replay, rendering, rich text, and stylesheets are
@@ -118,7 +118,7 @@ precise boundary.
 ## Installation
 
 ```sh
-composer require kumwe/producer:0.5.0
+composer require kumwe/producer:0.6.0
 ```
 
 PHP 8.1 or newer with `ext-json` and `ext-mbstring`. No runtime Composer dependencies.

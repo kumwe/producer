@@ -1,7 +1,7 @@
 {
     "schema": "kumwe-package-capabilities/v1",
     "package": "kumwe/producer",
-    "release": "0.5.0",
+    "release": "0.6.0",
     "namespace": "Kumwe\\Producer\\",
     "responsibility": "Implement the pinned Studio contract through portable PHP wire handling and rendering.",
     "non_responsibilities": [

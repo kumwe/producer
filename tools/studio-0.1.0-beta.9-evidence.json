@@ -1,0 +1,119 @@
+{
+  "kind": "studio-npm-publication-evidence",
+  "release": "0.1.0-beta.9",
+  "source": {
+    "commit": "883f00ce1dd797e0d4b772660fe0d61e25a71d33",
+    "repository": "https://github.com/kumwe/studio",
+    "workflow": "https://github.com/kumwe/studio/actions/runs/36611400848/attempts/1"
+  },
+  "packages": [
+    {
+      "name": "@kumwe/studio-core",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio-core/-/studio-core-0.1.0-beta.9.tgz",
+      "sha256": "097d003f2de198aa80c8e9085085510112b536319d005c9e22af0e2912e2a847",
+      "shasum": "199f75ec125f884496123a4a20aff06cb8ac939a",
+      "integrity": "sha512-oLMCRihuVFXLtVaU0Po8mtG2kuU8IC3lP27q9MgTpzxqWJ7c/64NNKknrLzYl9GfNaYPnTkDYIFsSPwxRaRG3A==",
+      "bytes": 92084,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-core@0.1.0-beta.9"
+    },
+    {
+      "name": "@kumwe/studio-media",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio-media/-/studio-media-0.1.0-beta.9.tgz",
+      "sha256": "22066834f7d43d6322a67be3802dd60b565d2b960c44f7072e50a62a608c0ce7",
+      "shasum": "b04118ec97915494fa7f6811162fe856083f3db7",
+      "integrity": "sha512-fQDhfao5U+fJfXSNqzrRpTEzgQXVfdyp8+FJhFffBBCPMdWuuLMJAhQNRBzKWNlGUmHcphOxeEHarxn3LSxORw==",
+      "bytes": 10974,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-media@0.1.0-beta.9"
+    },
+    {
+      "name": "@kumwe/studio-preview",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio-preview/-/studio-preview-0.1.0-beta.9.tgz",
+      "sha256": "e92dac757f4f367553518dea042513cae182b881fff6dad5e4c91529f524368d",
+      "shasum": "40b6af8a2db39cd380558a8e2568ad676a783241",
+      "integrity": "sha512-dSCdWnH2xKnmd1vF1bWCnnIsx/sGTfwh4DTz2IJOwjfFPLGoavSF8VvX6cAmJH0V0LFa9/XQyBYXPHkNSanIqQ==",
+      "bytes": 13728,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-preview@0.1.0-beta.9"
+    },
+    {
+      "name": "@kumwe/studio-protocol",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio-protocol/-/studio-protocol-0.1.0-beta.9.tgz",
+      "sha256": "dae19ab604b300cac34bf95459e4b99a7659f7a35843ce382230d4180ef0e316",
+      "shasum": "f9c52a7430e57549683db58d9edb7ce134855276",
+      "integrity": "sha512-SyvgEYzPkqJMz3H7Hn/8tX5n2fiHY+HfaV1kzc9r+1n6cUCpXhqYJ0HlV77iPNoVmwwhqDE7DF5U8zzDQwLfIA==",
+      "bytes": 106683,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-protocol@0.1.0-beta.9"
+    },
+    {
+      "name": "@kumwe/studio-renderer-web",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio-renderer-web/-/studio-renderer-web-0.1.0-beta.9.tgz",
+      "sha256": "6fc3ddbdcdb2b36c8f37b6b8239769a1a0f72cc8f6745cd0342bdce39ce86bfe",
+      "shasum": "5fb3b31ecaa9e365674723787081e00e154c99b4",
+      "integrity": "sha512-5nbX520EO/CuUHl33X+zJ53+aSWxGpbEUd6ClGpVPzeqBP1Y4SawLDkcOokp4g3cb5mPEjcWgmJurosFMn9wyg==",
+      "bytes": 34804,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-renderer-web@0.1.0-beta.9"
+    },
+    {
+      "name": "@kumwe/studio-rich-text",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio-rich-text/-/studio-rich-text-0.1.0-beta.9.tgz",
+      "sha256": "cbf6cc3d28b38457c2da11db8c53031b901da3d429a0b62ef6c3ad2fb6d7fd73",
+      "shasum": "fbebf434c2a20f012057c1de2339f3673f095373",
+      "integrity": "sha512-MIMQHw03oj3XVM5FTvBopvn9f4RtjtTxre4PG45v4AWloN/XVA+3+su1z5A8Z4F8cp49LI9aEWIfVnCx5VOTXg==",
+      "bytes": 27638,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-rich-text@0.1.0-beta.9"
+    },
+    {
+      "name": "@kumwe/studio",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio/-/studio-0.1.0-beta.9.tgz",
+      "sha256": "d6fd1945598d6759e881180baed8b4af9b894876c52582aae6f2453c618f8eec",
+      "shasum": "e9e4ffbf957fbc82d9b00b11ee13710d9fbcd2c5",
+      "integrity": "sha512-mCsilUPCLJE5pXz4xPjsyXLrNjTMM01JyJaLHDmwICmm/tRyiqzWXcN7gTyjk29rfjfo829sMmJ+Fm0inkDbzg==",
+      "bytes": 446052,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio@0.1.0-beta.9"
+    },
+    {
+      "name": "@kumwe/studio-testkit",
+      "version": "0.1.0-beta.9",
+      "tarball": "https://registry.npmjs.org/@kumwe/studio-testkit/-/studio-testkit-0.1.0-beta.9.tgz",
+      "sha256": "7c17f650e38b9d725b9a9f58377177c0f2b6accc7ca898f1251135f7ee764849",
+      "shasum": "2341748fbe161afac8ff56615829d04d3f17301b",
+      "integrity": "sha512-piwmVQnysJWS0sK5Vrj9kWJsFweYjbkzkYK7ZE+waw2YUc/lnThUKgTVMgV9LpwqirAGtyiflnlLxkyfRTRnVA==",
+      "bytes": 191185,
+      "attestation": "https://registry.npmjs.org/-/npm/v1/attestations/@kumwe%2fstudio-testkit@0.1.0-beta.9"
+    }
+  ],
+  "browserArchive": {
+    "archiveStem": "studio-browser-0.1.0-beta.9",
+    "status": "verified-publication",
+    "candidate": {
+      "archive": {
+        "file": "studio-browser-0.1.0-beta.9-1554b8495c93fc6f.tar",
+        "bytes": 1483776,
+        "budgetBytes": 2097152,
+        "sha256": "1554b8495c93fc6f209ccb1e56c4a58a49c66532618eca40737e6999d827eecb",
+        "sha512": "529126b2f33eeffd0543926e07279980b77d93852466063f93b4d0c12c6c3fccbedf9a4152dcd1c1906f44f1bc10414c482a1e031660650eceb7c89c36a956a5",
+        "integrity": "sha512-UpEmsvM+7/0FQ5JuByeZgLd9k4UkZgY/k7TQwSxsP8y+35pBUtzRwZBvRPG8EEFMSCoeAxZgZQ7Ot8icNqlWpQ==",
+        "manifestSha256": "bf45b029e7b17c8af93e96735a8e925a214612419e1b4c1db95fd60757b9fb06",
+        "members": 74
+      },
+      "checksum": {
+        "file": "studio-browser-0.1.0-beta.9-1554b8495c93fc6f.tar.sha256",
+        "bytes": 115,
+        "sha256": "dd29a83b8e86f7889bda21387c68fdd47929f25f52d20331504d1988c9d9c478"
+      }
+    },
+    "publication": {
+      "status": "available",
+      "tag": "studio-v0.1.0-beta.9",
+      "releaseUrl": "https://github.com/kumwe/studio/releases/tag/studio-v0.1.0-beta.9",
+      "archiveUrl": "https://github.com/kumwe/studio/releases/download/studio-v0.1.0-beta.9/studio-browser-0.1.0-beta.9-1554b8495c93fc6f.tar",
+      "checksumUrl": "https://github.com/kumwe/studio/releases/download/studio-v0.1.0-beta.9/studio-browser-0.1.0-beta.9-1554b8495c93fc6f.tar.sha256"
+    }
+  }
+}

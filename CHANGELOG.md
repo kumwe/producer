@@ -9,6 +9,14 @@ Delivered, repository-verified behaviour. Current development priorities are in
 - Replace completed handoff instructions with a durable release record; preserve all API, Studio
   pin, corpus and archive checks and the ongoing Twig integration objective.
 
+## 0.6.0 — 2026-09-30
+
+- Re-pin to Studio `0.1.0-beta.9` at source commit
+  `883f00ce1dd797e0d4b772660fe0d61e25a71d33`. The canvas keyboard controls expose their
+  translated accessible name and role while Enter and F2 open the selected block’s controls.
+- Import the published npm browser assets and governed GitHub archive/checksum with their exact
+  digests. The PHP API, wire version, 55 schemas and 301-member corpus remain compatible.
+
 ## 0.5.0 — 2026-09-29
 
 - Re-pin to Studio `0.1.0-beta.8` at source commit

@@ -26,11 +26,11 @@ GitHub release assets. A blocked pin stays under `## Unreleased`.
 `php tools/verify-release-ready.php` remains a package-specific release gate.
 Release notes identify the exact Studio pin implemented by the tagged package.
 
-The current Studio `0.1.0-beta.8` integration at source commit
-`9b9c292781cc611396d22207aefd68d106459878` is release-ready. Its eight npm packages, 55 schemas,
+The current Studio `0.1.0-beta.9` integration at source commit
+`883f00ce1dd797e0d4b772660fe0d61e25a71d33` is release-ready. Its eight npm packages, 55 schemas,
 301 corpus members, browser module, and enhancement runtime are provenance- or manifest-verified,
 and it claims zero conformance profiles. Its deterministic 74-member browser archive and detached
-checksum are published by the governed GitHub prerelease `studio-v0.1.0-beta.8`, and the pin was
+checksum are published by the governed GitHub prerelease `studio-v0.1.0-beta.9`, and the pin was
 regenerated from those public downloads.
 
 The deterministic re-pin command requires all evidence-bearing inputs explicitly; it never fetches
